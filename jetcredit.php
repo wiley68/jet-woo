@@ -3,7 +3,7 @@
  * Plugin Name: ПБ Лични Финанси
  * Plugin URI: https://avalonbg.com/software/cc-woo.html
  * Description: Дава възможност на Вашите клиенти да закупуват стока на изплащане с ПБ Лични Финанси
- * Version: 1.8.3
+ * Version: 1.8.4
  * Author: Ilko Ivanov
  * Author URI: https://avalonbg.com
  * Text Domain: jetcredit
@@ -39,7 +39,7 @@ define( 'JET_PLUGIN_PATH', plugin_dir_path(__FILE__) );
 define( 'JET_IMAGES_URI', JET_PLUGIN_URL . 'images/' );
 define( 'JET_CSS_URI', JET_PLUGIN_URL . 'css/' );
 define( 'JET_JS_URI', JET_PLUGIN_URL . 'js/' );
-define( 'JET_VERSION', '1.8.3' );
+define( 'JET_VERSION', '1.8.4' );
 define( 'JET_MINPRICE', 75.00 );
 define( 'JET_MIN_250', 250.00 );
 define( 'JET_MIN_250_EUR', 125.00 );

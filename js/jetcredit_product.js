@@ -29,6 +29,51 @@ jQuery(document).ready(function($) {
 		});
 	};
 
+	const jetGetButtonContainer = () => {
+		return $('#jet-product-button-container');
+	};
+
+	const jetConvertPriceToCalculatorCurrency = (price) => {
+		const jetButtonContainer = jetGetButtonContainer();
+		const jetEur = parseInt(jetButtonContainer.data('jet-eur'), 10);
+		const jetCurrency = String(jetButtonContainer.data('jet-currency') || '');
+		let jetNormalizedPrice = parseFloat(price);
+
+		if (Number.isNaN(jetNormalizedPrice)) {
+			return 0;
+		}
+
+		switch (jetEur) {
+			case 1:
+				if (jetCurrency === 'EUR') {
+					jetNormalizedPrice *= 1.95583;
+				}
+				break;
+			case 2:
+			case 3:
+				if (jetCurrency === 'BGN') {
+					jetNormalizedPrice /= 1.95583;
+				}
+				break;
+		}
+
+		return jetNormalizedPrice;
+	};
+
+	const jetShouldShowButtonImmediately = (jetPriceall) => {
+		const jetButtonContainer = jetGetButtonContainer();
+		const jetMinprice = parseFloat(jetButtonContainer.data('jet-minprice'));
+		const jetParvaRaw = parseFloat($('#jet_parva').val());
+		const jetParva = Number.isNaN(jetParvaRaw) ? 0 : jetParvaRaw;
+		const jetTotalCreditPrice = jetConvertPriceToCalculatorCurrency(jetPriceall) - jetParva;
+
+		if (Number.isNaN(jetMinprice)) {
+			return true;
+		}
+
+		return jetTotalCreditPrice >= jetMinprice;
+	};
+
 	const jetCalculate = async () => {
 		let jet_price1 = $('#jet_price').val();
 		let jet_quantity = 1;
@@ -61,6 +106,12 @@ jQuery(document).ready(function($) {
 		}
 
 		const jetPriceall = parseFloat(jet_price1) * jet_quantity;
+
+		if (jetShouldShowButtonImmediately(jetPriceall)) {
+			jetGetButtonContainer().show();
+		} else {
+			jetGetButtonContainer().hide();
+		}
 
 		  jetHideOptions401();
 		  jetHideOptions601();

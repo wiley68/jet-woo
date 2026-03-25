@@ -280,6 +280,9 @@ function jet_credit_button() {
 			break;
 	}
 
+	$_minprice = (float) get_option( 'jet_minprice' );
+	$jet_show_button_initial = $jet_price >= $_minprice;
+
 	$jet_gap            = (int) get_option( 'jet_gap' );
 	$zaiavka1jet_text   = get_option( 'jet_z1' );
 	$jet_vnoski_default = get_option( 'jet_vnoski_default' );
@@ -329,7 +332,13 @@ function jet_credit_button() {
 	<input type="hidden" id="jet_product_id" value="<?php echo (int)$jet_product->get_Id(); ?>" />
 	<input type="hidden" id="jet_variation_id" value="" />
 	<input type="hidden" id="jet_card_in" value="<?php echo (int)$jet_card_in; ?>" />
-	<div id="jet-product-button-container" style="display:none;padding-top:<?php echo $jet_gap; ?>px;">
+	<div
+		id="jet-product-button-container"
+		data-jet-minprice="<?php echo esc_attr( number_format( $_minprice, 2, '.', '' ) ); ?>"
+		data-jet-eur="<?php echo (int) $jet_eur; ?>"
+		data-jet-currency="<?php echo esc_attr( $jet_currency_code ); ?>"
+		style="display:<?php echo $jet_show_button_initial ? 'block' : 'none'; ?>;padding-top:<?php echo $jet_gap; ?>px;"
+	>
 		<div id="jet_alert_overlay" class="jet_alert_overlay"></div>
 		<div id="jet_alert_box"></div>
 		<?php if ($zaiavka1jet_text != '') { ?>
