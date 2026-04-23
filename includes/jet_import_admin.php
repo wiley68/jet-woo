@@ -13,6 +13,7 @@
 		'jet_gap' => 0,
 		'jet_z1' => '',
 		'jet_vnoska' => 1,
+		'jet_button_type' => 'standard',
 		'jet_minprice' => JET_MINPRICE,
 		'jet_eur' => 0
 	];
@@ -133,15 +134,21 @@
 						</div>
 					</div>
 					<div class="jet_form_group">
-						<div class="jet_control_label"><?php echo esc_html('Избор на режим на работа с валути'); ?></div>
+						<div class="jet_control_label"><?php echo esc_html('Вид на бутона'); ?></div>
 						<div class="jet_control">
-							<select name="jet_eur" class="jet_form_control">
-								<option value=0 <?php selected($jet_eur, 0); ?>><?php echo esc_html('Единична визуализация в лева и изпращане на исканията в лева'); ?></option>
-								<option value=1 <?php selected($jet_eur, 1); ?>><?php echo esc_html('Двойна визуализация лева/евро и изпращане на исканията в лева'); ?></option>
-								<option value=2 <?php selected($jet_eur, 2); ?>><?php echo esc_html('Двойна визуализация евро/лева и изпращане на исканията в евро'); ?></option>
-								<option value=3 <?php selected($jet_eur, 3); ?>><?php echo esc_html('Единична визуализация в евро и изпращане на исканията в евро'); ?></option>
+							<select name="jet_button_type" id="jet_button_type" class="jet_form_control">
+								<option value="standard" <?php selected($jet_button_type, 'standard'); ?>><?php echo esc_html('Стандартен бутон'); ?></option>
+								<option value="wide" <?php selected($jet_button_type, 'wide'); ?>><?php echo esc_html('Широк дизайн'); ?></option>
 							</select>
-							<span class="jet_form_controll_text"><?php echo esc_html('Избор на режим на работа с валути. Възможност за показване в евро или лева. Изпращане на исканията в евро или лева с превалутиране ако е необходимо'); ?></span>
+							<span class="jet_form_controll_text"><?php echo esc_html('От тук можете да си изберете вида на бутоните които ще се показват в продуктовата и в страницата количка.'); ?></span>
+							<div style="margin-top:12px;">
+								<img
+									id="jet_button_type_preview"
+									src="<?php echo esc_url( JET_IMAGES_URI . ( $jet_button_type === 'wide' ? '/jet_new.png' : '/jet.png' ) ); ?>"
+									alt="<?php echo esc_attr('Преглед на вид бутон'); ?>"
+									style="max-width:100%;height:auto;border:1px solid #ddd;padding:6px;background:#fff;"
+								/>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -261,6 +268,18 @@
 						<div class="jet_control">
 							<input type="text" name="jet_minprice" class="jet_form_control" value="<?php echo esc_attr($jet_minprice); ?>">
 							<span class="jet_form_controll_text"><?php echo esc_html('Минимално възможната сума на стоките за закупуване на кредит през ПБ Лични Финанси'); ?></span>
+						</div>
+					</div>
+					<div class="jet_form_group">
+						<div class="jet_control_label"><?php echo esc_html('Избор на режим на работа с валути'); ?></div>
+						<div class="jet_control">
+							<select name="jet_eur" class="jet_form_control">
+								<option value=0 <?php selected($jet_eur, 0); ?>><?php echo esc_html('Единична визуализация в лева и изпращане на исканията в лева'); ?></option>
+								<option value=1 <?php selected($jet_eur, 1); ?>><?php echo esc_html('Двойна визуализация лева/евро и изпращане на исканията в лева'); ?></option>
+								<option value=2 <?php selected($jet_eur, 2); ?>><?php echo esc_html('Двойна визуализация евро/лева и изпращане на исканията в евро'); ?></option>
+								<option value=3 <?php selected($jet_eur, 3); ?>><?php echo esc_html('Единична визуализация в евро и изпращане на исканията в евро'); ?></option>
+							</select>
+							<span class="jet_form_controll_text"><?php echo esc_html('Избор на режим на работа с валути. Възможност за показване в евро или лева. Изпращане на исканията в евро или лева с превалутиране ако е необходимо'); ?></span>
 						</div>
 					</div>
 				</div>
@@ -384,3 +403,22 @@
 		</div>
 	</div>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+	const jetButtonTypeSelect = document.getElementById('jet_button_type');
+	const jetButtonTypePreview = document.getElementById('jet_button_type_preview');
+	if (!jetButtonTypeSelect || !jetButtonTypePreview) {
+		return;
+	}
+	const jetPreviewImages = {
+		standard: '<?php echo esc_js( JET_IMAGES_URI . '/jet.png' ); ?>',
+		wide: '<?php echo esc_js( JET_IMAGES_URI . '/jet_new.png' ); ?>'
+	};
+	const updatePreview = function() {
+		const selectedType = jetButtonTypeSelect.value;
+		jetButtonTypePreview.src = jetPreviewImages[selectedType] || jetPreviewImages.standard;
+	};
+	jetButtonTypeSelect.addEventListener('change', updatePreview);
+	updatePreview();
+});
+</script>
