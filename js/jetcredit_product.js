@@ -3,6 +3,21 @@ jQuery(document).ready(function($) {
 	let card;
 	card = 0;
 
+	const jetMovePopupToBodyStart = () => {
+		const popup = document.getElementById('jet-product-popup-container');
+		if (!popup || !document.body) {
+			return;
+		}
+		if (popup.parentNode !== document.body) {
+			document.body.insertBefore(popup, document.body.firstChild);
+			return;
+		}
+		if (document.body.firstChild !== popup) {
+			document.body.insertBefore(popup, document.body.firstChild);
+		}
+	};
+	jetMovePopupToBodyStart();
+
 	const getJetNonce = () => {
 		return $.ajax({
 			url: jet_js.ajax_url,
