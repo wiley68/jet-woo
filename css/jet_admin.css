@@ -323,3 +323,89 @@
 	-webkit-box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1) !important;
 	box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1) !important;
 }
+
+.jet_button_scheme_block {
+	margin-top: 16px !important;
+	padding-top: 12px !important;
+	border-top: 1px solid #e5e5e5 !important;
+	width: 100% !important;
+	-webkit-box-sizing: border-box !important;
+	-moz-box-sizing: border-box !important;
+	box-sizing: border-box !important;
+}
+
+.jet_scheme_block_title {
+	margin: 0 0 10px 0 !important;
+	font-size: 13px !important;
+	font-weight: 600 !important;
+	color: #1d2327 !important;
+}
+
+.jet_scheme_grid_wrap {
+	width: 100% !important;
+	overflow-x: auto !important;
+	-webkit-overflow-scrolling: touch !important;
+}
+
+.jet_scheme_grid {
+	display: grid !important;
+	grid-template-columns: repeat(7, minmax(72px, 1fr)) !important;
+	gap: 10px !important;
+	min-width: min-content !important;
+}
+
+.jet_scheme_card {
+	display: block !important;
+	margin: 0 !important;
+	cursor: pointer !important;
+	-webkit-box-sizing: border-box !important;
+	-moz-box-sizing: border-box !important;
+	box-sizing: border-box !important;
+}
+
+.jet_scheme_radio {
+	position: absolute !important;
+	clip: rect(0, 0, 0, 0) !important;
+	width: 1px !important;
+	height: 1px !important;
+	margin: -1px !important;
+	padding: 0 !important;
+	overflow: hidden !important;
+	border: 0 !important;
+}
+
+.jet_scheme_preview {
+	display: flex !important;
+	align-items: center !important;
+	justify-content: center !important;
+	min-height: 48px !important;
+	padding: 6px 4px !important;
+	-webkit-box-sizing: border-box !important;
+	-moz-box-sizing: border-box !important;
+	box-sizing: border-box !important;
+	width: 100% !important;
+	transition: box-shadow 0.15s ease, transform 0.15s ease !important;
+}
+
+.jet_scheme_preview_text {
+	font-size: 11px !important;
+	font-weight: 700 !important;
+	line-height: 1.15 !important;
+	text-align: center !important;
+	word-break: break-word !important;
+}
+
+.jet_scheme_card:hover .jet_scheme_preview {
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+}
+
+.jet_scheme_card:has(.jet_scheme_radio:checked) .jet_scheme_preview {
+	box-shadow: 0 0 0 2px #2271b1, 0 2px 8px rgba(34, 113, 177, 0.25) !important;
+}
+
+.jet_scheme_summary {
+	margin: 12px 0 0 0 !important;
+	font-size: 13px !important;
+	font-weight: 600 !important;
+	color: #1d2327 !important;
+}

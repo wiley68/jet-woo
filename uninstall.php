@@ -29,6 +29,7 @@ $options = array(
 	'jet_shirina',
 	'jet_vnoska',
 	'jet_button_type',
+	'jet_button_scheme',
 	'jet_minprice',
 	'jet_eur',
 	'jet_order_status_id',

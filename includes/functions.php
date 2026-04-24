@@ -1,4 +1,6 @@
 <?php
+require_once JET_INCLUDES_DIR . '/class-jet-button-schemes.php';
+
 function jet_do_output_buffer() {
 	ob_start();
 }
@@ -289,6 +291,8 @@ function jet_credit_button() {
 	if ( ! in_array( $jet_button_type, array( 'standard', 'wide' ), true ) ) {
 		$jet_button_type = 'standard';
 	}
+	$jet_button_scheme_idx = Jet_Button_Schemes::normalize_index( get_option( 'jet_button_scheme', '0' ) );
+	$jet_wide_wrap_style   = Jet_Button_Schemes::wrap_inline_style( $jet_button_scheme_idx );
 	if ( $jet_price < $jet_min_250 ) {
 		$jet_vnoski = '9';
 	} else {
@@ -345,7 +349,7 @@ function jet_credit_button() {
 		<div id="jet_alert_overlay" class="jet_alert_overlay"></div>
 		<div id="jet_alert_box"></div>
 		<?php if ( 'wide' === $jet_button_type ) { ?>
-			<div class="jet_wide_button_wrap">
+			<div class="jet_wide_button_wrap" style="<?php echo esc_attr( $jet_wide_wrap_style ); ?>">
 				<button
 					type="button"
 					id="btn_jet"

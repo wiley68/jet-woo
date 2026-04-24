@@ -1,4 +1,7 @@
 <?php
+	if ( ! class_exists( 'Jet_Button_Schemes', false ) && defined( 'JET_INCLUDES_DIR' ) ) {
+		require_once JET_INCLUDES_DIR . '/class-jet-button-schemes.php';
+	}
 	$jet_settings = [
 		'jet_status_in' => 1,
 		'jet_hook' => 'woocommerce_after_add_to_cart_button',
@@ -13,19 +16,26 @@
 		'jet_gap' => 0,
 		'jet_vnoska' => 1,
 		'jet_button_type' => 'standard',
+		'jet_button_scheme' => '0',
 		'jet_minprice' => JET_MINPRICE,
 		'jet_eur' => 0
 	];
 	if(array_key_exists('jet_hidden', $_POST) && $_POST['jet_hidden'] == 'Y') {
 		check_admin_referer('jetcredit_settings_save', 'jetcredit_nonce');
 		foreach ( $jet_settings as $key => $default ) {
-			$value = filter_input(INPUT_POST, $key, FILTER_SANITIZE_FULL_SPECIAL_CHARS);
-			update_option($key, $value !== null ? $value : $default);
+			$value = filter_input( INPUT_POST, $key, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+			if ( 'jet_button_scheme' === $key && class_exists( 'Jet_Button_Schemes', false ) ) {
+				$value = $value !== null ? (string) Jet_Button_Schemes::normalize_index( $value ) : (string) Jet_Button_Schemes::normalize_index( $default );
+			}
+			update_option( $key, $value !== null ? $value : $default );
 		}
 		echo '<div class="updated"><p><strong>' . esc_html('Настройките са записани успешно.') . '</strong></p></div>';
 	}
 	foreach ( $jet_settings as $key => $default ) {
-		$$key = get_option($key, $default);
+		$$key = get_option( $key, $default );
+	}
+	if ( class_exists( 'Jet_Button_Schemes', false ) ) {
+		$jet_button_scheme = (string) Jet_Button_Schemes::normalize_index( isset( $jet_button_scheme ) ? $jet_button_scheme : '0' );
 	}
 	/* read filters */
 	$jet_schemes = jet_read_kop();
@@ -127,6 +137,18 @@
 							);
 							?>
 							<span class="jet_form_controll_text"><?php echo esc_html('Дали да се показва текст, в дясно от бутона указващ месечната вноска за избрания период на лизинг?'); ?></span>
+						</div>
+					</div>
+					<div class="jet_form_group">
+						<div class="jet_control_label"><?php echo esc_html('Избор на режим на работа с валути'); ?></div>
+						<div class="jet_control">
+							<select name="jet_eur" class="jet_form_control">
+								<option value=0 <?php selected($jet_eur, 0); ?>><?php echo esc_html('Единична визуализация в лева и изпращане на исканията в лева'); ?></option>
+								<option value=1 <?php selected($jet_eur, 1); ?>><?php echo esc_html('Двойна визуализация лева/евро и изпращане на исканията в лева'); ?></option>
+								<option value=2 <?php selected($jet_eur, 2); ?>><?php echo esc_html('Двойна визуализация евро/лева и изпращане на исканията в евро'); ?></option>
+								<option value=3 <?php selected($jet_eur, 3); ?>><?php echo esc_html('Единична визуализация в евро и изпращане на исканията в евро'); ?></option>
+							</select>
+							<span class="jet_form_controll_text"><?php echo esc_html('Избор на режим на работа с валути. Възможност за показване в евро или лева. Изпращане на исканията в евро или лева с превалутиране ако е необходимо'); ?></span>
 						</div>
 					</div>
 				</div>
@@ -249,18 +271,6 @@
 							<span class="jet_form_controll_text"><?php echo esc_html('Минимално възможната сума на стоките за закупуване на кредит през ПБ Лични Финанси'); ?></span>
 						</div>
 					</div>
-					<div class="jet_form_group">
-						<div class="jet_control_label"><?php echo esc_html('Избор на режим на работа с валути'); ?></div>
-						<div class="jet_control">
-							<select name="jet_eur" class="jet_form_control">
-								<option value=0 <?php selected($jet_eur, 0); ?>><?php echo esc_html('Единична визуализация в лева и изпращане на исканията в лева'); ?></option>
-								<option value=1 <?php selected($jet_eur, 1); ?>><?php echo esc_html('Двойна визуализация лева/евро и изпращане на исканията в лева'); ?></option>
-								<option value=2 <?php selected($jet_eur, 2); ?>><?php echo esc_html('Двойна визуализация евро/лева и изпращане на исканията в евро'); ?></option>
-								<option value=3 <?php selected($jet_eur, 3); ?>><?php echo esc_html('Единична визуализация в евро и изпращане на исканията в евро'); ?></option>
-							</select>
-							<span class="jet_form_controll_text"><?php echo esc_html('Избор на режим на работа с валути. Възможност за показване в евро или лева. Изпращане на исканията в евро или лева с превалутиране ако е необходимо'); ?></span>
-						</div>
-					</div>
 				</div>
 				<div
 					class="jet_tab_panel"
@@ -313,7 +323,7 @@
 						<div class="jet_control">
 							<select name="jet_button_type" id="jet_button_type" class="jet_form_control">
 								<option value="standard" <?php selected($jet_button_type, 'standard'); ?>><?php echo esc_html('Стандартен бутон'); ?></option>
-								<option value="wide" <?php selected($jet_button_type, 'wide'); ?>><?php echo esc_html('Широк дизайн'); ?></option>
+								<option value="wide" <?php selected($jet_button_type, 'wide'); ?>><?php echo esc_html('Персонализиран дизайн'); ?></option>
 							</select>
 							<span class="jet_form_controll_text"><?php echo esc_html('От тук можете да си изберете вида на бутоните които ще се показват в продуктовата и в страницата количка.'); ?></span>
 							<div style="margin-top:12px;">
@@ -323,6 +333,40 @@
 									alt="<?php echo esc_attr('Преглед на вид бутон'); ?>"
 									style="max-width:100%;height:auto;border:1px solid #ddd;padding:6px;background:#fff;"
 								/>
+							</div>
+							<?php
+							$jet_scheme_list = class_exists( 'Jet_Button_Schemes', false ) ? Jet_Button_Schemes::get_schemes() : array();
+							$jet_cur_scheme  = class_exists( 'Jet_Button_Schemes', false ) ? Jet_Button_Schemes::get_scheme( (int) $jet_button_scheme ) : null;
+							?>
+							<div
+								id="jet_button_scheme_block"
+								class="jet_button_scheme_block"
+								role="radiogroup"
+								aria-label="<?php echo esc_attr( 'Визуална схема на персонализирания бутон' ); ?>"
+								<?php echo 'wide' !== $jet_button_type ? 'hidden' : ''; ?>
+							>
+								<p class="jet_scheme_block_title"><?php echo esc_html( 'Цветова схема на бутона' ); ?></p>
+								<div class="jet_scheme_grid_wrap">
+									<div class="jet_scheme_grid">
+										<?php foreach ( $jet_scheme_list as $i => $sch ) : ?>
+											<label class="jet_scheme_card">
+												<input type="radio" name="jet_button_scheme" value="<?php echo esc_attr( (string) $i ); ?>" class="jet_scheme_radio" <?php checked( (int) $jet_button_scheme, (int) $i ); ?> />
+												<span class="jet_scheme_preview" style="<?php
+												printf(
+													'background:%1$s;border:2px solid %2$s;border-radius:16px;',
+													esc_attr( $sch['background'] ),
+													esc_attr( $sch['border'] )
+												);
+												?>"><span class="jet_scheme_preview_text" style="<?php
+												printf( 'color:%s;', esc_attr( $sch['color'] ) );
+												?>"><?php echo esc_html( $sch['short'] ); ?></span></span>
+											</label>
+										<?php endforeach; ?>
+									</div>
+								</div>
+								<p class="jet_scheme_summary" id="jet_scheme_selected_summary"><?php
+								echo esc_html( 'Избрана визуална схема: ' . ( $jet_cur_scheme ? $jet_cur_scheme['label'] : '' ) );
+								?></p>
 							</div>
 						</div>
 					</div>
@@ -455,6 +499,31 @@
 document.addEventListener('DOMContentLoaded', function() {
 	const jetButtonTypeSelect = document.getElementById('jet_button_type');
 	const jetButtonTypePreview = document.getElementById('jet_button_type_preview');
+	const jetSchemeBlock = document.getElementById('jet_button_scheme_block');
+	const jetSchemeSummary = document.getElementById('jet_scheme_selected_summary');
+	const jetSchemeLabels = <?php echo class_exists( 'Jet_Button_Schemes', false ) ? wp_json_encode( array_column( Jet_Button_Schemes::get_schemes(), 'label' ) ) : '[]'; ?>;
+	const jetToggleSchemeBlock = function() {
+		if (!jetSchemeBlock || !jetButtonTypeSelect) {
+			return;
+		}
+		if (jetButtonTypeSelect.value === 'wide') {
+			jetSchemeBlock.removeAttribute('hidden');
+		} else {
+			jetSchemeBlock.setAttribute('hidden', 'hidden');
+		}
+	};
+	const jetUpdateSchemeSummary = function() {
+		if (!jetSchemeSummary || !Array.isArray(jetSchemeLabels)) {
+			return;
+		}
+		const checked = document.querySelector('input[name="jet_button_scheme"]:checked');
+		if (!checked) {
+			return;
+		}
+		const idx = parseInt(checked.value, 10);
+		const label = jetSchemeLabels[idx] || '';
+		jetSchemeSummary.textContent = '<?php echo esc_js( 'Избрана визуална схема: ' ); ?>' + label;
+	};
 	if (jetButtonTypeSelect && jetButtonTypePreview) {
 		const jetPreviewImages = {
 			standard: '<?php echo esc_js( JET_IMAGES_URI . '/jet.png' ); ?>',
@@ -463,10 +532,18 @@ document.addEventListener('DOMContentLoaded', function() {
 		const updatePreview = function() {
 			const selectedType = jetButtonTypeSelect.value;
 			jetButtonTypePreview.src = jetPreviewImages[selectedType] || jetPreviewImages.standard;
+			jetToggleSchemeBlock();
 		};
 		jetButtonTypeSelect.addEventListener('change', updatePreview);
 		updatePreview();
+	} else if (jetButtonTypeSelect) {
+		jetButtonTypeSelect.addEventListener('change', jetToggleSchemeBlock);
+		jetToggleSchemeBlock();
 	}
+	document.querySelectorAll('input[name="jet_button_scheme"]').forEach(function(r) {
+		r.addEventListener('change', jetUpdateSchemeSummary);
+	});
+	jetUpdateSchemeSummary();
 
 	const jetTabButtons = document.querySelectorAll('.jet_tab_btn');
 	const jetTabPanels = document.querySelectorAll('.jet_tab_panel');
