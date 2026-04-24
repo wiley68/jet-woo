@@ -113,7 +113,7 @@
 					role="tabpanel"
 					aria-labelledby="jet-tab-1-button"
 				>
-					<div class="jet_form_group">
+					<div class="jet_form_group jet_form_group_button_visual">
 						<div class="jet_control_label"><?php echo esc_html('Включи модула'); ?></div>
 						<div class="jet_control">
 							<?php
@@ -380,18 +380,59 @@
 								<option value="wide" <?php selected($jet_button_type, 'wide'); ?>><?php echo esc_html('Персонализиран дизайн'); ?></option>
 							</select>
 							<span class="jet_form_controll_text"><?php echo esc_html('От тук можете да си изберете вида на бутоните които ще се показват в продуктовата и в страницата количка.'); ?></span>
-							<div style="margin-top:12px;">
-								<img
-									id="jet_button_type_preview"
-									src="<?php echo esc_url( JET_IMAGES_URI . ( $jet_button_type === 'wide' ? '/jet_new.png' : '/jet.png' ) ); ?>"
-									alt="<?php echo esc_attr('Преглед на вид бутон'); ?>"
-									style="max-width:100%;height:auto;border:1px solid #ddd;padding:6px;background:#fff;"
-								/>
-							</div>
 							<?php
 							$jet_scheme_list = class_exists( 'Jet_Button_Schemes', false ) ? Jet_Button_Schemes::get_schemes() : array();
 							$jet_cur_scheme  = class_exists( 'Jet_Button_Schemes', false ) ? Jet_Button_Schemes::get_scheme( (int) $jet_button_scheme ) : null;
+							if ( ! is_array( $jet_cur_scheme ) && ! empty( $jet_scheme_list ) ) {
+								$jet_cur_scheme = $jet_scheme_list[0];
+							}
+							$jet_admin_preview_style = '';
+							if ( class_exists( 'Jet_Button_Schemes', false ) ) {
+								$jet_admin_preview_style = Jet_Button_Schemes::wrap_inline_style( (int) $jet_button_scheme ) . sprintf( '--jet-wide-max-width:%dpx;', (int) $jet_btn_max_width );
+							}
 							?>
+							<div class="jet_button_preview_area">
+								<img
+									id="jet_button_type_preview"
+									src="<?php echo esc_url( JET_IMAGES_URI . '/jet.png' ); ?>"
+									alt="<?php echo esc_attr('Преглед на вид бутон'); ?>"
+									style="max-width:100%;height:auto;border:1px solid #ddd;padding:6px;background:#fff;<?php echo 'wide' === $jet_button_type ? 'display:none;' : ''; ?>"
+								/>
+								<div
+									id="jet_button_type_wide_preview"
+									class="jet_admin_preview_wrap"
+									style="<?php echo esc_attr( $jet_admin_preview_style ); ?><?php echo 'wide' === $jet_button_type ? '' : 'display:none;'; ?>"
+								>
+									<button type="button" class="jet_admin_preview_button" tabindex="-1">
+										<div class="jet_admin_preview_button_head">
+											<span id="jet_admin_preview_text"><?php echo esc_html( $jet_btn_text ); ?></span>
+											<img
+												id="jet_admin_preview_logo_main"
+												src="<?php echo esc_url( JET_IMAGES_URI . '/jet_logo.png' ); ?>"
+												alt="<?php echo esc_attr( 'ПБ Лични Финанси' ); ?>"
+												class="jet_admin_preview_button_logo"
+												<?php echo 1 === (int) $jet_btn_logo ? '' : 'style="display:none;"'; ?>
+											/>
+										</div>
+										<div class="jet_admin_preview_button_text">12 x 97.33 евро <span class="jet_admin_preview_button_text_second">(190.37 лв.)</span></div>
+									</button>
+									<?php if ( 1 === (int) $jet_card_in ) { ?>
+										<button type="button" class="jet_admin_preview_button" tabindex="-1">
+											<div class="jet_admin_preview_button_head">
+												<span id="jet_admin_preview_text_card"><?php echo esc_html( $jet_btn_text_card ); ?></span>
+												<img
+													id="jet_admin_preview_logo_card"
+													src="<?php echo esc_url( JET_IMAGES_URI . '/jet_logo.png' ); ?>"
+													alt="<?php echo esc_attr( 'ПБ Лични Финанси' ); ?>"
+													class="jet_admin_preview_button_logo"
+													<?php echo 1 === (int) $jet_btn_logo ? '' : 'style="display:none;"'; ?>
+												/>
+											</div>
+											<div class="jet_admin_preview_button_text">12 x 97.33 евро <span class="jet_admin_preview_button_text_second">(190.37 лв.)</span></div>
+										</button>
+									<?php } ?>
+								</div>
+							</div>
 							<div
 								id="jet_button_scheme_block"
 								class="jet_button_scheme_block"
@@ -609,12 +650,21 @@
 document.addEventListener('DOMContentLoaded', function() {
 	const jetButtonTypeSelect = document.getElementById('jet_button_type');
 	const jetButtonTypePreview = document.getElementById('jet_button_type_preview');
+	const jetButtonTypeWidePreview = document.getElementById('jet_button_type_wide_preview');
+	const jetPreviewTextMain = document.getElementById('jet_admin_preview_text');
+	const jetPreviewTextCard = document.getElementById('jet_admin_preview_text_card');
+	const jetPreviewLogoMain = document.getElementById('jet_admin_preview_logo_main');
+	const jetPreviewLogoCard = document.getElementById('jet_admin_preview_logo_card');
+	const jetBtnTextInput = document.querySelector('input[name="jet_btn_text"]');
+	const jetBtnTextCardInput = document.querySelector('input[name="jet_btn_text_card"]');
+	const jetBtnLogoHidden = document.getElementById('jet_btn_logo');
 	const jetResetVisualDefaultsBtn = document.getElementById('jet_reset_visual_defaults_btn');
 	const jetBtnMaxWidthInput = document.getElementById('jet_btn_max_width');
 	const jetBtnMaxWidthRange = document.getElementById('jet_btn_max_width_range');
 	const jetSchemeBlock = document.getElementById('jet_button_scheme_block');
 	const jetSchemeSummary = document.getElementById('jet_scheme_selected_summary');
 	const jetSchemeLabels = <?php echo class_exists( 'Jet_Button_Schemes', false ) ? wp_json_encode( array_column( Jet_Button_Schemes::get_schemes(), 'label' ) ) : '[]'; ?>;
+	const jetSchemeData = <?php echo class_exists( 'Jet_Button_Schemes', false ) ? wp_json_encode( Jet_Button_Schemes::get_schemes() ) : '[]'; ?>;
 	const clampJetBtnWidth = function(value) {
 		const parsed = parseInt(value, 10);
 		if (Number.isNaN(parsed)) {
@@ -630,12 +680,51 @@ document.addEventListener('DOMContentLoaded', function() {
 		if (jetBtnMaxWidthRange && source !== jetBtnMaxWidthRange) {
 			jetBtnMaxWidthRange.value = next;
 		}
+		if (jetButtonTypeWidePreview) {
+			jetButtonTypeWidePreview.style.setProperty('--jet-wide-max-width', next + 'px');
+		}
+	};
+	const updateJetWidePreview = function() {
+		if (!jetButtonTypeWidePreview) {
+			return;
+		}
+		const checkedScheme = document.querySelector('input[name="jet_button_scheme"]:checked');
+		if (checkedScheme && Array.isArray(jetSchemeData)) {
+			const idx = parseInt(checkedScheme.value, 10);
+			const scheme = jetSchemeData[idx];
+			if (scheme) {
+				jetButtonTypeWidePreview.style.setProperty('--jet-wide-bg', scheme.background || '#ffffff');
+				jetButtonTypeWidePreview.style.setProperty('--jet-wide-hover', scheme.hover || '#f0fdf4');
+				jetButtonTypeWidePreview.style.setProperty('--jet-wide-border', scheme.border || '#166534');
+				jetButtonTypeWidePreview.style.setProperty('--jet-wide-color', scheme.color || '#166534');
+				jetButtonTypeWidePreview.style.setProperty('--jet-wide-color-second', scheme.color_second || '#000000');
+			}
+		}
+		if (jetPreviewTextMain && jetBtnTextInput) {
+			jetPreviewTextMain.textContent = jetBtnTextInput.value || '<?php echo esc_js( 'Купи на изплащане с' ); ?>';
+		}
+		if (jetPreviewTextCard && jetBtnTextCardInput) {
+			jetPreviewTextCard.textContent = jetBtnTextCardInput.value || '<?php echo esc_js( 'На вноски с твоята кредитна карта' ); ?>';
+		}
+		const showLogo = !jetBtnLogoHidden || jetBtnLogoHidden.value === '1';
+		if (jetPreviewLogoMain) {
+			jetPreviewLogoMain.style.display = showLogo ? '' : 'none';
+		}
+		if (jetPreviewLogoCard) {
+			jetPreviewLogoCard.style.display = showLogo ? '' : 'none';
+		}
 	};
 	const jetToggleSchemeBlock = function() {
 		if (!jetSchemeBlock || !jetButtonTypeSelect) {
 			return;
 		}
 		const isWide = jetButtonTypeSelect.value === 'wide';
+		if (jetButtonTypePreview) {
+			jetButtonTypePreview.style.display = isWide ? 'none' : '';
+		}
+		if (jetButtonTypeWidePreview) {
+			jetButtonTypeWidePreview.style.display = isWide ? '' : 'none';
+		}
 		if (isWide) {
 			jetSchemeBlock.removeAttribute('hidden');
 		} else {
@@ -658,14 +747,11 @@ document.addEventListener('DOMContentLoaded', function() {
 		jetSchemeSummary.textContent = '<?php echo esc_js( 'Избрана визуална схема: ' ); ?>' + label;
 	};
 	if (jetButtonTypeSelect && jetButtonTypePreview) {
-		const jetPreviewImages = {
-			standard: '<?php echo esc_js( JET_IMAGES_URI . '/jet.png' ); ?>',
-			wide: '<?php echo esc_js( JET_IMAGES_URI . '/jet_new.png' ); ?>'
-		};
 		const updatePreview = function() {
-			const selectedType = jetButtonTypeSelect.value;
-			jetButtonTypePreview.src = jetPreviewImages[selectedType] || jetPreviewImages.standard;
+			// Стандартният preview ползва само jet.png; за "wide" рендерираме жив HTML preview.
+			jetButtonTypePreview.src = '<?php echo esc_js( JET_IMAGES_URI . '/jet.png' ); ?>';
 			jetToggleSchemeBlock();
+			updateJetWidePreview();
 		};
 		jetButtonTypeSelect.addEventListener('change', updatePreview);
 		updatePreview();
@@ -674,9 +760,27 @@ document.addEventListener('DOMContentLoaded', function() {
 		jetToggleSchemeBlock();
 	}
 	document.querySelectorAll('input[name="jet_button_scheme"]').forEach(function(r) {
-		r.addEventListener('change', jetUpdateSchemeSummary);
+		r.addEventListener('change', function() {
+			jetUpdateSchemeSummary();
+			updateJetWidePreview();
+		});
 	});
 	jetUpdateSchemeSummary();
+	if (jetBtnTextInput) {
+		jetBtnTextInput.addEventListener('input', updateJetWidePreview);
+	}
+	if (jetBtnTextCardInput) {
+		jetBtnTextCardInput.addEventListener('input', updateJetWidePreview);
+	}
+	if (jetBtnLogoHidden) {
+		jetBtnLogoHidden.addEventListener('input', updateJetWidePreview);
+		jetBtnLogoHidden.addEventListener('change', updateJetWidePreview);
+	}
+	document.addEventListener('click', function(event) {
+		if (event.target && typeof event.target.closest === 'function' && event.target.closest('#jet_btn_logo_switch')) {
+			window.setTimeout(updateJetWidePreview, 0);
+		}
+	});
 	if (jetBtnMaxWidthInput && jetBtnMaxWidthRange) {
 		syncJetBtnWidth(jetBtnMaxWidthInput.value);
 		jetBtnMaxWidthInput.addEventListener('input', function() {
@@ -689,6 +793,7 @@ document.addEventListener('DOMContentLoaded', function() {
 			syncJetBtnWidth(jetBtnMaxWidthRange.value, jetBtnMaxWidthRange);
 		});
 	}
+	updateJetWidePreview();
 
 	const jetTabButtons = document.querySelectorAll('.jet_tab_btn');
 	const jetTabPanels = document.querySelectorAll('.jet_tab_panel');
