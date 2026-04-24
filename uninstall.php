@@ -34,6 +34,7 @@ $options = array(
 	'jet_btn_text_card',
 	'jet_btn_logo',
 	'jet_btn_max_width',
+	'jet_btn_round',
 	'jet_minprice',
 	'jet_eur',
 	'jet_order_status_id',

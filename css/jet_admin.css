@@ -419,6 +419,11 @@
 	margin-top: 8px !important;
 }
 
+.jet_btn_round_range {
+	width: 100% !important;
+	margin-top: 8px !important;
+}
+
 .jet_form_group_button_visual {
 	align-items: flex-start !important;
 }
@@ -444,7 +449,7 @@
 }
 
 .jet_admin_preview_wrap {
-	display: flex !important;
+	display: flex;
 	flex-direction: column !important;
 	gap: 10px !important;
 	width: 100% !important;

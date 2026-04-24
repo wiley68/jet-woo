@@ -295,13 +295,19 @@ function jet_credit_button() {
 	$jet_btn_text_card   = get_option( 'jet_btn_text_card', 'На вноски с твоята кредитна карта' );
 	$jet_btn_logo        = (int) get_option( 'jet_btn_logo', 1 );
 	$jet_btn_max_width   = (int) get_option( 'jet_btn_max_width', 570 );
+	$jet_btn_round       = (int) get_option( 'jet_btn_round', 16 );
 	if ( $jet_btn_max_width < 30 ) {
 		$jet_btn_max_width = 30;
 	} elseif ( $jet_btn_max_width > 1200 ) {
 		$jet_btn_max_width = 1200;
 	}
+	if ( $jet_btn_round < 0 ) {
+		$jet_btn_round = 0;
+	} elseif ( $jet_btn_round > 25 ) {
+		$jet_btn_round = 25;
+	}
 	$jet_button_scheme_idx = Jet_Button_Schemes::normalize_index( get_option( 'jet_button_scheme', '0' ) );
-	$jet_wide_wrap_style   = Jet_Button_Schemes::wrap_inline_style( $jet_button_scheme_idx ) . sprintf( '--jet-wide-max-width:%dpx;', $jet_btn_max_width );
+	$jet_wide_wrap_style   = Jet_Button_Schemes::wrap_inline_style( $jet_button_scheme_idx ) . sprintf( '--jet-wide-max-width:%dpx;--jet-wide-radius:%dpx;', $jet_btn_max_width, $jet_btn_round );
 	if ( $jet_price < $jet_min_250 ) {
 		$jet_vnoski = '9';
 	} else {
