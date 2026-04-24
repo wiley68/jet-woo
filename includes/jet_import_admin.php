@@ -22,6 +22,7 @@
 		'jet_btn_logo' => 1,
 		'jet_btn_max_width' => 570,
 		'jet_btn_round' => 16,
+		'jet_btn_font' => 14,
 		'jet_minprice' => JET_MINPRICE,
 		'jet_eur' => 0
 	];
@@ -32,6 +33,7 @@
 		'jet_btn_logo' => 1,
 		'jet_btn_max_width' => 570,
 		'jet_btn_round' => 16,
+		'jet_btn_font' => 14,
 	];
 	if(array_key_exists('jet_hidden', $_POST) && $_POST['jet_hidden'] == 'Y') {
 		check_admin_referer('jetcredit_settings_save', 'jetcredit_nonce');
@@ -73,6 +75,15 @@
 					}
 					$value = (string) $round;
 				}
+				if ( 'jet_btn_font' === $key ) {
+					$font = $value !== null ? (int) $value : (int) $default;
+					if ( $font < 6 ) {
+						$font = 6;
+					} elseif ( $font > 36 ) {
+						$font = 36;
+					}
+					$value = (string) $font;
+				}
 				update_option( $key, $value !== null ? $value : $default );
 			}
 			echo '<div class="updated"><p><strong>' . esc_html('Настройките са записани успешно.') . '</strong></p></div>';
@@ -95,6 +106,12 @@
 		$jet_btn_round = 0;
 	} elseif ( $jet_btn_round > 25 ) {
 		$jet_btn_round = 25;
+	}
+	$jet_btn_font = (int) $jet_btn_font;
+	if ( $jet_btn_font < 6 ) {
+		$jet_btn_font = 6;
+	} elseif ( $jet_btn_font > 36 ) {
+		$jet_btn_font = 36;
 	}
 	/* read filters */
 	$jet_schemes = jet_read_kop();
@@ -405,7 +422,7 @@
 							}
 							$jet_admin_preview_style = '';
 							if ( class_exists( 'Jet_Button_Schemes', false ) ) {
-								$jet_admin_preview_style = Jet_Button_Schemes::wrap_inline_style( (int) $jet_button_scheme ) . sprintf( '--jet-wide-max-width:%dpx;--jet-wide-radius:%dpx;', (int) $jet_btn_max_width, (int) $jet_btn_round );
+								$jet_admin_preview_style = Jet_Button_Schemes::wrap_inline_style( (int) $jet_button_scheme ) . sprintf( '--jet-wide-max-width:%dpx;--jet-wide-radius:%dpx;--jet-wide-font-size:%dpx;', (int) $jet_btn_max_width, (int) $jet_btn_round, (int) $jet_btn_font );
 							}
 							?>
 							<div class="jet_button_preview_area">
@@ -560,6 +577,31 @@
 										<span class="jet_form_controll_text"><?php echo esc_html( 'Радиус в px. 0 означава бутони без закръгление.'); ?></span>
 									</div>
 								</div>
+								<div class="jet_form_group">
+									<div class="jet_control_label"><?php echo esc_html( 'Размер на шрифт в бутона' ); ?></div>
+									<div class="jet_control">
+										<input
+											type="number"
+											name="jet_btn_font"
+											id="jet_btn_font"
+											class="jet_form_control"
+											min="6"
+											max="36"
+											step="1"
+											value="<?php echo esc_attr( (string) $jet_btn_font ); ?>"
+										>
+										<input
+											type="range"
+											id="jet_btn_font_range"
+											class="jet_btn_font_range"
+											min="6"
+											max="36"
+											step="1"
+											value="<?php echo esc_attr( (string) $jet_btn_font ); ?>"
+										>
+										<span class="jet_form_controll_text"><?php echo esc_html( 'Размер в px за текстовете в персонализирания бутон (6–36).'); ?></span>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -705,6 +747,8 @@ document.addEventListener('DOMContentLoaded', function() {
 	const jetBtnMaxWidthRange = document.getElementById('jet_btn_max_width_range');
 	const jetBtnRoundInput = document.getElementById('jet_btn_round');
 	const jetBtnRoundRange = document.getElementById('jet_btn_round_range');
+	const jetBtnFontInput = document.getElementById('jet_btn_font');
+	const jetBtnFontRange = document.getElementById('jet_btn_font_range');
 	const jetSchemeBlock = document.getElementById('jet_button_scheme_block');
 	const jetSchemeSummary = document.getElementById('jet_scheme_selected_summary');
 	const jetSchemeLabels = <?php echo class_exists( 'Jet_Button_Schemes', false ) ? wp_json_encode( array_column( Jet_Button_Schemes::get_schemes(), 'label' ) ) : '[]'; ?>;
@@ -745,6 +789,25 @@ document.addEventListener('DOMContentLoaded', function() {
 		}
 		if (jetButtonTypeWidePreview) {
 			jetButtonTypeWidePreview.style.setProperty('--jet-wide-radius', next + 'px');
+		}
+	};
+	const clampJetBtnFont = function(value) {
+		const parsed = parseInt(value, 10);
+		if (Number.isNaN(parsed)) {
+			return 14;
+		}
+		return Math.min(36, Math.max(6, parsed));
+	};
+	const syncJetBtnFont = function(value, source) {
+		const next = clampJetBtnFont(value);
+		if (jetBtnFontInput && source !== jetBtnFontInput) {
+			jetBtnFontInput.value = next;
+		}
+		if (jetBtnFontRange && source !== jetBtnFontRange) {
+			jetBtnFontRange.value = next;
+		}
+		if (jetButtonTypeWidePreview) {
+			jetButtonTypeWidePreview.style.setProperty('--jet-wide-font-size', next + 'px');
 		}
 	};
 	const updateJetWidePreview = function() {
@@ -866,6 +929,18 @@ document.addEventListener('DOMContentLoaded', function() {
 		});
 		jetBtnRoundRange.addEventListener('input', function() {
 			syncJetBtnRound(jetBtnRoundRange.value, jetBtnRoundRange);
+		});
+	}
+	if (jetBtnFontInput && jetBtnFontRange) {
+		syncJetBtnFont(jetBtnFontInput.value);
+		jetBtnFontInput.addEventListener('input', function() {
+			syncJetBtnFont(jetBtnFontInput.value, jetBtnFontInput);
+		});
+		jetBtnFontInput.addEventListener('change', function() {
+			syncJetBtnFont(jetBtnFontInput.value);
+		});
+		jetBtnFontRange.addEventListener('input', function() {
+			syncJetBtnFont(jetBtnFontRange.value, jetBtnFontRange);
 		});
 	}
 	updateJetWidePreview();

@@ -1,5 +1,19 @@
 @import url('./jetcredit_fonts.css');
 
+#jet-product-button-container {
+	width: 100% !important;
+	max-width: 100% !important;
+	box-sizing: border-box !important;
+	align-self: stretch !important;
+	min-width: 0 !important;
+}
+
+#jet-product-button-container,
+#jet-product-button-container * {
+	letter-spacing: normal !important;
+	word-spacing: normal !important;
+}
+
 .jet_button_table {
 	padding: 2px 0px !important;
 	text-align: center !important;
@@ -48,6 +62,7 @@
 	--jet-wide-max-width: 570px;
 	--jet-wide-color: #166534;
 	--jet-wide-color-second: #000000;
+	--jet-wide-font-size: 14px;
 }
 
 .jet_wide_button {
@@ -79,6 +94,7 @@
 }
 
 .jet_wide_button_head {
+	font-size: var(--jet-wide-font-size, 14px);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -95,7 +111,7 @@
 }
 
 .jet_wide_button_text {
-	font-size: 14px;
+	font-size: var(--jet-wide-font-size, 14px);
 	color: var(--jet-wide-color, #166534);
 	line-height: 1.2;
 	text-align: center;
@@ -114,6 +130,8 @@
 #jet-product-popup-container,
 #jet-product-popup-container * {
 	font-family: "Roboto Condensed", sans-serif !important;
+	letter-spacing: normal !important;
+	word-spacing: normal !important;
 }
 
 .modalpayment_jet {

@@ -1,5 +1,14 @@
 @import url('./jetcredit_fonts.css');
 
+/* Не наследяваме разредка от темата за полетата на метода в checkout */
+li.payment_method_jetpayment,
+li.payment_method_jetpayment *,
+li.payment_method_jetpaymentcard,
+li.payment_method_jetpaymentcard * {
+	letter-spacing: normal !important;
+	word-spacing: normal !important;
+}
+
 /* calculator panel */
 .jet_panel * {
 	font-family: "Roboto Condensed", sans-serif !important;

@@ -296,6 +296,7 @@ function jet_credit_button() {
 	$jet_btn_logo        = (int) get_option( 'jet_btn_logo', 1 );
 	$jet_btn_max_width   = (int) get_option( 'jet_btn_max_width', 570 );
 	$jet_btn_round       = (int) get_option( 'jet_btn_round', 16 );
+	$jet_btn_font        = (int) get_option( 'jet_btn_font', 14 );
 	if ( $jet_btn_max_width < 30 ) {
 		$jet_btn_max_width = 30;
 	} elseif ( $jet_btn_max_width > 1200 ) {
@@ -306,8 +307,13 @@ function jet_credit_button() {
 	} elseif ( $jet_btn_round > 25 ) {
 		$jet_btn_round = 25;
 	}
+	if ( $jet_btn_font < 6 ) {
+		$jet_btn_font = 6;
+	} elseif ( $jet_btn_font > 36 ) {
+		$jet_btn_font = 36;
+	}
 	$jet_button_scheme_idx = Jet_Button_Schemes::normalize_index( get_option( 'jet_button_scheme', '0' ) );
-	$jet_wide_wrap_style   = Jet_Button_Schemes::wrap_inline_style( $jet_button_scheme_idx ) . sprintf( '--jet-wide-max-width:%dpx;--jet-wide-radius:%dpx;', $jet_btn_max_width, $jet_btn_round );
+	$jet_wide_wrap_style   = Jet_Button_Schemes::wrap_inline_style( $jet_button_scheme_idx ) . sprintf( '--jet-wide-max-width:%dpx;--jet-wide-radius:%dpx;--jet-wide-font-size:%dpx;', $jet_btn_max_width, $jet_btn_round, $jet_btn_font );
 	if ( $jet_price < $jet_min_250 ) {
 		$jet_vnoski = '9';
 	} else {
@@ -840,7 +846,7 @@ function jet_credit_button() {
 <?php }
 $jet_hook = get_option( 'jet_hook' );
 if ( ! empty( $jet_hook ) ) {
-	add_action( $jet_hook, 'jet_credit_button' );
+	add_action( $jet_hook, 'jet_credit_button', 1 );
 }
 
 function jet_credit_button_cart() {
@@ -917,6 +923,7 @@ function jet_credit_button_cart() {
 	$jet_btn_logo        = (int) get_option( 'jet_btn_logo', 1 );
 	$jet_btn_max_width   = (int) get_option( 'jet_btn_max_width', 570 );
 	$jet_btn_round       = (int) get_option( 'jet_btn_round', 16 );
+	$jet_btn_font        = (int) get_option( 'jet_btn_font', 14 );
 	if ( $jet_btn_max_width < 30 ) {
 		$jet_btn_max_width = 30;
 	} elseif ( $jet_btn_max_width > 1200 ) {
@@ -927,8 +934,13 @@ function jet_credit_button_cart() {
 	} elseif ( $jet_btn_round > 25 ) {
 		$jet_btn_round = 25;
 	}
+	if ( $jet_btn_font < 6 ) {
+		$jet_btn_font = 6;
+	} elseif ( $jet_btn_font > 36 ) {
+		$jet_btn_font = 36;
+	}
 	$jet_button_scheme_idx = Jet_Button_Schemes::normalize_index( get_option( 'jet_button_scheme', '0' ) );
-	$jet_wide_wrap_style   = Jet_Button_Schemes::wrap_inline_style( $jet_button_scheme_idx ) . sprintf( '--jet-wide-max-width:%dpx;--jet-wide-radius:%dpx;', $jet_btn_max_width, $jet_btn_round );
+	$jet_wide_wrap_style   = Jet_Button_Schemes::wrap_inline_style( $jet_button_scheme_idx ) . sprintf( '--jet-wide-max-width:%dpx;--jet-wide-radius:%dpx;--jet-wide-font-size:%dpx;', $jet_btn_max_width, $jet_btn_round, $jet_btn_font );
 	if ($jet_price < $jet_min_250) {
 		$jet_vnoski = '9';
 	} else {
@@ -1485,7 +1497,7 @@ function jet_credit_button_cart() {
 	</div>
 	<?php
 }
-add_action( 'woocommerce_after_cart_totals', 'jet_credit_button_cart' );
+add_action( 'woocommerce_after_cart_totals', 'jet_credit_button_cart', 1 );
 
 
 function jet_add_query_vars_filter($vars) {

@@ -424,6 +424,11 @@
 	margin-top: 8px !important;
 }
 
+.jet_btn_font_range {
+	width: 100% !important;
+	margin-top: 8px !important;
+}
+
 .jet_form_group_button_visual {
 	align-items: flex-start !important;
 }
@@ -467,6 +472,7 @@
 	--jet-wide-max-width: 570px;
 	--jet-wide-color: #166534;
 	--jet-wide-color-second: #000000;
+	--jet-wide-font-size: 14px;
 }
 
 .jet_admin_preview_button {
@@ -491,10 +497,17 @@
 	align-items: center !important;
 	justify-content: center !important;
 	gap: 6px !important;
+	font-size: var(--jet-wide-font-size, 14px) !important;
 	font-weight: 700 !important;
 	color: var(--jet-wide-color, #166534) !important;
 	line-height: 1.2 !important;
 	white-space: nowrap !important;
+}
+
+#jet_admin_preview_text,
+#jet_admin_preview_text_card {
+	font-size: var(--jet-wide-font-size, 14px) !important;
+	line-height: 1.2 !important;
 }
 
 .jet_admin_preview_button_logo {
@@ -503,7 +516,7 @@
 }
 
 .jet_admin_preview_button_text {
-	font-size: 14px !important;
+	font-size: var(--jet-wide-font-size, 14px) !important;
 	color: var(--jet-wide-color, #166534) !important;
 	line-height: 1.2 !important;
 	text-align: center !important;
