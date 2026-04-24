@@ -291,8 +291,17 @@ function jet_credit_button() {
 	if ( ! in_array( $jet_button_type, array( 'standard', 'wide' ), true ) ) {
 		$jet_button_type = 'standard';
 	}
+	$jet_btn_text        = get_option( 'jet_btn_text', 'Купи на изплащане с' );
+	$jet_btn_text_card   = get_option( 'jet_btn_text_card', 'На вноски с твоята кредитна карта' );
+	$jet_btn_logo        = (int) get_option( 'jet_btn_logo', 1 );
+	$jet_btn_max_width   = (int) get_option( 'jet_btn_max_width', 570 );
+	if ( $jet_btn_max_width < 30 ) {
+		$jet_btn_max_width = 30;
+	} elseif ( $jet_btn_max_width > 1200 ) {
+		$jet_btn_max_width = 1200;
+	}
 	$jet_button_scheme_idx = Jet_Button_Schemes::normalize_index( get_option( 'jet_button_scheme', '0' ) );
-	$jet_wide_wrap_style   = Jet_Button_Schemes::wrap_inline_style( $jet_button_scheme_idx );
+	$jet_wide_wrap_style   = Jet_Button_Schemes::wrap_inline_style( $jet_button_scheme_idx ) . sprintf( '--jet-wide-max-width:%dpx;', $jet_btn_max_width );
 	if ( $jet_price < $jet_min_250 ) {
 		$jet_vnoski = '9';
 	} else {
@@ -356,8 +365,10 @@ function jet_credit_button() {
 					class="jet_wide_button"
 				>
 					<div class="jet_wide_button_head">
-						<span>Купи на изплащане с</span>
-						<img src="<?php echo esc_url( JET_IMAGES_URI . '/jet_logo.png' ); ?>" alt="ПБ Лични Финанси" class="jet_wide_button_logo" />
+						<span><?php echo esc_html( $jet_btn_text ); ?></span>
+						<?php if ( 1 === $jet_btn_logo ) { ?>
+							<img src="<?php echo esc_url( JET_IMAGES_URI . '/jet_logo.png' ); ?>" alt="ПБ Лични Финанси" class="jet_wide_button_logo" />
+						<?php } ?>
 					</div>
 					<?php if (1 === (int) $is_vnoska) { ?>
 						<div class="jet_wide_button_text">
@@ -378,8 +389,10 @@ function jet_credit_button() {
 						class="jet_wide_button"
 					>
 						<div class="jet_wide_button_head">
-							<span>На вноски с твоята кредитна карта</span>
-							<img src="<?php echo esc_url( JET_IMAGES_URI . '/jet_logo.png' ); ?>" alt="ПБ Лични Финанси" class="jet_wide_button_logo" />
+							<span><?php echo esc_html( $jet_btn_text_card ); ?></span>
+							<?php if ( 1 === $jet_btn_logo ) { ?>
+								<img src="<?php echo esc_url( JET_IMAGES_URI . '/jet_logo.png' ); ?>" alt="ПБ Лични Финанси" class="jet_wide_button_logo" />
+							<?php } ?>
 						</div>
 						<?php if (1 === (int) $is_vnoska) { ?>
 							<div class="jet_wide_button_text">

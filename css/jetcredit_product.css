@@ -45,13 +45,14 @@
 	--jet-wide-hover: #f0fdf4;
 	--jet-wide-border: #166534;
 	--jet-wide-radius: 16px;
+	--jet-wide-max-width: 570px;
 	--jet-wide-color: #166534;
 	--jet-wide-color-second: #000000;
 }
 
 .jet_wide_button {
 	width: 100%;
-	max-width: 570px;
+	max-width: var(--jet-wide-max-width, 570px);
 	height: 50px;
 	max-height: 50px;
 	border: 2px solid var(--jet-wide-border, #166534);
@@ -69,6 +70,12 @@
 .jet_wide_button:hover {
 	background: var(--jet-wide-hover, #f0fdf4);
 	border-color: var(--jet-wide-border, #166534);
+}
+
+.jet_wide_button:focus,
+.jet_wide_button:active,
+.jet_wide_button:focus-visible {
+	outline: none;
 }
 
 .jet_wide_button_head {

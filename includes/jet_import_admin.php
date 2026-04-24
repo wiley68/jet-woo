@@ -17,25 +17,67 @@
 		'jet_vnoska' => 1,
 		'jet_button_type' => 'standard',
 		'jet_button_scheme' => '0',
+		'jet_btn_text' => 'Купи на изплащане с',
+		'jet_btn_text_card' => 'На вноски с твоята кредитна карта',
+		'jet_btn_logo' => 1,
+		'jet_btn_max_width' => 570,
 		'jet_minprice' => JET_MINPRICE,
 		'jet_eur' => 0
 	];
+	$jet_visual_defaults = [
+		'jet_button_scheme' => '0',
+		'jet_btn_text' => 'Купи на изплащане с',
+		'jet_btn_text_card' => 'На вноски с твоята кредитна карта',
+		'jet_btn_logo' => 1,
+		'jet_btn_max_width' => 570,
+	];
 	if(array_key_exists('jet_hidden', $_POST) && $_POST['jet_hidden'] == 'Y') {
 		check_admin_referer('jetcredit_settings_save', 'jetcredit_nonce');
-		foreach ( $jet_settings as $key => $default ) {
-			$value = filter_input( INPUT_POST, $key, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
-			if ( 'jet_button_scheme' === $key && class_exists( 'Jet_Button_Schemes', false ) ) {
-				$value = $value !== null ? (string) Jet_Button_Schemes::normalize_index( $value ) : (string) Jet_Button_Schemes::normalize_index( $default );
+		$reset_visual = array_key_exists( 'jet_reset_visual_defaults', $_POST ) && '1' === (string) $_POST['jet_reset_visual_defaults'];
+		if ( $reset_visual ) {
+			$submitted_button_type = filter_input( INPUT_POST, 'jet_button_type', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+			if ( ! is_string( $submitted_button_type ) || '' === $submitted_button_type ) {
+				$submitted_button_type = (string) get_option( 'jet_button_type', 'standard' );
 			}
-			update_option( $key, $value !== null ? $value : $default );
+			if ( 'wide' === $submitted_button_type ) {
+				foreach ( $jet_visual_defaults as $key => $default ) {
+					update_option( $key, $default );
+				}
+				echo '<div class="updated"><p><strong>' . esc_html( 'Визуалните настройки на бутона са върнати по подразбиране.' ) . '</strong></p></div>';
+			} else {
+				echo '<div class="notice notice-warning"><p><strong>' . esc_html( 'Връщането на визуалните настройки е достъпно само при тип „Персонализиран дизайн“.' ) . '</strong></p></div>';
+			}
+		} else {
+			foreach ( $jet_settings as $key => $default ) {
+				$value = filter_input( INPUT_POST, $key, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+				if ( 'jet_button_scheme' === $key && class_exists( 'Jet_Button_Schemes', false ) ) {
+					$value = $value !== null ? (string) Jet_Button_Schemes::normalize_index( $value ) : (string) Jet_Button_Schemes::normalize_index( $default );
+				}
+				if ( 'jet_btn_max_width' === $key ) {
+					$width = $value !== null ? (int) $value : (int) $default;
+					if ( $width < 30 ) {
+						$width = 30;
+					} elseif ( $width > 1200 ) {
+						$width = 1200;
+					}
+					$value = (string) $width;
+				}
+				update_option( $key, $value !== null ? $value : $default );
+			}
+			echo '<div class="updated"><p><strong>' . esc_html('Настройките са записани успешно.') . '</strong></p></div>';
 		}
-		echo '<div class="updated"><p><strong>' . esc_html('Настройките са записани успешно.') . '</strong></p></div>';
 	}
 	foreach ( $jet_settings as $key => $default ) {
 		$$key = get_option( $key, $default );
 	}
 	if ( class_exists( 'Jet_Button_Schemes', false ) ) {
 		$jet_button_scheme = (string) Jet_Button_Schemes::normalize_index( isset( $jet_button_scheme ) ? $jet_button_scheme : '0' );
+	}
+	$jet_btn_max_width = (int) $jet_btn_max_width;
+	if ( $jet_btn_max_width < 30 ) {
+		$jet_btn_max_width = 30;
+	} elseif ( $jet_btn_max_width > 1200 ) {
+		$jet_btn_max_width = 1200;
 	}
 	/* read filters */
 	$jet_schemes = jet_read_kop();
@@ -319,7 +361,19 @@
 						</div>
 					</div>
 					<div class="jet_form_group">
-						<div class="jet_control_label"><?php echo esc_html('Вид на бутона'); ?></div>
+						<div class="jet_control_label">
+							<div>
+								<div><?php echo esc_html('Вид на бутона'); ?></div>
+								<button
+									type="submit"
+									name="jet_reset_visual_defaults"
+									value="1"
+									id="jet_reset_visual_defaults_btn"
+									class="button button-secondary"
+									style="margin-top:8px;<?php echo 'wide' === $jet_button_type ? '' : 'display:none;'; ?>"
+								><?php echo esc_html( 'Върни стандартните настройки' ); ?></button>
+							</div>
+						</div>
 						<div class="jet_control">
 							<select name="jet_button_type" id="jet_button_type" class="jet_form_control">
 								<option value="standard" <?php selected($jet_button_type, 'standard'); ?>><?php echo esc_html('Стандартен бутон'); ?></option>
@@ -367,6 +421,62 @@
 								<p class="jet_scheme_summary" id="jet_scheme_selected_summary"><?php
 								echo esc_html( 'Избрана визуална схема: ' . ( $jet_cur_scheme ? $jet_cur_scheme['label'] : '' ) );
 								?></p>
+								<div class="jet_form_group">
+									<div class="jet_control_label"><?php echo esc_html( 'Текст на основния бутон' ); ?></div>
+									<div class="jet_control">
+										<input type="text" name="jet_btn_text" class="jet_form_control" value="<?php echo esc_attr( $jet_btn_text ); ?>">
+										<span class="jet_form_controll_text"><?php echo esc_html( 'Текстът в първия ред на персонализирания бутон.' ); ?></span>
+									</div>
+								</div>
+								<div class="jet_form_group">
+									<div class="jet_control_label"><?php echo esc_html( 'Текст на картовия бутон' ); ?></div>
+									<div class="jet_control">
+										<input type="text" name="jet_btn_text_card" class="jet_form_control" value="<?php echo esc_attr( $jet_btn_text_card ); ?>">
+										<span class="jet_form_controll_text"><?php echo esc_html( 'Текстът в първия ред на бутона за кредитна карта.' ); ?></span>
+									</div>
+								</div>
+								<div class="jet_form_group">
+									<div class="jet_control_label"><?php echo esc_html( 'Покажи лого в бутона' ); ?></div>
+									<div class="jet_control">
+										<?php
+										echo Jet_Admin_Toggle::render(
+											array(
+												'name'       => 'jet_btn_logo',
+												'value'      => $jet_btn_logo,
+												'aria_label' => 'Покажи лого в бутона',
+												'label_on'   => 'Да',
+												'label_off'  => 'Не',
+											)
+										);
+										?>
+										<span class="jet_form_controll_text"><?php echo esc_html( 'Определя дали да се показва логото на ПБ Лични Финанси в персонализирания бутон.' ); ?></span>
+									</div>
+								</div>
+								<div class="jet_form_group">
+									<div class="jet_control_label"><?php echo esc_html( 'Максимална ширина на бутона' ); ?></div>
+									<div class="jet_control">
+										<input
+											type="number"
+											name="jet_btn_max_width"
+											id="jet_btn_max_width"
+											class="jet_form_control"
+											min="30"
+											max="1200"
+											step="1"
+											value="<?php echo esc_attr( (string) $jet_btn_max_width ); ?>"
+										>
+										<input
+											type="range"
+											id="jet_btn_max_width_range"
+											class="jet_btn_max_width_range"
+											min="30"
+											max="1200"
+											step="1"
+											value="<?php echo esc_attr( (string) $jet_btn_max_width ); ?>"
+										>
+										<span class="jet_form_controll_text"><?php echo esc_html( 'Ширина в px. Може да зададете стойност ръчно или с плъзгача (30–1200).'); ?></span>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
@@ -499,17 +609,40 @@
 document.addEventListener('DOMContentLoaded', function() {
 	const jetButtonTypeSelect = document.getElementById('jet_button_type');
 	const jetButtonTypePreview = document.getElementById('jet_button_type_preview');
+	const jetResetVisualDefaultsBtn = document.getElementById('jet_reset_visual_defaults_btn');
+	const jetBtnMaxWidthInput = document.getElementById('jet_btn_max_width');
+	const jetBtnMaxWidthRange = document.getElementById('jet_btn_max_width_range');
 	const jetSchemeBlock = document.getElementById('jet_button_scheme_block');
 	const jetSchemeSummary = document.getElementById('jet_scheme_selected_summary');
 	const jetSchemeLabels = <?php echo class_exists( 'Jet_Button_Schemes', false ) ? wp_json_encode( array_column( Jet_Button_Schemes::get_schemes(), 'label' ) ) : '[]'; ?>;
+	const clampJetBtnWidth = function(value) {
+		const parsed = parseInt(value, 10);
+		if (Number.isNaN(parsed)) {
+			return 570;
+		}
+		return Math.min(1200, Math.max(30, parsed));
+	};
+	const syncJetBtnWidth = function(value, source) {
+		const next = clampJetBtnWidth(value);
+		if (jetBtnMaxWidthInput && source !== jetBtnMaxWidthInput) {
+			jetBtnMaxWidthInput.value = next;
+		}
+		if (jetBtnMaxWidthRange && source !== jetBtnMaxWidthRange) {
+			jetBtnMaxWidthRange.value = next;
+		}
+	};
 	const jetToggleSchemeBlock = function() {
 		if (!jetSchemeBlock || !jetButtonTypeSelect) {
 			return;
 		}
-		if (jetButtonTypeSelect.value === 'wide') {
+		const isWide = jetButtonTypeSelect.value === 'wide';
+		if (isWide) {
 			jetSchemeBlock.removeAttribute('hidden');
 		} else {
 			jetSchemeBlock.setAttribute('hidden', 'hidden');
+		}
+		if (jetResetVisualDefaultsBtn) {
+			jetResetVisualDefaultsBtn.style.display = isWide ? '' : 'none';
 		}
 	};
 	const jetUpdateSchemeSummary = function() {
@@ -544,6 +677,18 @@ document.addEventListener('DOMContentLoaded', function() {
 		r.addEventListener('change', jetUpdateSchemeSummary);
 	});
 	jetUpdateSchemeSummary();
+	if (jetBtnMaxWidthInput && jetBtnMaxWidthRange) {
+		syncJetBtnWidth(jetBtnMaxWidthInput.value);
+		jetBtnMaxWidthInput.addEventListener('input', function() {
+			syncJetBtnWidth(jetBtnMaxWidthInput.value, jetBtnMaxWidthInput);
+		});
+		jetBtnMaxWidthInput.addEventListener('change', function() {
+			syncJetBtnWidth(jetBtnMaxWidthInput.value);
+		});
+		jetBtnMaxWidthRange.addEventListener('input', function() {
+			syncJetBtnWidth(jetBtnMaxWidthRange.value, jetBtnMaxWidthRange);
+		});
+	}
 
 	const jetTabButtons = document.querySelectorAll('.jet_tab_btn');
 	const jetTabPanels = document.querySelectorAll('.jet_tab_panel');

@@ -345,6 +345,8 @@
 	width: 100% !important;
 	overflow-x: auto !important;
 	-webkit-overflow-scrolling: touch !important;
+	padding: 4px !important;
+	box-sizing: border-box !important;
 }
 
 .jet_scheme_grid {
@@ -400,7 +402,9 @@
 }
 
 .jet_scheme_card:has(.jet_scheme_radio:checked) .jet_scheme_preview {
-	box-shadow: 0 0 0 2px #2271b1, 0 2px 8px rgba(34, 113, 177, 0.25) !important;
+	outline: 3px solid #dc2626 !important;
+	outline-offset: 1px !important;
+	box-shadow: none !important;
 }
 
 .jet_scheme_summary {
@@ -408,4 +412,9 @@
 	font-size: 13px !important;
 	font-weight: 600 !important;
 	color: #1d2327 !important;
+}
+
+.jet_btn_max_width_range {
+	width: 100% !important;
+	margin-top: 8px !important;
 }

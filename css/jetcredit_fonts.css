@@ -3,7 +3,7 @@
 	font-style: normal;
 	font-weight: 300 700;
 	font-display: swap;
-	src: url('../fonts/RobotoCondensed-Variable.ttf') format('truetype');
+	src: url('/wp-content/plugins/jetcredit/fonts/RobotoCondensed-Variable.ttf') format('truetype');
 }
 
 @font-face {
@@ -11,5 +11,5 @@
 	font-style: italic;
 	font-weight: 300 700;
 	font-display: swap;
-	src: url('../fonts/RobotoCondensed-Italic-Variable.ttf') format('truetype');
+	src: url('/wp-content/plugins/jetcredit/fonts/RobotoCondensed-Italic-Variable.ttf') format('truetype');
 }
