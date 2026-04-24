@@ -908,6 +908,27 @@ function jet_credit_button_cart() {
 	
 	$jet_gap = (int)get_option("jet_gap");
 	$jet_vnoski_default = get_option("jet_vnoski_default");
+	$jet_button_type = get_option( 'jet_button_type', 'standard' );
+	if ( ! in_array( $jet_button_type, array( 'standard', 'wide' ), true ) ) {
+		$jet_button_type = 'standard';
+	}
+	$jet_btn_text        = get_option( 'jet_btn_text', 'Купи на изплащане с' );
+	$jet_btn_text_card   = get_option( 'jet_btn_text_card', 'На вноски с твоята кредитна карта' );
+	$jet_btn_logo        = (int) get_option( 'jet_btn_logo', 1 );
+	$jet_btn_max_width   = (int) get_option( 'jet_btn_max_width', 570 );
+	$jet_btn_round       = (int) get_option( 'jet_btn_round', 16 );
+	if ( $jet_btn_max_width < 30 ) {
+		$jet_btn_max_width = 30;
+	} elseif ( $jet_btn_max_width > 1200 ) {
+		$jet_btn_max_width = 1200;
+	}
+	if ( $jet_btn_round < 0 ) {
+		$jet_btn_round = 0;
+	} elseif ( $jet_btn_round > 25 ) {
+		$jet_btn_round = 25;
+	}
+	$jet_button_scheme_idx = Jet_Button_Schemes::normalize_index( get_option( 'jet_button_scheme', '0' ) );
+	$jet_wide_wrap_style   = Jet_Button_Schemes::wrap_inline_style( $jet_button_scheme_idx ) . sprintf( '--jet-wide-max-width:%dpx;--jet-wide-radius:%dpx;', $jet_btn_max_width, $jet_btn_round );
 	if ($jet_price < $jet_min_250) {
 		$jet_vnoski = '9';
 	} else {
@@ -994,61 +1015,112 @@ function jet_credit_button_cart() {
 	<div id="jet-product-button-container" style="padding-top:<?php echo $jet_gap; ?>px;">
 		<div id="jet_alert_overlay" class="jet_alert_overlay"></div>
 		<div id="jet_alert_box"></div>
-		<table class="jet_table_img">
-			<tr>
-				<td class="jet_button_table">
-					<img 
-						id="btn_jet"
-						class="jet_logo" 
-						src="<?php echo JET_IMAGES_URI; ?>/jet.png" 
-						alt="Кредитен модул ПБ Лични Финанси" 
-						title="Кредитен модул ПБ Лични Финанси" 
-					/>
-				</td>
-			</tr>
-			<?php if ($is_vnoska == 1) { ?>
-			<tr>
-				<td class="jet_button_table">
-					<?php if ($jet_sign_second == '') { ?>
-						<p><span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?></p>
-					<?php } else { ?>
-						<p>
-							<span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?><br />
-							<span style="font-size:75%;font-weight:400;">(<span id="jet_vnoska_second"></span> <?php echo $jet_sign_second; ?>)</span>
-						</p>
+		<?php if ( 'wide' === $jet_button_type ) { ?>
+			<div class="jet_wide_button_wrap" style="<?php echo esc_attr( $jet_wide_wrap_style ); ?>">
+				<button
+					type="button"
+					id="btn_jet"
+					class="jet_wide_button"
+				>
+					<div class="jet_wide_button_head">
+						<span><?php echo esc_html( $jet_btn_text ); ?></span>
+						<?php if ( 1 === $jet_btn_logo ) { ?>
+							<img src="<?php echo esc_url( JET_IMAGES_URI . '/jet_logo.png' ); ?>" alt="ПБ Лични Финанси" class="jet_wide_button_logo" />
+						<?php } ?>
+					</div>
+					<?php if (1 === (int) $is_vnoska) { ?>
+						<div class="jet_wide_button_text">
+							<?php if ($jet_sign_second == '') { ?>
+								<span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?>
+							<?php } else { ?>
+								<span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?>
+								<span class="jet_wide_button_text_second">(<span id="jet_vnoska_second"></span> <?php echo $jet_sign_second; ?>)</span>
+							<?php } ?>
+						</div>
 					<?php } ?>
-				</td>
-			</tr>
-			<?php } ?>
-		</table>
-		 <?php if ($jet_card_in == 1) { ?>
-		<table class="jet_table_img">
-			<tr>
-				<td class="jet_button_table">
-					<img 
+				</button>
+				<?php if (1 === (int) $jet_card_in) { ?>
+					<button
+						type="button"
 						id="btn_jet_card"
-						class="jet_logo" 
-						src="<?php echo JET_IMAGES_URI; ?>/jet_card.png" 
-						alt="Специални предложения само за клиенти, които вече имат кредитна карта, издадена от ПБ Лични Финанси." 
-						title="Специални предложения само за клиенти, които вече имат кредитна карта, издадена от ПБ Лични Финанси." 
-					/>
-				</td>
-			</tr>
-			<?php if ($is_vnoska == 1) { ?>
-			<tr>
-				<td class="jet_button_table">
-					<?php if ($jet_sign_second == '') { ?>
-						<p><span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?></p>
-					<?php } else { ?>
-						<p>
-							<span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?><br />
-							<span style="font-size:75%;font-weight:400;">(<span id="jet_vnoska_card_second"></span> <?php echo $jet_sign_second; ?>)</span>
-						</p>
+						class="jet_wide_button"
+					>
+						<div class="jet_wide_button_head">
+							<span><?php echo esc_html( $jet_btn_text_card ); ?></span>
+							<?php if ( 1 === $jet_btn_logo ) { ?>
+								<img src="<?php echo esc_url( JET_IMAGES_URI . '/jet_logo.png' ); ?>" alt="ПБ Лични Финанси" class="jet_wide_button_logo" />
+							<?php } ?>
+						</div>
+						<?php if (1 === (int) $is_vnoska) { ?>
+							<div class="jet_wide_button_text">
+								<?php if ($jet_sign_second == '') { ?>
+									<span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?>
+								<?php } else { ?>
+									<span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?>
+									<span class="jet_wide_button_text_second">(<span id="jet_vnoska_card_second"></span> <?php echo $jet_sign_second; ?>)</span>
+								<?php } ?>
+							</div>
+						<?php } ?>
+					</button>
+				<?php } ?>
+			</div>
+		<?php } else { ?>
+			<table class="jet_table_img">
+				<tr>
+					<td class="jet_button_table">
+						<img 
+							id="btn_jet"
+							class="jet_logo" 
+							src="<?php echo JET_IMAGES_URI; ?>/jet.png" 
+							alt="Кредитен модул ПБ Лични Финанси" 
+							title="Кредитен модул ПБ Лични Финанси" 
+						/>
+					</td>
+				</tr>
+				<?php if ($is_vnoska == 1) { ?>
+				<tr>
+					<td class="jet_button_table">
+						<?php if ($jet_sign_second == '') { ?>
+							<p><span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?></p>
+						<?php } else { ?>
+							<p>
+								<span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?><br />
+								<span style="font-size:75%;font-weight:400;">(<span id="jet_vnoska_second"></span> <?php echo $jet_sign_second; ?>)</span>
+							</p>
+						<?php } ?>
+					</td>
+				</tr>
+				<?php } ?>
+			</table>
+			<?php if ($jet_card_in == 1) { ?>
+				<table class="jet_table_img">
+					<tr>
+						<td class="jet_button_table">
+							<img 
+								id="btn_jet_card"
+								class="jet_logo" 
+								src="<?php echo JET_IMAGES_URI; ?>/jet_card.png" 
+								alt="Специални предложения само за клиенти, които вече имат кредитна карта, издадена от ПБ Лични Финанси." 
+								title="Специални предложения само за клиенти, които вече имат кредитна карта, издадена от ПБ Лични Финанси." 
+							/>
+						</td>
+					</tr>
+					<?php if ($is_vnoska == 1) { ?>
+					<tr>
+						<td class="jet_button_table">
+							<?php if ($jet_sign_second == '') { ?>
+								<p><span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?></p>
+							<?php } else { ?>
+								<p>
+									<span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?><br />
+									<span style="font-size:75%;font-weight:400;">(<span id="jet_vnoska_card_second"></span> <?php echo $jet_sign_second; ?>)</span>
+								</p>
+							<?php } ?>
+						</td>
+					</tr>
 					<?php } ?>
-				</td>
-			</tr>
+				</table>
 			<?php } ?>
-		</table>
 		<?php } ?>
 	</div>
 	
