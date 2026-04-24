@@ -1,12 +1,5 @@
 @import url('./jetcredit_fonts.css');
 
-.jet_table {
-	padding: 0px !important;
-	margin: 0px !important;
-	border: 0px none transparent !important;
-	background: transparent !important;
-}
-
 .jet_button_table {
 	padding: 2px 0px !important;
 	text-align: center !important;
@@ -21,17 +14,6 @@
 	line-height: 20px !important;
 	background-color: transparent !important;
 	font-family: 'Roboto Condensed', sans-serif !important;
-}
-
-.jet_button_div_txt {
-	width: 100% !important;
-	font-family: 'Roboto Condensed', sans-serif !important;
-	font-size: 18px !important;
-	font-weight: 600 !important;
-	text-align: left !important;
-	line-height: 20px !important;
-	background-color: transparent !important;
-	color: #01A66C !important;
 }
 
 .jet_table_img {

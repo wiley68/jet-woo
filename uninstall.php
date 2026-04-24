@@ -27,7 +27,6 @@ $options = array(
 	'jet_count',
 	'jet_gap',
 	'jet_shirina',
-	'jet_z1',
 	'jet_vnoska',
 	'jet_button_type',
 	'jet_minprice',

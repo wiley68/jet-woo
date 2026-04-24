@@ -284,7 +284,6 @@ function jet_credit_button() {
 	$jet_show_button_initial = $jet_price >= $_minprice;
 
 	$jet_gap            = (int) get_option( 'jet_gap' );
-	$zaiavka1jet_text   = get_option( 'jet_z1' );
 	$jet_vnoski_default = get_option( 'jet_vnoski_default' );
 	$jet_button_type    = get_option( 'jet_button_type', 'standard' );
 	if ( ! in_array( $jet_button_type, array( 'standard', 'wide' ), true ) ) {
@@ -345,17 +344,6 @@ function jet_credit_button() {
 	>
 		<div id="jet_alert_overlay" class="jet_alert_overlay"></div>
 		<div id="jet_alert_box"></div>
-		<?php if ($zaiavka1jet_text != '') { ?>
-		<table class="jet_table">
-			<tr>
-				<td class="jet_button_table">
-					<div class="jet_button_div_txt">
-					<?php echo $zaiavka1jet_text; ?>
-					</div>
-				</td>
-			</tr>
-		</table>
-		<?php } ?>
 		<?php if ( 'wide' === $jet_button_type ) { ?>
 			<div class="jet_wide_button_wrap">
 				<button
@@ -896,7 +884,6 @@ function jet_credit_button_cart() {
 	}
 	
 	$jet_gap = (int)get_option("jet_gap");
-	$zaiavka1jet_text = get_option("jet_z1");
 	$jet_vnoski_default = get_option("jet_vnoski_default");
 	if ($jet_price < $jet_min_250) {
 		$jet_vnoski = '9';
@@ -984,17 +971,6 @@ function jet_credit_button_cart() {
 	<div id="jet-product-button-container" style="padding-top:<?php echo $jet_gap; ?>px;">
 		<div id="jet_alert_overlay" class="jet_alert_overlay"></div>
 		<div id="jet_alert_box"></div>
-		<?php if ($zaiavka1jet_text != '') { ?>
-		<table class="jet_table">
-			<tr>
-				<td class="jet_button_table">
-					<div class="jet_button_div_txt">
-					<?php echo $zaiavka1jet_text; ?>
-					</div>
-				</td>
-			</tr>
-		</table>
-		<?php } ?>
 		<table class="jet_table_img">
 			<tr>
 				<td class="jet_button_table">

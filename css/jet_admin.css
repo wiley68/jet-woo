@@ -149,6 +149,84 @@
 	font-size: 12px !important;
 }
 
+.jet_toggle_row {
+	display: flex !important;
+	align-items: center !important;
+	-webkit-box-sizing: border-box !important;
+	-moz-box-sizing: border-box !important;
+	box-sizing: border-box !important;
+}
+
+.jet_switch {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 10px !important;
+	padding: 0 !important;
+	margin: 0 !important;
+	border: 0 !important;
+	background: transparent !important;
+	cursor: pointer !important;
+	-webkit-box-sizing: border-box !important;
+	-moz-box-sizing: border-box !important;
+	box-sizing: border-box !important;
+	font: inherit !important;
+	color: #1d2327 !important;
+}
+
+.jet_switch:hover .jet_switch__track {
+	filter: brightness(0.95) !important;
+}
+
+.jet_switch:focus {
+	outline: 0 !important;
+}
+
+.jet_switch:focus-visible {
+	outline: 2px solid #2271b1 !important;
+	outline-offset: 2px !important;
+	border-radius: 4px !important;
+}
+
+.jet_switch__track {
+	position: relative !important;
+	width: 48px !important;
+	height: 26px !important;
+	border-radius: 13px !important;
+	background: #c3c4c7 !important;
+	transition: background 0.2s ease, filter 0.15s ease !important;
+	flex-shrink: 0 !important;
+	-webkit-box-sizing: border-box !important;
+	-moz-box-sizing: border-box !important;
+	box-sizing: border-box !important;
+}
+
+.jet_switch.is-on .jet_switch__track {
+	background: #2271b1 !important;
+}
+
+.jet_switch__thumb {
+	position: absolute !important;
+	top: 3px !important;
+	left: 3px !important;
+	width: 20px !important;
+	height: 20px !important;
+	border-radius: 50% !important;
+	background: #fff !important;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+	transition: transform 0.2s ease !important;
+	-webkit-box-sizing: border-box !important;
+	-moz-box-sizing: border-box !important;
+	box-sizing: border-box !important;
+}
+
+.jet_switch.is-on .jet_switch__thumb {
+	transform: translateX(22px) !important;
+}
+
+.jet_switch__state {
+	white-space: nowrap !important;
+}
+
 .jet_flex {
 	width: 100% !important;
 	display: flex !important;
@@ -182,4 +260,66 @@
 	padding: 5px !important;
 	border-radius: 4px !important;
 	background: #e5e5e5 !important;
+}
+
+.jet_tab_wrap {
+	display: flex !important;
+	flex-direction: column !important;
+	gap: 0 !important;
+	width: 100% !important;
+}
+
+.jet_tab_list {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	gap: 6px !important;
+	border: 1px solid #dcdcdc !important;
+	background: #f5f5f5 !important;
+	padding: 8px 10px !important;
+	border-bottom: 0 !important;
+	border-top-left-radius: 2px !important;
+	border-top-right-radius: 2px !important;
+}
+
+.jet_tab_btn {
+	margin: 0 !important;
+	height: auto !important;
+	line-height: 1.2 !important;
+	padding: 6px 10px !important;
+	white-space: normal !important;
+}
+
+.jet_tab_btn.is-active {
+	background: #2271b1 !important;
+	border-color: #2271b1 !important;
+	color: #fff !important;
+	box-shadow: none !important;
+}
+
+.jet_tab_panels {
+	border: 1px solid #dcdcdc !important;
+	background: #fff !important;
+	border-top: 0 !important;
+}
+
+.jet_tab_panel {
+	display: none !important;
+}
+
+.jet_tab_panel.is-active {
+	display: block !important;
+}
+
+.jet_tab_empty {
+	min-height: 200px !important;
+}
+
+.jet_tab_filters_row {
+	margin: 0 !important;
+}
+
+.jet_tab_filters_panel {
+	flex: 1 !important;
+	-webkit-box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1) !important;
+	box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1) !important;
 }
