@@ -1,0 +1,26 @@
+{
+	"files.eol": "\n",
+	"files.insertFinalNewline": true,
+	"files.trimTrailingWhitespace": true,
+	"[php]": {
+		"editor.tabSize": 4,
+		"editor.insertSpaces": false,
+		"editor.formatOnSave": false
+	},
+	"[javascript]": {
+		"editor.tabSize": 4,
+		"editor.insertSpaces": true,
+		"editor.formatOnSave": true
+	},
+	"[json]": {
+		"editor.tabSize": 2,
+		"editor.insertSpaces": true,
+		"editor.formatOnSave": true
+	},
+	"phpsab.standard": "${workspaceFolder}/phpcs.xml.dist",
+	"phpsab.snifferMode": "onSave",
+	"phpsab.fixerEnable": true,
+	"phpsab.executablePathCS": "${workspaceFolder}/vendor/bin/phpcs",
+	"phpsab.executablePathCBF": "${workspaceFolder}/vendor/bin/phpcbf",
+	"phpsab.snifferRunTitle": "jetcredit PHPCS"
+}

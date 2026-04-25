@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<ruleset name="jetcredit">
+	<description>PHPCS за плъгина ПБ Лични Финанси (jetcredit) — WordPress.org стил.</description>
+
+	<file>.</file>
+
+	<exclude-pattern>/vendor/*</exclude-pattern>
+	<exclude-pattern>/node_modules/*</exclude-pattern>
+	<exclude-pattern>*.min.js</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="colors"/>
+
+	<!-- Минимални версии — коригирай при нужда спрямо readme на плъгина -->
+	<config name="minimum_supported_wp_version" value="6.0"/>
+	<config name="testVersion" value="7.4-"/>
+
+	<rule ref="WordPress">
+		<!--
+		Текущите имена на файлове не винаги следват class-*.php / kebab-case;
+		изключено до евентуално преименуване.
+		-->
+		<exclude name="WordPress.Files.FileName.InvalidClassFileName"/>
+		<exclude name="WordPress.Files.FileName.NotHyphenatedLowercase"/>
+	</rule>
+
+	<!-- Наследен код използва [] — WPCS-Extra иначе изисква array() -->
+	<rule ref="Universal.Arrays.DisallowShortArraySyntax">
+		<severity>0</severity>
+	</rule>
+
+	<rule ref="PHPCompatibilityWP"/>
+</ruleset>

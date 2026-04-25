@@ -165,37 +165,37 @@
 						</div>
 					</div>
 					<div class="jet_form_group">
-						<div class="jet_control_label"><?php echo esc_html('Покажи бутона в количката'); ?></div>
+						<div class="jet_control_label"><?php echo esc_html('Покажи бутоните в количката'); ?></div>
 						<div class="jet_control">
 							<?php
 							echo Jet_Admin_Toggle::render(
 								array(
 									'name'       => 'jet_cart_show',
 									'value'      => $jet_cart_show,
-									'aria_label' => 'Покажи бутона в количката',
+									'aria_label' => 'Покажи бутоните в количката',
 									'label_on'   => 'Да',
 									'label_off'  => 'Не',
 								)
 							);
 							?>
-							<span class="jet_form_controll_text"><?php echo esc_html('Показвай бутона за закупуване на кредит през ПБ Лични Финанси в количката'); ?></span>
+							<span class="jet_form_controll_text"><?php echo esc_html('Показвай бутоните за закупуване на кредит през ПБ Лични Финанси в количката'); ?></span>
 						</div>
 					</div>
 					<div class="jet_form_group">
-						<div class="jet_control_label"><?php echo esc_html('Покажи бутона за изпращане чрез кредитна карта'); ?></div>
+						<div class="jet_control_label"><?php echo esc_html('Използвайте метод на плащане чрез кредитна карта'); ?></div>
 						<div class="jet_control">
 							<?php
 							echo Jet_Admin_Toggle::render(
 								array(
 									'name'       => 'jet_card_in',
 									'value'      => $jet_card_in,
-									'aria_label' => 'Покажи бутона за изпращане чрез кредитна карта',
+									'aria_label' => 'Използвайте метод на плащане чрез кредитна карта',
 									'label_on'   => 'Да',
 									'label_off'  => 'Не',
 								)
 							);
 							?>
-							<span class="jet_form_controll_text"><?php echo esc_html('Показвай бутона за закупуване на кредит през ПБ Лични Финанси със заявката за лизинг направена по метода с кредитна карта'); ?></span>
+							<span class="jet_form_controll_text"><?php echo esc_html('Предоставя се възможност за закупуване на кредит през ПБ Лични Финанси със заявката за лизинг направена по метода с кредитна карта'); ?></span>
 						</div>
 					</div>
 					<div class="jet_form_group">

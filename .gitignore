@@ -47,3 +47,6 @@ error_log
 # Note: If you wish to whitelist themes,
 # uncomment the next line
 #/wp-content/themes
+
+# Composer (PHPCS / WordPress Coding Standards за jetcredit)
+/vendor/
