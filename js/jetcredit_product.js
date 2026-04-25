@@ -92,6 +92,8 @@ jQuery(document).ready(function($) {
 	const jetCalculate = async () => {
 		let jet_price1 = $('#jet_price').val();
 		let jet_quantity = 1;
+		/** WAPF „Общо“ вече е пълна стойност за текущо количество/опции — не я умножаваме по брой */
+		let jetFromWapfGrandTotal = false;
 
 		const variationDiv = document.getElementsByClassName('woocommerce-variation-price');
 		if (typeof variationDiv[0] !== 'undefined') {
@@ -113,14 +115,33 @@ jQuery(document).ready(function($) {
 			}
 		}
 
+		/* Advanced Product Fields (WAPF): когато темата/плъгинът пълнят тотала тук, а не .woocommerce-variation-price */
+		const wapfGrand = document.querySelector('.wapf-product-totals .wapf-grand-total');
+		if (wapfGrand) {
+			const wapfTotals = wapfGrand.closest('.wapf-product-totals');
+			if (wapfTotals) {
+				const wapfStyle = window.getComputedStyle(wapfTotals);
+				if (wapfStyle.display !== 'none' && wapfStyle.visibility !== 'hidden') {
+					const wapfText = wapfGrand.textContent && wapfGrand.textContent.trim();
+					if (wapfText) {
+						jet_price1 = wapfText;
+						jetFromWapfGrandTotal = true;
+					}
+				}
+			}
+		}
+
 		jet_price1 = jet_price1.replace(/[^\d.,]/g, '');
 		jet_price1 = jetConvertToDotDecimal(jet_price1);
 
 		if ($('input[name="quantity"]').length) {
-			jet_quantity = parseInt($('input[name="quantity"]').val());
+			jet_quantity = parseInt($('input[name="quantity"]').val(), 10) || 1;
 		}
 
-		const jetPriceall = parseFloat(jet_price1) * jet_quantity;
+		const rawPrice = parseFloat(jet_price1) || 0;
+		const jetPriceall = jetFromWapfGrandTotal
+			? rawPrice
+			: rawPrice * jet_quantity;
 
 		if (jetShouldShowButtonImmediately(jetPriceall)) {
 			jetGetButtonContainer().show();
@@ -579,6 +600,23 @@ jQuery(document).ready(function($) {
 		}
 	} else {
 		jetCalculate();
+	}
+
+	/* WAPF: при промяна на опции/тотал DOM не минава през .single_variation */
+	const wapfTotalsNode = document.querySelector('.wapf-product-totals');
+	if (wapfTotalsNode instanceof Node) {
+		let wapfDebounce;
+		const wapfObserver = new MutationObserver(() => {
+			clearTimeout(wapfDebounce);
+			wapfDebounce = setTimeout(jetCalculate, 80);
+		});
+		wapfObserver.observe(wapfTotalsNode, {
+			childList: true,
+			subtree: true,
+			characterData: true,
+			attributes: true,
+			attributeFilter: [ 'style', 'class' ]
+		});
 	}
 	
 	jetCalculate();
