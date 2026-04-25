@@ -336,25 +336,6 @@ function jet_credit_button() {
 		$jet_phone    = get_user_meta( $jet_user_id, 'phone_number', true );
 	}
 
-	$useragent     = array_key_exists( 'HTTP_USER_AGENT', $_SERVER ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '';
-	$jet_is_mobile = preg_match( '/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i', $useragent ) || preg_match( '/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i', substr( $useragent,0,4 ) );
-	if ( $jet_is_mobile ) {
-		$jet_PopUp_Detailed_v1 = "jetm_PopUp_Detailed_v1";
-		$jet_Mask = "jetm_Mask";
-		$jet_column_left = "jetm_column_left";
-		$jet_column_right = "jetm_column_right";
-		$obshto_credit_text = 'Общо кредит';
-		$obshto_plashtania = 'Общо плащания';
-		$modalpayment_jet = 'modalpayment_jetm';
-	} else {
-		$jet_PopUp_Detailed_v1 = "jet_PopUp_Detailed_v1";
-		$jet_Mask = "jet_Mask";
-		$jet_column_left = "jet_column_left";
-		$jet_column_right = "jet_column_right";
-		$obshto_credit_text = 'Общ размер на кредита';
-		$obshto_plashtania = 'Обща стойност на плащанията';
-		$modalpayment_jet = 'modalpayment_jet';
-	}
 	?>
 	<input type="hidden" id="jet_price" value="<?php echo (float)wc_get_price_including_tax($jet_product); ?>" />
 	<input type="hidden" id="jet_product_id" value="<?php echo (int)$jet_product->get_Id(); ?>" />
@@ -423,12 +404,12 @@ function jet_credit_button() {
 			<table class="jet_table_img">
 				<tr>
 					<td class="jet_button_table">
-						<img 
+						<img
 							id="btn_jet"
-							class="jet_logo" 
-							src="<?php echo JET_IMAGES_URI; ?>/jet.png" 
-							alt="Кредитен модул ПБ Лични Финанси" 
-							title="Кредитен модул ПБ Лични Финанси" 
+							class="jet_logo"
+							src="<?php echo JET_IMAGES_URI; ?>/jet.png"
+							alt="Кредитен модул ПБ Лични Финанси"
+							title="Кредитен модул ПБ Лични Финанси"
 						/>
 					</td>
 				</tr>
@@ -451,12 +432,12 @@ function jet_credit_button() {
 			<table class="jet_table_img">
 				<tr>
 					<td class="jet_button_table">
-						<img 
+						<img
 							id="btn_jet_card"
-							class="jet_logo" 
-							src="<?php echo JET_IMAGES_URI; ?>/jet_card.png" 
-							alt="Специални предложения само за клиенти, които вече имат кредитна карта, издадена от ПБ Лични Финанси." 
-							title="Специални предложения само за клиенти, които вече имат кредитна карта, издадена от ПБ Лични Финанси." 
+							class="jet_logo"
+							src="<?php echo JET_IMAGES_URI; ?>/jet_card.png"
+							alt="Специални предложения само за клиенти, които вече имат кредитна карта, издадена от ПБ Лични Финанси."
+							title="Специални предложения само за клиенти, които вече имат кредитна карта, издадена от ПБ Лични Финанси."
 						/>
 					</td>
 				</tr>
@@ -479,33 +460,33 @@ function jet_credit_button() {
 		<?php } ?>
 	</div>
 
-	<div id="jet-product-popup-container" class="<?php echo $modalpayment_jet; ?>">
+	<div id="jet-product-popup-container" class="modalpayment_jet">
 		<div class="modalpayment-content_jet">
 			<div id="jet_body">
-				<div class="<?php echo $jet_PopUp_Detailed_v1; ?>">
-					<div class="<?php echo $jet_Mask; ?>">
+				<div class="jet_PopUp_Detailed_v1">
+					<div class="jet_Mask">
 						<div id="jet_step_1">
-							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+							<div class="jet_row jet_row_parva">
+								<div class="jet_column_left">
 									Първоначална вноска (<?php echo $jet_sign; ?>)
 								</div>
-								<div class="<?php echo $jet_column_right; ?>">
-									<input 
-										class="jet_input_text_active" 
-										type="number" 
+								<div class="jet_column_right">
+									<input
+										class="jet_input_text_active"
+										type="number"
 										min="0"
-										id="jet_parva" 
-										value=0 
+										id="jet_parva"
+										value=0
 									/>
-									<button 
-										type="button" 
-										id="btn_preizcisli" 
+									<button
+										type="button"
+										id="btn_preizcisli"
 										class="jet_button_preizcisli"
 									>Преизчисли</button>
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									<?php if ($jet_sign_second == '') { ?>
 										Цена на стоките (<?php echo $jet_sign; ?>)
 									<?php } else { ?>
@@ -530,12 +511,12 @@ function jet_credit_button() {
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									Брой погасителни вноски
 								</div>
 								<div class="jet_column_right">
 									<select
-										id="jet_vnoski" 
+										id="jet_vnoski"
 										class="jet_input_text"
 									>
 										<option value="3" <?php if ($jet_vnoski == 3) { echo 'selected'; } ?>>3 месеца</option>
@@ -552,11 +533,11 @@ function jet_credit_button() {
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									<?php if ($jet_sign_second == '') { ?>
-										<?php echo $obshto_credit_text; ?> (<?php echo $jet_sign; ?>)
+										Общо кредит (<?php echo $jet_sign; ?>)
 									<?php } else { ?>
-										<?php echo $obshto_credit_text; ?> (<?php echo $jet_sign; ?>
+										Общо кредит (<?php echo $jet_sign; ?>
 										<span style='font-size:60%;font-weight:400;height:16px;'>&nbsp;/&nbsp;<?php echo $jet_sign_second; ?></span>)
 									<?php } ?>
 								</div>
@@ -577,7 +558,7 @@ function jet_credit_button() {
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									<?php if ($jet_sign_second == '') { ?>
 										Месечна вноска (<?php echo $jet_sign; ?>)
 									<?php } else { ?>
@@ -602,7 +583,7 @@ function jet_credit_button() {
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									Фикс ГПР (%)
 								</div>
 								<div class="jet_column_right">
@@ -613,7 +594,7 @@ function jet_credit_button() {
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									ГЛП (%)
 								</div>
 								<div class="jet_column_right">
@@ -624,11 +605,11 @@ function jet_credit_button() {
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									<?php if ($jet_sign_second == '') { ?>
-										<?php echo $obshto_plashtania; ?> (<?php echo $jet_sign; ?>)
+										Общо плащания (<?php echo $jet_sign; ?>)
 									<?php } else { ?>
-										<?php echo $obshto_plashtania; ?> (<?php echo $jet_sign; ?>
+										Общо плащания (<?php echo $jet_sign; ?>
 										<span style='font-size:60%;font-weight:400;height:16px;'>&nbsp;/&nbsp;<?php echo $jet_sign_second; ?></span>)
 									<?php } ?>
 								</div>
@@ -651,36 +632,36 @@ function jet_credit_button() {
 							<div class="jet_hr"></div>
 							<div class="jet_row_footer">
 								<div style="padding-bottom: 5px;">
-									<input 
-										type="checkbox" 
-										name="uslovia" 
-										value="uslovia" 
-										id="uslovia" 
+									<input
+										type="checkbox"
+										name="uslovia"
+										value="uslovia"
+										id="uslovia"
 										class="jet_uslovia"
 									/>
 									&nbsp;&nbsp;&nbsp;
-									<a 
-										href="https://www.postbank.bg/common-conditions-PFBG" 
-										class="jet_uslovia_a" 
-										title="Условия за кандидатстване на ПБ Лични Финанси" 
+									<a
+										href="https://www.postbank.bg/common-conditions-PFBG"
+										class="jet_uslovia_a"
+										title="Условия за кандидатстване на ПБ Лични Финанси"
 										target="_blank"
 									>
 										<span style="font-size: 14px;">Запознах се с условията за кандидатстване на ПБ Лични финанси</span>
 									</a>
 								</div>
 								<div>
-									<input 
-										type="checkbox" 
-										name="uslovia1" 
-										value="uslovia1" 
-										id="uslovia1" 
+									<input
+										type="checkbox"
+										name="uslovia1"
+										value="uslovia1"
+										id="uslovia1"
 										class="jet_uslovia"
 									/>
 									&nbsp;&nbsp;&nbsp;
-									<a 
-										href="https://www.postbank.bg/Personal-Data-PFBG-retailers" 
-										class="jet_uslovia_a" 
-										title="Регламент (ЕС) 2016/679 от 27 април 2016 г. за защита на физическите лица по отношение на обработката на лични данни и за свободното движение на такива данни и за отмяна на Директива 95/46 / ЕО" 
+									<a
+										href="https://www.postbank.bg/Personal-Data-PFBG-retailers"
+										class="jet_uslovia_a"
+										title="Регламент (ЕС) 2016/679 от 27 април 2016 г. за защита на физическите лица по отношение на обработката на лични данни и за свободното движение на такива данни и за отмяна на Директива 95/46 / ЕО"
 										target="_blank"
 									>
 										<span style="font-size: 14px;">"GDPR" означава Регламент (ЕС) 2016/679 от 27 април 2016 г. за защита на физическите лица по отношение на обработката на лични данни и за свободното движение на такива данни и за отмяна на Директива 95/46 / ЕО</span>
@@ -688,128 +669,128 @@ function jet_credit_button() {
 								</div>
 							</div>
 							<div class="jet_row_bottom">
-								<button 
-									type="button" 
-									class="jet_btn" 
+								<button
+									type="button"
+									class="jet_btn"
 									id="back_jetcredit"
 								>Откажи</button>
-								<button 
-									type="button" 
-									class="jet_btn" 
+								<button
+									type="button"
+									class="jet_btn"
 									id="buy_cart_jetcredit"
 								>Добави в количката</button>
-								<button 
-									type="button" 
-									class="jet_btn" 
-									id="buy_jetcredit" 
-									style="opacity: 0.5;" 
+								<button
+									type="button"
+									class="jet_btn"
+									id="buy_jetcredit"
+									style="opacity: 0.5;"
 									disabled
 								>Купи на изплащане</button>
 							</div>
 						</div>
-						
+
 						<div id="jet_step_2">
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									Име *
 								</div>
 								<div class="jet_column_right">
-									<input 
-										class="jet_input_text_active jet_left" 
+									<input
+										class="jet_input_text_active jet_left"
 										type="text"
-										id="jet_name" 
+										id="jet_name"
 										autocomplete="off"
-										value="<?php echo $jet_name; ?>" 
+										value="<?php echo $jet_name; ?>"
 									/>
-									<input 
+									<input
 										type="hidden"
-										id="jet_lname" 
+										id="jet_lname"
 										autocomplete="off"
-										value="" 
+										value=""
 									/>
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									Фамилия *
 								</div>
 								<div class="jet_column_right">
-									<input 
-										class="jet_input_text_active jet_left" 
+									<input
+										class="jet_input_text_active jet_left"
 										type="text"
-										id="jet_lastname" 
+										id="jet_lastname"
 										autocomplete="off"
-										value="<?php echo $jet_lastname; ?>" 
+										value="<?php echo $jet_lastname; ?>"
 									/>
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									ЕГН *
 								</div>
 								<div class="jet_column_right">
-									<input 
-										class="jet_input_text_active jet_left" 
+									<input
+										class="jet_input_text_active jet_left"
 										type="text"
-										id="jet_egn" 
+										id="jet_egn"
 										autocomplete="off"
-										value="" 
+										value=""
 									/>
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
-									Мобилен телефон *
+								<div class="jet_column_left">
+									Моб. телефон *
 								</div>
 								<div class="jet_column_right">
-									<input 
-										class="jet_input_text_active jet_left" 
+									<input
+										class="jet_input_text_active jet_left"
 										type="text"
-										id="jet_phone" 
+										id="jet_phone"
 										autocomplete="off"
-										value="<?php echo $jet_phone; ?>" 
+										value="<?php echo $jet_phone; ?>"
 									/>
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									E-Mail *
 								</div>
 								<div class="jet_column_right">
-									<input 
-										class="jet_input_text_active jet_left" 
+									<input
+										class="jet_input_text_active jet_left"
 										type="text"
-										id="jet_email" 
+										id="jet_email"
 										autocomplete="off"
-										value="<?php echo $jet_email; ?>" 
+										value="<?php echo $jet_email; ?>"
 									/>
 								</div>
 							</div>
 							<div class="jet_hr"></div>
 							<div class="jet_row_footer">
 								<div style="padding-bottom: 5px;">
-									<input 
-										type="checkbox" 
-										name="uslovia2" 
-										value="uslovia2" 
-										id="uslovia2" 
+									<input
+										type="checkbox"
+										name="uslovia2"
+										value="uslovia2"
+										id="uslovia2"
 										class="jet_uslovia"
 									/>
 									&nbsp;&nbsp;&nbsp;
-									<a 
-										href="https://www.postbank.bg/common-conditions-PFBG" 
-										class="jet_uslovia_a" 
-										title="Условия за кандидатстване на ПБ Лични Финанси" 
+									<a
+										href="https://www.postbank.bg/common-conditions-PFBG"
+										class="jet_uslovia_a"
+										title="Условия за кандидатстване на ПБ Лични Финанси"
 										target="_blank"
 									>
 										<span style="font-size: 14px;">Запознах се с условията за кандидатстване на ПБ Лични финанси</span>
 									</a>
 								</div>
 								<div style="padding-bottom: 5px;">
-									<a 
-										href="https://www.postbank.bg/product-information-PBPG-retailers" 
-										class="jet_uslovia_a" 
-										title="Продуктова Информация на ПБ Лични финанси" 
+									<a
+										href="https://www.postbank.bg/product-information-PBPG-retailers"
+										class="jet_uslovia_a"
+										title="Продуктова Информация на ПБ Лични финанси"
 										target="_blank"
 									>
 										<span style="font-size: 14px;">Продуктова Информация на ПБ Лични финанси</span>
@@ -817,27 +798,27 @@ function jet_credit_button() {
 								</div>
 							</div>
 							<div class="jet_row_bottom">
-								<button 
-									type="button" 
-									class="jet_btn" 
+								<button
+									type="button"
+									class="jet_btn"
 									id="back2_jetcredit"
 								>Назад</button>
 								<div style="flex: 1;"></div>
-								<button 
-									type="button" 
-									class="jet_btn" 
+								<button
+									type="button"
+									class="jet_btn"
 									id="close_jetcredit"
 								>Откажи</button>
-								<button 
-									type="button" 
-									class="jet_btn" 
-									id="buy2_jetcredit" 
-									style="opacity: 0.5;" 
+								<button
+									type="button"
+									class="jet_btn"
+									id="buy2_jetcredit"
+									style="opacity: 0.5;"
 									disabled
 								>Изпрати</button>
 							</div>
 						</div>
-						
+
 					</div>
 				</div>
 			</div>
@@ -851,32 +832,32 @@ if ( ! empty( $jet_hook ) ) {
 
 function jet_credit_button_cart() {
 	global $woocommerce;
-	
+
 	$jet_cart_show = (int) get_option( 'jet_cart_show' );
 	if ( $jet_cart_show === 0 ) {
 		return null;
 	}
-	
+
 	$jet_currency_code = get_woocommerce_currency();
 	if ( $jet_currency_code !== 'EUR' && $jet_currency_code !== 'BGN' ) {
 		return null;
 	}
-	
+
 	$jet_price = $woocommerce->cart->get_total('float');
 	if ( $jet_price === 0 ) {
 		return null;
 	}
-	
+
 	$is_active = (int) get_option( 'jet_status_in' );
 	if ( $is_active === 0 ) {
 		return null;
 	}
-	
+
 	$jet_eur = (int) get_option( 'jet_eur' );
 	$jet_sign = 'лв.';
 	$jet_sign_second = 'евро';
 	$jet_min_250 = JET_MIN_250;
-	
+
 	switch ($jet_eur) {
 		case 0:
 			$jet_sign = 'лв.';
@@ -906,12 +887,12 @@ function jet_credit_button_cart() {
 			$jet_min_250 = JET_MIN_250_EUR;
 			break;
 	}
-	
+
 	$_minprice = get_option( "jet_minprice" );
 	if ($jet_price < $_minprice) {
 		return null;
 	}
-	
+
 	$jet_gap = (int)get_option("jet_gap");
 	$jet_vnoski_default = get_option("jet_vnoski_default");
 	$jet_button_type = get_option( 'jet_button_type', 'standard' );
@@ -946,10 +927,10 @@ function jet_credit_button_cart() {
 	} else {
 		$jet_vnoski = $jet_vnoski_default;
 	}
-	
+
 	$jet_card_in = (int)get_option("jet_card_in");
 	$is_vnoska = (int)get_option("jet_vnoska");
-	
+
 	$jet_name = "";
 	$jet_lastname = "";
 	$jet_email = "";
@@ -962,27 +943,8 @@ function jet_credit_button_cart() {
 		$jet_user_id = $jet_customer->ID;
 		$jet_phone = get_user_meta($jet_user_id, 'phone_number', true);
 	}
-	
-	$useragent = array_key_exists('HTTP_USER_AGENT', $_SERVER) ? $_SERVER['HTTP_USER_AGENT'] : '';
-	$jet_is_mobile = preg_match('/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows (ce|phone)|xda|xiino/i',$useragent)||preg_match('/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i',substr($useragent,0,4));
-	if($jet_is_mobile){
-		$jet_PopUp_Detailed_v1 = "jetm_PopUp_Detailed_v1";
-		$jet_Mask = "jetm_Mask";
-		$jet_column_left = "jetm_column_left";
-		$jet_column_right = "jetm_column_right";
-		$obshto_credit_text = 'Общо кредит';
-		$obshto_plashtania = 'Общо плащания';
-		$modalpayment_jet = 'modalpayment_jetm';
-	}else{
-		$jet_PopUp_Detailed_v1 = "jet_PopUp_Detailed_v1";
-		$jet_Mask = "jet_Mask";
-		$jet_column_left = "jet_column_left";
-		$jet_column_right = "jet_column_right";
-		$obshto_credit_text = 'Общ размер на кредита';
-		$obshto_plashtania = 'Обща стойност на плащанията';
-		$modalpayment_jet = 'modalpayment_jet';
-	}
-	
+
+
 	$jet_products = '';
 	$jet_products_qt = '';
 	$jet_products_pr = '';
@@ -1080,12 +1042,12 @@ function jet_credit_button_cart() {
 			<table class="jet_table_img">
 				<tr>
 					<td class="jet_button_table">
-						<img 
+						<img
 							id="btn_jet"
-							class="jet_logo" 
-							src="<?php echo JET_IMAGES_URI; ?>/jet.png" 
-							alt="Кредитен модул ПБ Лични Финанси" 
-							title="Кредитен модул ПБ Лични Финанси" 
+							class="jet_logo"
+							src="<?php echo JET_IMAGES_URI; ?>/jet.png"
+							alt="Кредитен модул ПБ Лични Финанси"
+							title="Кредитен модул ПБ Лични Финанси"
 						/>
 					</td>
 				</tr>
@@ -1108,12 +1070,12 @@ function jet_credit_button_cart() {
 				<table class="jet_table_img">
 					<tr>
 						<td class="jet_button_table">
-							<img 
+							<img
 								id="btn_jet_card"
-								class="jet_logo" 
-								src="<?php echo JET_IMAGES_URI; ?>/jet_card.png" 
-								alt="Специални предложения само за клиенти, които вече имат кредитна карта, издадена от ПБ Лични Финанси." 
-								title="Специални предложения само за клиенти, които вече имат кредитна карта, издадена от ПБ Лични Финанси." 
+								class="jet_logo"
+								src="<?php echo JET_IMAGES_URI; ?>/jet_card.png"
+								alt="Специални предложения само за клиенти, които вече имат кредитна карта, издадена от ПБ Лични Финанси."
+								title="Специални предложения само за клиенти, които вече имат кредитна карта, издадена от ПБ Лични Финанси."
 							/>
 						</td>
 					</tr>
@@ -1135,34 +1097,34 @@ function jet_credit_button_cart() {
 			<?php } ?>
 		<?php } ?>
 	</div>
-	
-	<div id="jet-product-popup-container" class="<?php echo $modalpayment_jet; ?>">
+
+	<div id="jet-product-popup-container" class="modalpayment_jet">
 		<div class="modalpayment-content_jet">
 			<div id="jet_body">
-				<div class="<?php echo $jet_PopUp_Detailed_v1; ?>">
-					<div class="<?php echo $jet_Mask; ?>">
+				<div class="jet_PopUp_Detailed_v1">
+					<div class="jet_Mask">
 						<div id="jet_step_1">
-							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+							<div class="jet_row jet_row_parva">
+								<div class="jet_column_left">
 									Първоначална вноска (<?php echo $jet_sign; ?>)
 								</div>
-								<div class="<?php echo $jet_column_right; ?>">
-									<input 
-										class="jet_input_text_active" 
-										type="number" 
+								<div class="jet_column_right">
+									<input
+										class="jet_input_text_active"
+										type="number"
 										min="0"
-										id="jet_parva" 
-										value=0 
+										id="jet_parva"
+										value=0
 									/>
-									<button 
-										type="button" 
-										id="btn_preizcisli" 
+									<button
+										type="button"
+										id="btn_preizcisli"
 										class="jet_button_preizcisli"
 									>Преизчисли</button>
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									<?php if ($jet_sign_second == '') { ?>
 										Цена на стоките (<?php echo $jet_sign; ?>)
 									<?php } else { ?>
@@ -1187,12 +1149,12 @@ function jet_credit_button_cart() {
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									Брой погасителни вноски
 								</div>
 								<div class="jet_column_right">
 									<select
-										id="jet_vnoski" 
+										id="jet_vnoski"
 										class="jet_input_text"
 									>
 										<option value="3" <?php if ($jet_vnoski == 3) { echo 'selected'; } ?>>3 месеца</option>
@@ -1209,11 +1171,11 @@ function jet_credit_button_cart() {
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									<?php if ($jet_sign_second == '') { ?>
-										<?php echo $obshto_credit_text; ?> (<?php echo $jet_sign; ?>)
+										Общо кредит (<?php echo $jet_sign; ?>)
 									<?php } else { ?>
-										<?php echo $obshto_credit_text; ?> (<?php echo $jet_sign; ?>
+										Общо кредит (<?php echo $jet_sign; ?>
 										<span style='font-size:60%;font-weight:400;height:16px;'>&nbsp;/&nbsp;<?php echo $jet_sign_second; ?></span>)
 									<?php } ?>
 								</div>
@@ -1234,7 +1196,7 @@ function jet_credit_button_cart() {
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									<?php if ($jet_sign_second == '') { ?>
 										Месечна вноска (<?php echo $jet_sign; ?>)
 									<?php } else { ?>
@@ -1259,7 +1221,7 @@ function jet_credit_button_cart() {
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									Фикс ГПР (%)
 								</div>
 								<div class="jet_column_right">
@@ -1270,7 +1232,7 @@ function jet_credit_button_cart() {
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									ГЛП (%)
 								</div>
 								<div class="jet_column_right">
@@ -1281,11 +1243,11 @@ function jet_credit_button_cart() {
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									<?php if ($jet_sign_second == '') { ?>
-										<?php echo $obshto_plashtania; ?> (<?php echo $jet_sign; ?>)
+										Общо плащания (<?php echo $jet_sign; ?>)
 									<?php } else { ?>
-										<?php echo $obshto_plashtania; ?> (<?php echo $jet_sign; ?>
+										Общо плащания (<?php echo $jet_sign; ?>
 										<span style='font-size:60%;font-weight:400;height:16px;'>&nbsp;/&nbsp;<?php echo $jet_sign_second; ?></span>)
 									<?php } ?>
 								</div>
@@ -1308,36 +1270,36 @@ function jet_credit_button_cart() {
 							<div class="jet_hr"></div>
 							<div class="jet_row_footer">
 								<div style="padding-bottom: 5px;">
-									<input 
-										type="checkbox" 
-										name="uslovia" 
-										value="uslovia" 
-										id="uslovia" 
+									<input
+										type="checkbox"
+										name="uslovia"
+										value="uslovia"
+										id="uslovia"
 										class="jet_uslovia"
 									/>
 									&nbsp;&nbsp;&nbsp;
-									<a 
-										href="https://www.postbank.bg/common-conditions-PFBG" 
-										class="jet_uslovia_a" 
-										title="Условия за кандидатстване на ПБ Лични Финанси" 
+									<a
+										href="https://www.postbank.bg/common-conditions-PFBG"
+										class="jet_uslovia_a"
+										title="Условия за кандидатстване на ПБ Лични Финанси"
 										target="_blank"
 									>
 										<span style="font-size: 14px;">Запознах се с условията за кандидатстване на ПБ Лични финанси</span>
 									</a>
 								</div>
 								<div>
-									<input 
-										type="checkbox" 
-										name="uslovia1" 
-										value="uslovia1" 
-										id="uslovia1" 
+									<input
+										type="checkbox"
+										name="uslovia1"
+										value="uslovia1"
+										id="uslovia1"
 										class="jet_uslovia"
 									/>
 									&nbsp;&nbsp;&nbsp;
-									<a 
-										href="https://www.postbank.bg/Personal-Data-PFBG-retailers" 
-										class="jet_uslovia_a" 
-										title="Регламент (ЕС) 2016/679 от 27 април 2016 г. за защита на физическите лица по отношение на обработката на лични данни и за свободното движение на такива данни и за отмяна на Директива 95/46 / ЕО" 
+									<a
+										href="https://www.postbank.bg/Personal-Data-PFBG-retailers"
+										class="jet_uslovia_a"
+										title="Регламент (ЕС) 2016/679 от 27 април 2016 г. за защита на физическите лица по отношение на обработката на лични данни и за свободното движение на такива данни и за отмяна на Директива 95/46 / ЕО"
 										target="_blank"
 									>
 										<span style="font-size: 14px;">"GDPR" означава Регламент (ЕС) 2016/679 от 27 април 2016 г. за защита на физическите лица по отношение на обработката на лични данни и за свободното движение на такива данни и за отмяна на Директива 95/46 / ЕО</span>
@@ -1345,123 +1307,123 @@ function jet_credit_button_cart() {
 								</div>
 							</div>
 							<div class="jet_row_bottom">
-								<button 
-									type="button" 
-									class="jet_btn" 
+								<button
+									type="button"
+									class="jet_btn"
 									id="back_jetcredit"
 								>Откажи</button>
-								<button 
-									type="button" 
-									class="jet_btn" 
-									id="buy_jetcredit" 
-									style="color: gray;background: #696969;" 
+								<button
+									type="button"
+									class="jet_btn"
+									id="buy_jetcredit"
+									style="color: gray;background: #696969;"
 									disabled
 								>Купи на изплащане</button>
 							</div>
 						</div>
-						
+
 						<div id="jet_step_2">
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									Име *
 								</div>
 								<div class="jet_column_right">
-									<input 
-										class="jet_input_text_active jet_left" 
+									<input
+										class="jet_input_text_active jet_left"
 										type="text"
-										id="jet_name" 
+										id="jet_name"
 										autocomplete="off"
-										value="<?php echo $jet_name; ?>" 
+										value="<?php echo $jet_name; ?>"
 									/>
-									<input 
+									<input
 										type="hidden"
-										id="jet_lname" 
+										id="jet_lname"
 										autocomplete="off"
-										value="" 
+										value=""
 									/>
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									Фамилия *
 								</div>
 								<div class="jet_column_right">
-									<input 
-										class="jet_input_text_active jet_left" 
+									<input
+										class="jet_input_text_active jet_left"
 										type="text"
-										id="jet_lastname" 
+										id="jet_lastname"
 										autocomplete="off"
-										value="<?php echo $jet_lastname; ?>" 
+										value="<?php echo $jet_lastname; ?>"
 									/>
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									ЕГН *
 								</div>
 								<div class="jet_column_right">
-									<input 
-										class="jet_input_text_active jet_left" 
+									<input
+										class="jet_input_text_active jet_left"
 										type="text"
-										id="jet_egn" 
+										id="jet_egn"
 										autocomplete="off"
-										value="" 
+										value=""
 									/>
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
-									Мобилен телефон *
+								<div class="jet_column_left">
+									Моб. телефон *
 								</div>
 								<div class="jet_column_right">
-									<input 
-										class="jet_input_text_active jet_left" 
+									<input
+										class="jet_input_text_active jet_left"
 										type="text"
-										id="jet_phone" 
+										id="jet_phone"
 										autocomplete="off"
-										value="" 
+										value=""
 									/>
 								</div>
 							</div>
 							<div class="jet_row">
-								<div class="<?php echo $jet_column_left; ?>">
+								<div class="jet_column_left">
 									E-Mail *
 								</div>
 								<div class="jet_column_right">
-									<input 
-										class="jet_input_text_active jet_left" 
+									<input
+										class="jet_input_text_active jet_left"
 										type="text"
-										id="jet_email" 
+										id="jet_email"
 										autocomplete="off"
-										value="<?php echo $jet_email; ?>" 
+										value="<?php echo $jet_email; ?>"
 									/>
 								</div>
 							</div>
 							<div class="jet_hr"></div>
 							<div class="jet_row_footer">
 								<div style="padding-bottom: 5px;">
-									<input 
-										type="checkbox" 
-										name="uslovia2" 
-										value="uslovia2" 
-										id="uslovia2" 
+									<input
+										type="checkbox"
+										name="uslovia2"
+										value="uslovia2"
+										id="uslovia2"
 										class="jet_uslovia"
 									/>
 									&nbsp;&nbsp;&nbsp;
-									<a 
-										href="https://www.postbank.bg/common-conditions-PFBG" 
-										class="jet_uslovia_a" 
-										title="Условия за кандидатстване на ПБ Лични Финанси" 
+									<a
+										href="https://www.postbank.bg/common-conditions-PFBG"
+										class="jet_uslovia_a"
+										title="Условия за кандидатстване на ПБ Лични Финанси"
 										target="_blank"
 									>
 										<span style="font-size: 14px;">Запознах се с условията за кандидатстване на ПБ Лични финанси</span>
 									</a>
 								</div>
 								<div style="padding-bottom: 5px;">
-									<a 
-										href="https://www.postbank.bg/product-information-PBPG-retailers" 
-										class="jet_uslovia_a" 
-										title="Продуктова Информация на ПБ Лични финанси" 
+									<a
+										href="https://www.postbank.bg/product-information-PBPG-retailers"
+										class="jet_uslovia_a"
+										title="Продуктова Информация на ПБ Лични финанси"
 										target="_blank"
 									>
 										<span style="font-size: 14px;">Продуктова Информация на ПБ Лични финанси</span>
@@ -1469,27 +1431,27 @@ function jet_credit_button_cart() {
 								</div>
 							</div>
 							<div class="jet_row_bottom">
-								<button 
-									type="button" 
-									class="jet_btn" 
+								<button
+									type="button"
+									class="jet_btn"
 									id="back2_jetcredit"
 								>Назад</button>
 								<div style="flex: 1;"></div>
-								<button 
-									type="button" 
-									class="jet_btn" 
+								<button
+									type="button"
+									class="jet_btn"
 									id="close_jetcredit"
 								>Откажи</button>
-								<button 
-									type="button" 
-									class="jet_btn" 
-									id="buy2_jetcredit" 
-									style="color: gray;background: #696969;" 
+								<button
+									type="button"
+									class="jet_btn"
+									id="buy2_jetcredit"
+									style="color: gray;background: #696969;"
 									disabled
 								>Изпрати</button>
 							</div>
 						</div>
-						
+
 					</div>
 				</div>
 			</div>
@@ -1555,7 +1517,7 @@ function jet_addfilter() {
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'jet_kop';
 	$exists = $wpdb->get_var( $wpdb->prepare(
-		"SELECT COUNT(*) FROM $table_name WHERE jet_product_id = %s", 
+		"SELECT COUNT(*) FROM $table_name WHERE jet_product_id = %s",
 		$jet_product_id
 	) );
 	if ( $exists ) {
@@ -1570,17 +1532,17 @@ function jet_addfilter() {
 			"jet_product_start" => $jet_product_start,
 			"jet_product_end" => $jet_product_end
 		);
-		$inserted = $wpdb->insert( 
-			$table_name, 
-			$jet_categories_current, 
-			array( 
+		$inserted = $wpdb->insert(
+			$table_name,
+			$jet_categories_current,
+			array(
 				'%s',
 				'%f',
 				'%s',
 				'%f',
 				'%s',
 				'%s'
-			) 
+			)
 		);
 		if ($inserted) {
 			$json['success'] = 'success';
@@ -1610,8 +1572,8 @@ function jet_removefilter() {
 	}
 	global $wpdb;
 	$table_name = $wpdb->prefix . 'jet_kop';
-	$deleted = $wpdb->delete( 
-		$table_name, 
+	$deleted = $wpdb->delete(
+		$table_name,
 		array( 'jet_product_id' => $jet_product_id ),
 		array( '%s' )
 	);

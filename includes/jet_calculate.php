@@ -30,7 +30,7 @@
 		}
 		return $rate;
 	}
-	
+
 	function jet_calculate() {
 		check_ajax_referer('jet_nonce', 'security');
 
@@ -230,7 +230,7 @@
 		check_ajax_referer('jet_nonce', 'security');
 
 		if(!empty((string)$_POST['jet_lname'])) die();
-		
+
 		$json = [];
 		if (isset($_POST['jet_priceall'])) {
 			$jet_priceall = filter_var($_POST['jet_priceall'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
@@ -317,7 +317,7 @@
 		} else {
 			$jet_quantity = 1;
 		}
-		
+
 		$toEmail_admin = get_bloginfo('admin_email');
 		$toEmail_other = get_option('jet_email');
 		$jet_id = get_option('jet_id');
@@ -328,7 +328,7 @@
 		}else{
 			$product_c_txt = " - ";
 		}
-		
+
 		if(isset($jet_variation_id) && $jet_variation_id != 0) {
 			$product = new WC_Product_Variation($jet_variation_id);
 			$attributes = $product->get_attributes();
@@ -350,9 +350,9 @@
 		if ($product_m_txt == ""){
 			$product_m_txt = " - ";
 		}
-		
+
 		$product_p_txt = $jet_priceall / $jet_quantity;
-		
+
 		$jet_eur = (int)get_option("jet_eur");
 		$jet_sign = 'лева';
 		switch ($jet_eur) {
@@ -405,14 +405,14 @@
 		update_option("jet_count", $jet_count);
 		$subject = $jet_id . ", онлайн заявка по поръчка $jet_count";
 		$cc = $toEmail_other . ", " . $jet_email;
-		
+
 		$headers = [
 			'MIME-Version: 1.0',
 			'Content-type: text/plain; charset=utf-8',
 			'From: ' . mb_encode_mimeheader($jet_id,"UTF-8") . ' <' . $toEmail_admin . '>',
 			'Cc: ' . $cc
 		];
-		
+
 		if (wp_mail($toEmail_admin, $subject, $body, $headers)) {
 			$jet_billing_address_1 = '';
 			$jet_billing_address_2 = '';
@@ -441,7 +441,7 @@
 				$jet_shipping_postcode = get_user_meta($user_id, 'shipping_postcode', true);
 				$jet_shipping_country = get_user_meta($user_id, 'shipping_country', true);
 			}
-		
+
 			$order = wc_create_order();
 			$addressBilling = array(
 				'first_name' => $jet_name,
@@ -490,7 +490,7 @@
 		}else{
 			$json['success'] = 'unsuccess';
 		}
-		
+
 		wp_send_json($json);
 		die();
 	}
@@ -552,11 +552,11 @@
 			$jet_egn = "";
 		}
 		$jet_card_in = (int) get_option( 'jet_card_in' );
-		
+
 		$jet_eur = (int) get_option( 'jet_eur' );
 		$jet_min_250 = JET_MIN_250;
 		$jet_currency_code = get_woocommerce_currency();
-		
+
 		switch ($jet_eur) {
 			case 0:
 				break;
@@ -573,9 +573,9 @@
 				$jet_min_250 = JET_MIN_250_EUR;
 				break;
 		}
-		
+
 		$jet_total_credit_price = (float)$jet_priceall - (float)$jet_parva;
-		
+
 		$jet_purcent = (float) get_option("jet_purcent");
 		if ($jet_card_in == 1) {
 			$jet_purcent_card = (float)get_option("jet_purcent_card");
@@ -585,7 +585,7 @@
 		$jet_show_button = (bool) $jet_promo['jet_show_button'];
 		$jet_purcent = (float) $jet_promo['jet_purcent'];
 		$jet_purcent_card = (float) $jet_promo['jet_purcent_card'];
-		
+
 		$jet_vnoska = (($jet_total_credit_price / $jet_vnoski) * (1 + ($jet_vnoski * $jet_purcent) / 100));
 		if ($jet_card_in == 1) {
 			$jet_vnoska_card = (($jet_total_credit_price / $jet_vnoski) * (1 + ($jet_vnoski * $jet_purcent_card) / 100));
@@ -601,7 +601,7 @@
 			$jet_gpr_card = (pow((1 + $jet_gprm_card / 12), 12) - 1) * 100;
 			$jet_obshto_card = $jet_vnoska_card * $jet_vnoski;
 		}
-		
+
 		$jet_vnoska_second = 0;
 		$jet_vnoska_card_second = 0;
 		$jet_priceall_second = $jet_priceall;
@@ -642,7 +642,7 @@
 				$jet_obshto_card_second = $jet_obshto_card;
 				break;
 		}
-		
+
 		$json['success'] = 'success';
 		$json['jet_show_button'] = $jet_show_button;
 		$json['jet_vnoska'] = number_format($jet_vnoska, 2, ".", "");
@@ -678,7 +678,7 @@
 		WC()->session->set( 'jet_card_uslovia', sanitize_text_field( $jet_uslovia ) );
 		WC()->session->set( 'jet_card_uslovia1', sanitize_text_field( $jet_uslovia1 ) );
 		WC()->session->set( 'jet_card_egn', sanitize_text_field( $jet_egn ) );
-		
+
 		wp_send_json($json);
 		die();
 	}
@@ -689,7 +689,7 @@
 		check_ajax_referer('jet_nonce', 'security');
 
 		if(!empty((string)$_POST['jet_lname'])) die();
-		
+
 		$json = [];
 		if (isset($_POST['jet_priceall'])) {
 			$jet_priceall = filter_var($_POST['jet_priceall'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
@@ -924,7 +924,7 @@
 				$jet_shipping_postcode = get_user_meta($user_id, 'shipping_postcode', true);
 				$jet_shipping_country = get_user_meta($user_id, 'shipping_country', true);
 			}
-		
+
 			$order = wc_create_order();
 			$addressBilling = array(
 				'first_name' => $jet_name,
@@ -948,7 +948,7 @@
 				'postcode'   => $jet_shipping_postcode,
 				'country'	=> $jet_shipping_country);
 			$order->set_address( $addressShipping, 'shipping' );
-			
+
 			for ($index = 0; $index < sizeof($_product); $index++) {
 				$jet_product_id = $_product[$index];
 				$jet_variation_id = $product_v[$index];
@@ -964,7 +964,7 @@
 				}
 				$order->add_product($product, $jet_product_qt);
 			}
-			
+
 			$order->set_payment_method('jetpayment');
 			$order->set_payment_method_title('ПБ Лични Финанси');
 			$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
@@ -976,7 +976,7 @@
 			}
 			$order->calculate_totals();
 			$order->save();
-			
+
 			global $woocommerce;
 			foreach($woocommerce->cart->get_cart() as $cart_item_key => $cart_item){
 				$woocommerce->cart->remove_cart_item($cart_item_key);
@@ -985,7 +985,7 @@
 		}else{
 			$json['success'] = 'unsuccess';
 		}
-		
+
 		wp_send_json($json);
 		die();
 	}

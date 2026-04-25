@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(document).ready(function ($) {
 	let card;
 	card = 0;
 
@@ -22,29 +22,29 @@ jQuery(document).ready(function($) {
 			$('#jet_step_1').css('display', 'block');
 			$('#jet_step_2').css('display', 'none');
 
-			$('#btn_jet').on('click', function(event) {
+			$('#btn_jet').on('click', function (event) {
 				card = 0;
 				jetCalculate();
 				$('#jet-product-popup-container').css('display', 'block');
 			});
 
 			if ($('#btn_jet_card').length !== 0) {
-				$('#btn_jet_card').on('click', function(event) {
+				$('#btn_jet_card').on('click', function (event) {
 					card = 1;
 					jetCalculate();
 					$('#jet-product-popup-container').css('display', 'block');
 				});
 			}
 
-			$('#back_jetcredit').on('click', function(event) {
+			$('#back_jetcredit').on('click', function (event) {
 				jetClose();
 			});
 
-			$('#close_jetcredit').on('click', function(event) {
+			$('#close_jetcredit').on('click', function (event) {
 				jetClose();
 			});
 
-			$('#buy_jetcredit').on('click', function(event) {
+			$('#buy_jetcredit').on('click', function (event) {
 				let _taxa = parseFloat($('#jet_vnoska_popup').text());
 				if (card == 1 && $('#jet_vnoska_popup').length !== 0) {
 					_taxa = parseFloat($('#jet_vnoska_popup').text());
@@ -58,12 +58,12 @@ jQuery(document).ready(function($) {
 				}
 			});
 
-			$('#back2_jetcredit').on('click', function(event) {
+			$('#back2_jetcredit').on('click', function (event) {
 				$('#jet_step_2').css('display', 'none');
 				$('#jet_step_1').css('display', 'block');
 			});
 
-			$('#jet_egn').on('input', function(event) {
+			$('#jet_egn').on('input', function (event) {
 				const input = $(this).val();
 				const regex = /^[0-9]{0,10}$/;
 				if (!regex.test(input)) {
@@ -71,7 +71,7 @@ jQuery(document).ready(function($) {
 				}
 			});
 
-			$('#jet_phone').on('input', function(event) {
+			$('#jet_phone').on('input', function (event) {
 				const input = $(this).val();
 				const regex = /^[+0-9]+$/;
 				if (!regex.test(input)) {
@@ -79,13 +79,13 @@ jQuery(document).ready(function($) {
 				}
 			});
 
-			$('#buy2_jetcredit').on('click', function(event) {
+			$('#buy2_jetcredit').on('click', function (event) {
 				if (checkForm()) {
 					jetSend();
 				}
 			});
 
-			$('.jet_input_text_active').on('click', function(event) {
+			$('.jet_input_text_active').on('click', function (event) {
 				if ($(this).hasClass('error')) {
 					$(this).removeClass('error');
 				}
@@ -94,7 +94,7 @@ jQuery(document).ready(function($) {
 			jetCalculate();
 		}
 	}
-	
+
 	const jetCalculate = () => {
 		const jetPriceall = parseFloat($('#jet_price').val());
 		jetHideOptions401();
@@ -121,11 +121,11 @@ jQuery(document).ready(function($) {
 				data: jetFormData,
 				processData: false,
 				contentType: false,
-				success: function(json) {
+				success: function (json) {
 					if (json.success === 'success') {
 						if (json.jet_show_button) {
 							$('#jet-product-button-container').show();
-						}else{
+						} else {
 							$('#jet-product-button-container').hide();
 						}
 						$('#jet_vnoska').text(json.jet_vnoska);
@@ -158,7 +158,7 @@ jQuery(document).ready(function($) {
 						}
 					}
 				},
-				error: function(error) {
+				error: function (error) {
 					console.error('Error:', error);
 				}
 			});
@@ -167,7 +167,7 @@ jQuery(document).ready(function($) {
 			jetShowCustomAlert('Първоначалната вноска трябва да бъде по-малка от цената на стоките!', false);
 		}
 	}
-	
+
 	const jetClose = () => {
 		$('#jet-product-popup-container').css('display', 'none');
 		$('#jet_step_1').css('display', 'block');
@@ -182,7 +182,7 @@ jQuery(document).ready(function($) {
 		}
 		changeBtnJetcredit();
 	}
-	
+
 	const jetShowCustomAlert = (message, exit) => {
 		const jetAlertBox = $('<div></div>', {
 			id: 'jet_alert_box',
@@ -222,7 +222,7 @@ jQuery(document).ready(function($) {
 				cursor: 'pointer'
 			}
 		});
-		jetCloseButton.on('click', function() {
+		jetCloseButton.on('click', function () {
 			jetAlertBox.remove();
 			if (exit) {
 				window.location.href = window.location.origin;
@@ -232,7 +232,7 @@ jQuery(document).ready(function($) {
 		jetAlertBox.append(jetCloseButton);
 		$('body').append(jetAlertBox);
 	}
-	
+
 	const jetSend = () => {
 		$("#jet_alert_overlay").addClass("show");
 		const jetFormSendData = new FormData();
@@ -263,21 +263,21 @@ jQuery(document).ready(function($) {
 			data: jetFormSendData,
 			processData: false,
 			contentType: false,
-			success: function(json) {
+			success: function (json) {
 				if (json.success === 'success') {
 					jetShowCustomAlert('Успешно изпратихте Вашата заявка за лизинг към ПБ Лични Финанси. Очаквайте контакт за потвърждаване на направената от Вас заявка.', true);
 				} else {
 					jetShowCustomAlert('Не можете да изпратите Вашата заявка за лизинг към ПБ Лични Финанси. Моля опитайте по-късно.', false);
 				}
 			},
-			error: function(error) {
+			error: function (error) {
 				console.error('Error:', error);
 			}
 		});
 	}
-	
+
 	const jetHideOptions401 = () => {
-		$('#jet_vnoski').find('option').each(function() {
+		$('#jet_vnoski').find('option').each(function () {
 			if ($(this).val() === '15' || $(this).val() === '18' || $(this).val() === '24') {
 				$(this).prop('disabled', true);
 			}
@@ -285,7 +285,7 @@ jQuery(document).ready(function($) {
 	}
 
 	const jetShowOptions401 = () => {
-		$('#jet_vnoski').find('option').each(function() {
+		$('#jet_vnoski').find('option').each(function () {
 			if ($(this).val() === '15' || $(this).val() === '18' || $(this).val() === '24') {
 				$(this).prop('disabled', false);
 			}
@@ -293,7 +293,7 @@ jQuery(document).ready(function($) {
 	}
 
 	const jetHideOptions601 = () => {
-		$('#jet_vnoski').find('option').each(function() {
+		$('#jet_vnoski').find('option').each(function () {
 			if ($(this).val() === '30' || $(this).val() === '36') {
 				$(this).prop('disabled', true);
 			}
@@ -301,13 +301,13 @@ jQuery(document).ready(function($) {
 	}
 
 	const jetShowOptions601 = () => {
-		$('#jet_vnoski').find('option').each(function() {
+		$('#jet_vnoski').find('option').each(function () {
 			if ($(this).val() === '30' || $(this).val() === '36') {
 				$(this).prop('disabled', false);
 			}
 		});
 	}
-	
+
 	const changeBtnJetcredit = () => {
 		if ($('#uslovia').is(':checked') && $('#uslovia1').is(':checked')) {
 			let _taxa = parseFloat($('#jet_vnoska_popup').text());
@@ -330,7 +330,7 @@ jQuery(document).ready(function($) {
 			});
 		}
 	}
-	
+
 	const checkForm = () => {
 		let check = true;
 		const jet_name = document.getElementById('jet_name').value.trim();
@@ -365,10 +365,10 @@ jQuery(document).ready(function($) {
 		}
 		return check;
 	}
-	
+
 	const jetDebounce = (func, delay) => {
 		let inDebounce;
-		return function() {
+		return function () {
 			const context = this;
 			const args = arguments;
 			clearTimeout(inDebounce);
@@ -381,11 +381,11 @@ jQuery(document).ready(function($) {
 		if (cartTable !== null) {
 			const cartItems = cartTable.querySelectorAll('.cart_item');
 			return cartItems.length === 0;
-		}else{
+		} else {
 			return true;
 		}
 	}
-	
+
 	const changeBtnJetcreditBuy = () => {
 		if ($('#uslovia2').is(':checked')) {
 			$('#buy2_jetcredit').prop('disabled', false).css({
@@ -397,7 +397,7 @@ jQuery(document).ready(function($) {
 			});
 		}
 	}
-	
+
 	document.addEventListener('click', (event) => {
 		if (event.target.id == "uslovia" || event.target.id == "uslovia1") {
 			changeBtnJetcredit();
@@ -409,13 +409,13 @@ jQuery(document).ready(function($) {
 			jetCalculate();
 		}
 	});
-	
+
 	document.addEventListener('change', (event) => {
 		if (event.target.id == "jet_vnoski") {
 			jetCalculate();
 		}
 	});
-	
+
 	const targetNode = document.querySelector('div.woocommerce-notices-wrapper');
 	if (targetNode !== null) {
 		if (targetNode instanceof Node) {

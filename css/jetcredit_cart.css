@@ -148,20 +148,6 @@
 	padding-top: 20px !important;
 }
 
-.modalpayment_jetm {
-	display: none;
-	position: fixed !important;
-	z-index: 4000000 !important;
-	left: 0 !important;
-	top: 0 !important;
-	margin: 0 !important;
-	width: 100% !important;
-	height: 100vh !important;
-	overflow: auto !important;
-	background-color: rgb(0, 0, 0) !important;
-	background-color: rgba(0, 0, 0, 0.4) !important;
-}
-
 .modalpayment-content_jet {
 	position: relative !important;
 	margin: auto !important;
@@ -191,24 +177,7 @@
 	margin: auto !important;
 }
 
-.jetm_PopUp_Detailed_v1 {
-	border-radius: 3px !important;
-	width: 100% !important;
-	height: 100% !important;
-	background-color: #ffffff !important;
-	overflow: none !important;
-}
-
 .jet_Mask {
-	display: flex !important;
-	flex-direction: column !important;
-	border-radius: 3px !important;
-	background-color: #ffffff !important;
-	-webkit-box-shadow: 0px 0px 30px 0px #000000 !important;
-	box-shadow: 0px 0px 30px 0px #000000 !important;
-}
-
-.jetm_Mask {
 	display: flex !important;
 	flex-direction: column !important;
 	border-radius: 3px !important;
@@ -245,21 +214,6 @@
 	color: #052e16 !important;
 }
 
-.jetm_column_left {
-	display: flex !important;
-	-webkit-box-sizing: border-box !important;
-	-moz-box-sizing: border-box !important;
-	box-sizing: border-box !important;
-	flex: 1 !important;
-	align-items: center !important;
-	height: 58px !important;
-	font-size: 12pt !important;
-	font-weight: 500 !important;
-	line-height: 14px !important;
-	background-color: transparent !important;
-	color: #052e16 !important;
-}
-
 .jet_column_right {
 	display: flex !important;
 	-webkit-box-sizing: border-box !important;
@@ -271,16 +225,51 @@
 	height: 58px !important;
 }
 
-.jetm_column_right {
-	display: flex !important;
-	-webkit-box-sizing: border-box !important;
-	-moz-box-sizing: border-box !important;
-	box-sizing: border-box !important;
-	flex: 1 !important;
-	flex-wrap: wrap !important;
-	align-items: center !important;
-	justify-content: right !important;
-	gap: 5px !important;
+@media (max-width: 768px) {
+	.modalpayment_jet {
+		margin: 0 !important;
+		height: 100vh !important;
+		padding-top: 0 !important;
+	}
+
+	.jet_PopUp_Detailed_v1 {
+		width: 100% !important;
+		height: 100% !important;
+	}
+
+	.jet_Mask {
+		box-shadow: none !important;
+		-webkit-box-shadow: none !important;
+	}
+
+	.jet_column_left {
+		font-size: 12pt !important;
+		line-height: 14px !important;
+	}
+
+	.jet_column_right {
+		flex-wrap: wrap !important;
+		gap: 5px !important;
+	}
+
+	/* Само редът за първоначална вноска: дясната колона да се разтегне за input + бутон */
+	.jet_row_parva .jet_column_right {
+		height: auto !important;
+		align-items: stretch !important;
+	}
+
+	.jet_row_parva .jet_button_preizcisli {
+		width: auto !important;
+		flex: 0 0 auto !important;
+		margin-left: 0 !important;
+	}
+
+	/* Да не изглежда първият input като "главен" на мобилен */
+	.jet_row_parva input[type="number"].jet_input_text_active {
+		flex: 0 0 185px !important;
+		width: 185px !important;
+		max-width: 100% !important;
+	}
 }
 
 input[type="text"].jet_input_text_active,

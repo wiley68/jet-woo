@@ -1,4 +1,4 @@
-jQuery(document).ready(function($) {
+jQuery(document).ready(function ($) {
 	let jetVariationId = null;
 	let card;
 	card = 0;
@@ -149,10 +149,10 @@ jQuery(document).ready(function($) {
 			jetGetButtonContainer().hide();
 		}
 
-		  jetHideOptions401();
-		  jetHideOptions601();
-		  if (jetPriceall >= 401) jetShowOptions401();
-		  if (jetPriceall >= 601) jetShowOptions601();
+		jetHideOptions401();
+		jetHideOptions601();
+		if (jetPriceall >= 401) jetShowOptions401();
+		if (jetPriceall >= 601) jetShowOptions601();
 
 		if ($('#jet_parva').val().trim() == '' || parseFloat($('#jet_parva').val()) < jetPriceall) {
 			try {
@@ -254,7 +254,7 @@ jQuery(document).ready(function($) {
 	}
 
 	const jetHideOptions401 = () => {
-		$('#jet_vnoski').find('option').each(function() {
+		$('#jet_vnoski').find('option').each(function () {
 			if ($(this).val() === '15' || $(this).val() === '18' || $(this).val() === '24') {
 				$(this).prop('disabled', true);
 			}
@@ -262,7 +262,7 @@ jQuery(document).ready(function($) {
 	}
 
 	const jetShowOptions401 = () => {
-		$('#jet_vnoski').find('option').each(function() {
+		$('#jet_vnoski').find('option').each(function () {
 			if ($(this).val() === '15' || $(this).val() === '18' || $(this).val() === '24') {
 				$(this).prop('disabled', false);
 			}
@@ -270,7 +270,7 @@ jQuery(document).ready(function($) {
 	}
 
 	const jetHideOptions601 = () => {
-		$('#jet_vnoski').find('option').each(function() {
+		$('#jet_vnoski').find('option').each(function () {
 			if ($(this).val() === '30' || $(this).val() === '36') {
 				$(this).prop('disabled', true);
 			}
@@ -278,7 +278,7 @@ jQuery(document).ready(function($) {
 	}
 
 	const jetShowOptions601 = () => {
-		$('#jet_vnoski').find('option').each(function() {
+		$('#jet_vnoski').find('option').each(function () {
 			if ($(this).val() === '30' || $(this).val() === '36') {
 				$(this).prop('disabled', false);
 			}
@@ -363,7 +363,7 @@ jQuery(document).ready(function($) {
 				cursor: 'pointer'
 			}
 		});
-		jetCloseButton.on('click', function() {
+		jetCloseButton.on('click', function () {
 			jetAlertBox.remove();
 			if (exit) {
 				jetClose();
@@ -435,36 +435,36 @@ jQuery(document).ready(function($) {
 		jetFormSendData.append('jet_variation_id', $('#jet_variation_id').val());
 		jetFormSendData.append('jet_quantity', jet_quantity);
 		jetFormSendData.append('security', jet_js.nonce);
-		
+
 		$.ajax({
 			url: jet_js.ajax_url + '?action=jet_send',
 			method: 'POST',
 			data: jetFormSendData,
 			processData: false,
 			contentType: false,
-			success: function(json) {
+			success: function (json) {
 				if (json.success === 'success') {
 					jetShowCustomAlert('Успешно изпратихте Вашата заявка за лизинг към ПБ Лични Финанси. Очаквайте контакт за потвърждаване на направената от Вас заявка.', true);
 				} else {
 					jetShowCustomAlert('Не можете да изпратите Вашата заявка за лизинг към ПБ Лични Финанси. Моля опитайте по-късно.', false);
 				}
 			},
-			error: function(error) {
+			error: function (error) {
 				console.error('Error:', error);
 			}
 		});
 	}
 
-	$('form.variations_form').on('woocommerce_variation_select_change', function() {
+	$('form.variations_form').on('woocommerce_variation_select_change', function () {
 		jetVariationId = null;
 	});
 
-	$('form.variations_form').on('found_variation', function(event, variation) {
+	$('form.variations_form').on('found_variation', function (event, variation) {
 		jetVariationId = variation.variation_id;
 		$('#jet_variation_id').val(jetVariationId);
 	});
 
-	$('form.variations_form').on('reset_data', function() {
+	$('form.variations_form').on('reset_data', function () {
 		jetVariationId = null;
 		$('#jet_variation_id').val('');
 	});
@@ -520,7 +520,7 @@ jQuery(document).ready(function($) {
 		if (_taxa >= 20) {
 			$('#jet_step_1').hide('slow');
 			$('#jet_step_2').show('slow');
-		}else{
+		} else {
 			$('#jet_alert_overlay').addClass("show");
 			jetShowCustomAlert('Месечната вноска трябва да надхвърля сумата от 20 лв.!', false);
 		}
@@ -615,9 +615,9 @@ jQuery(document).ready(function($) {
 			subtree: true,
 			characterData: true,
 			attributes: true,
-			attributeFilter: [ 'style', 'class' ]
+			attributeFilter: ['style', 'class']
 		});
 	}
-	
+
 	jetCalculate();
 });

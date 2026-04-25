@@ -61,21 +61,6 @@ li.payment_method_jetpaymentcard * {
 	color: #052e16 !important;
 }
 
-.jetm_column_left {
-	display: flex !important;
-	-webkit-box-sizing: border-box !important;
-	-moz-box-sizing: border-box !important;
-	box-sizing: border-box !important;
-	flex: 1 !important;
-	align-items: center !important;
-	height: 38px !important;
-	font-size: 10pt !important;
-	font-weight: 500 !important;
-	line-height: 12px !important;
-	background-color: transparent !important;
-	color: #052e16 !important;
-}
-
 .jet_column_right {
 	display: flex !important;
 	-webkit-box-sizing: border-box !important;
@@ -87,16 +72,24 @@ li.payment_method_jetpaymentcard * {
 	height: 38px !important;
 }
 
-.jetm_column_right {
-	display: flex !important;
-	-webkit-box-sizing: border-box !important;
-	-moz-box-sizing: border-box !important;
-	box-sizing: border-box !important;
-	flex: 1 !important;
-	flex-wrap: wrap !important;
-	align-items: center !important;
-	justify-content: right !important;
-	gap: 5px !important;
+@media (max-width: 768px) {
+	.jet_column_left {
+		flex: 1.4 !important;
+		font-size: 10pt !important;
+		line-height: 12px !important;
+	}
+
+	.jet_column_right {
+		flex: 1 !important;
+		flex-wrap: wrap !important;
+		gap: 5px !important;
+	}
+
+	/* Само редът с първоначална вноска: колоната да се разпъва при пренасяне на бутона */
+	.jet_row_parva .jet_column_right {
+		height: auto !important;
+		align-items: stretch !important;
+	}
 }
 
 input[type="text"].jet_input_text_active,
