@@ -1,0 +1,1179 @@
+{
+    "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
+    "bomFormat": "CycloneDX",
+    "specVersion": "1.5",
+    "serialNumber": "urn:uuid:493946d1-e5b0-42dc-9ac3-24a5071cb8c7",
+    "version": 1,
+    "metadata": {
+        "timestamp": "2026-07-19T17:02:36Z",
+        "tools": [
+            {
+                "name": "composer",
+                "version": "2.8.3"
+            },
+            {
+                "vendor": "cyclonedx",
+                "name": "cyclonedx-php-composer",
+                "version": "v6.2.0",
+                "externalReferences": [
+                    {
+                        "type": "distribution",
+                        "url": "https://api.github.com/repos/CycloneDX/cyclonedx-php-composer/zipball/934440a5ef7c3c3cdb58c3c3d389d412630ccbf6",
+                        "comment": "dist reference: 934440a5ef7c3c3cdb58c3c3d389d412630ccbf6"
+                    },
+                    {
+                        "type": "vcs",
+                        "url": "https://github.com/CycloneDX/cyclonedx-php-composer.git",
+                        "comment": "source reference: 934440a5ef7c3c3cdb58c3c3d389d412630ccbf6"
+                    },
+                    {
+                        "type": "website",
+                        "url": "https://github.com/CycloneDX/cyclonedx-php-composer/#readme",
+                        "comment": "as detected from Composer manifest 'homepage'"
+                    },
+                    {
+                        "type": "issue-tracker",
+                        "url": "https://github.com/CycloneDX/cyclonedx-php-composer/issues",
+                        "comment": "as detected from Composer manifest 'support.issues'"
+                    },
+                    {
+                        "type": "vcs",
+                        "url": "https://github.com/CycloneDX/cyclonedx-php-composer/",
+                        "comment": "as detected from Composer manifest 'support.source'"
+                    }
+                ]
+            },
+            {
+                "vendor": "cyclonedx",
+                "name": "cyclonedx-library",
+                "version": "v4.1.0",
+                "externalReferences": [
+                    {
+                        "type": "distribution",
+                        "url": "https://api.github.com/repos/CycloneDX/cyclonedx-php-library/zipball/6a4f249cecf3b4211ad6bd8cee30fca89e0f81e5",
+                        "comment": "dist reference: 6a4f249cecf3b4211ad6bd8cee30fca89e0f81e5"
+                    },
+                    {
+                        "type": "vcs",
+                        "url": "https://github.com/CycloneDX/cyclonedx-php-library.git",
+                        "comment": "source reference: 6a4f249cecf3b4211ad6bd8cee30fca89e0f81e5"
+                    },
+                    {
+                        "type": "website",
+                        "url": "https://github.com/CycloneDX/cyclonedx-php-library/#readme",
+                        "comment": "as detected from Composer manifest 'homepage'"
+                    },
+                    {
+                        "type": "documentation",
+                        "url": "https://cyclonedx-php-library.readthedocs.io",
+                        "comment": "as detected from Composer manifest 'support.docs'"
+                    },
+                    {
+                        "type": "issue-tracker",
+                        "url": "https://github.com/CycloneDX/cyclonedx-php-library/issues",
+                        "comment": "as detected from Composer manifest 'support.issues'"
+                    },
+                    {
+                        "type": "vcs",
+                        "url": "https://github.com/CycloneDX/cyclonedx-php-library/",
+                        "comment": "as detected from Composer manifest 'support.source'"
+                    }
+                ]
+            }
+        ],
+        "component": {
+            "bom-ref": "avalonbg/jetcredit-dev-main",
+            "type": "application",
+            "name": "jetcredit",
+            "version": "dev-main",
+            "group": "avalonbg",
+            "description": "\u041f\u0411 \u041b\u0438\u0447\u043d\u0438 \u0424\u0438\u043d\u0430\u043d\u0441\u0438 \u2014 WooCommerce \u043f\u043b\u044a\u0433\u0438\u043d (dev tooling)",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "GPL-2.0-or-later"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/avalonbg/jetcredit@dev-main",
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "bd0811ec444c4caa2aa36856a280c115835f7f71"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "bd0811ec444c4caa2aa36856a280c115835f7f71"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "wordpress-plugin"
+                }
+            ]
+        }
+    },
+    "components": [
+        {
+            "bom-ref": "composer/spdx-licenses-1.6.0.0",
+            "type": "library",
+            "name": "spdx-licenses",
+            "version": "1.6.0",
+            "group": "composer",
+            "description": "SPDX licenses list and validation library.",
+            "author": "Nils Adermann, Jordi Boggiano, Rob Bast",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/composer/spdx-licenses@1.6.0",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/composer/spdx-licenses/zipball/5ecd0cb4177696f9fd48f1605dda81db3dee7889",
+                    "comment": "dist reference: 5ecd0cb4177696f9fd48f1605dda81db3dee7889"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/composer/spdx-licenses.git",
+                    "comment": "source reference: 5ecd0cb4177696f9fd48f1605dda81db3dee7889"
+                },
+                {
+                    "type": "chat",
+                    "url": "ircs://irc.libera.chat:6697/composer",
+                    "comment": "as detected from Composer manifest 'support.irc'"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/composer/spdx-licenses/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/composer/spdx-licenses/tree/1.6.0",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "5ecd0cb4177696f9fd48f1605dda81db3dee7889"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "5ecd0cb4177696f9fd48f1605dda81db3dee7889"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "library"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "cyclonedx/cyclonedx-library-4.1.0.0",
+            "type": "library",
+            "name": "cyclonedx-library",
+            "version": "v4.1.0",
+            "group": "cyclonedx",
+            "description": "Work with CycloneDX documents.",
+            "author": "Jan Kowalleck",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "Apache-2.0"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/cyclonedx/cyclonedx-library@v4.1.0",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/CycloneDX/cyclonedx-php-library/zipball/6a4f249cecf3b4211ad6bd8cee30fca89e0f81e5",
+                    "comment": "dist reference: 6a4f249cecf3b4211ad6bd8cee30fca89e0f81e5"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/CycloneDX/cyclonedx-php-library.git",
+                    "comment": "source reference: 6a4f249cecf3b4211ad6bd8cee30fca89e0f81e5"
+                },
+                {
+                    "type": "website",
+                    "url": "https://github.com/CycloneDX/cyclonedx-php-library/#readme",
+                    "comment": "as detected from Composer manifest 'homepage'"
+                },
+                {
+                    "type": "documentation",
+                    "url": "https://cyclonedx-php-library.readthedocs.io",
+                    "comment": "as detected from Composer manifest 'support.docs'"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/CycloneDX/cyclonedx-php-library/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/CycloneDX/cyclonedx-php-library/",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "6a4f249cecf3b4211ad6bd8cee30fca89e0f81e5"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "6a4f249cecf3b4211ad6bd8cee30fca89e0f81e5"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "library"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "cyclonedx/cyclonedx-php-composer-6.2.0.0",
+            "type": "library",
+            "name": "cyclonedx-php-composer",
+            "version": "v6.2.0",
+            "group": "cyclonedx",
+            "description": "Creates CycloneDX Software Bill-of-Materials (SBOM) from PHP Composer projects",
+            "author": "Jan Kowalleck",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "Apache-2.0"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/cyclonedx/cyclonedx-php-composer@v6.2.0",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/CycloneDX/cyclonedx-php-composer/zipball/934440a5ef7c3c3cdb58c3c3d389d412630ccbf6",
+                    "comment": "dist reference: 934440a5ef7c3c3cdb58c3c3d389d412630ccbf6"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/CycloneDX/cyclonedx-php-composer.git",
+                    "comment": "source reference: 934440a5ef7c3c3cdb58c3c3d389d412630ccbf6"
+                },
+                {
+                    "type": "website",
+                    "url": "https://github.com/CycloneDX/cyclonedx-php-composer/#readme",
+                    "comment": "as detected from Composer manifest 'homepage'"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/CycloneDX/cyclonedx-php-composer/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/CycloneDX/cyclonedx-php-composer/",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "934440a5ef7c3c3cdb58c3c3d389d412630ccbf6"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "934440a5ef7c3c3cdb58c3c3d389d412630ccbf6"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "composer-plugin"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "dealerdirect/phpcodesniffer-composer-installer-1.2.0.0",
+            "type": "library",
+            "name": "phpcodesniffer-composer-installer",
+            "version": "v1.2.0",
+            "group": "dealerdirect",
+            "description": "PHP_CodeSniffer Standards Composer Installer Plugin",
+            "author": "Franck Nijhof, Contributors",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/dealerdirect/phpcodesniffer-composer-installer@v1.2.0",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/PHPCSStandards/composer-installer/zipball/845eb62303d2ca9b289ef216356568ccc075ffd1",
+                    "comment": "dist reference: 845eb62303d2ca9b289ef216356568ccc075ffd1"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCSStandards/composer-installer.git",
+                    "comment": "source reference: 845eb62303d2ca9b289ef216356568ccc075ffd1"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/PHPCSStandards/composer-installer/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "other",
+                    "url": "https://github.com/PHPCSStandards/composer-installer/security/policy",
+                    "comment": "as detected from Composer manifest 'support.security'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCSStandards/composer-installer",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "845eb62303d2ca9b289ef216356568ccc075ffd1"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "845eb62303d2ca9b289ef216356568ccc075ffd1"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "composer-plugin"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "opis/json-schema-2.6.0.0",
+            "type": "library",
+            "name": "json-schema",
+            "version": "2.6.0",
+            "group": "opis",
+            "description": "Json Schema Validator for PHP",
+            "author": "Sorin Sarca, Marius Sarca",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "Apache-2.0"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/opis/json-schema@2.6.0",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/opis/json-schema/zipball/8458763e0dd0b6baa310e04f1829fc73da4e8c8a",
+                    "comment": "dist reference: 8458763e0dd0b6baa310e04f1829fc73da4e8c8a"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/opis/json-schema.git",
+                    "comment": "source reference: 8458763e0dd0b6baa310e04f1829fc73da4e8c8a"
+                },
+                {
+                    "type": "website",
+                    "url": "https://opis.io/json-schema",
+                    "comment": "as detected from Composer manifest 'homepage'"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/opis/json-schema/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/opis/json-schema/tree/2.6.0",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "8458763e0dd0b6baa310e04f1829fc73da4e8c8a"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "8458763e0dd0b6baa310e04f1829fc73da4e8c8a"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "library"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "opis/string-2.1.0.0",
+            "type": "library",
+            "name": "string",
+            "version": "2.1.0",
+            "group": "opis",
+            "description": "Multibyte strings as objects",
+            "author": "Marius Sarca, Sorin Sarca",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "Apache-2.0"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/opis/string@2.1.0",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/opis/string/zipball/3e4d2aaff518ac518530b89bb26ed40f4503635e",
+                    "comment": "dist reference: 3e4d2aaff518ac518530b89bb26ed40f4503635e"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/opis/string.git",
+                    "comment": "source reference: 3e4d2aaff518ac518530b89bb26ed40f4503635e"
+                },
+                {
+                    "type": "website",
+                    "url": "https://opis.io/string",
+                    "comment": "as detected from Composer manifest 'homepage'"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/opis/string/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/opis/string/tree/2.1.0",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "3e4d2aaff518ac518530b89bb26ed40f4503635e"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "3e4d2aaff518ac518530b89bb26ed40f4503635e"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "library"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "opis/uri-1.1.0.0",
+            "type": "library",
+            "name": "uri",
+            "version": "1.1.0",
+            "group": "opis",
+            "description": "Build, parse and validate URIs and URI-templates",
+            "author": "Marius Sarca, Sorin Sarca",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "Apache-2.0"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/opis/uri@1.1.0",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/opis/uri/zipball/0f3ca49ab1a5e4a6681c286e0b2cc081b93a7d5a",
+                    "comment": "dist reference: 0f3ca49ab1a5e4a6681c286e0b2cc081b93a7d5a"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/opis/uri.git",
+                    "comment": "source reference: 0f3ca49ab1a5e4a6681c286e0b2cc081b93a7d5a"
+                },
+                {
+                    "type": "website",
+                    "url": "https://opis.io",
+                    "comment": "as detected from Composer manifest 'homepage'"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/opis/uri/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/opis/uri/tree/1.1.0",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "0f3ca49ab1a5e4a6681c286e0b2cc081b93a7d5a"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "0f3ca49ab1a5e4a6681c286e0b2cc081b93a7d5a"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "library"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "package-url/packageurl-php-1.1.2.0",
+            "type": "library",
+            "name": "packageurl-php",
+            "version": "1.1.2",
+            "group": "package-url",
+            "description": "Builder and parser based on the package URL (purl) specification.",
+            "author": "Jan Kowalleck",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/package-url/packageurl-php@1.1.2",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/package-url/packageurl-php/zipball/32058ad61f0d8b457fa26e7860bbd8b903196d3f",
+                    "comment": "dist reference: 32058ad61f0d8b457fa26e7860bbd8b903196d3f"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/package-url/packageurl-php.git",
+                    "comment": "source reference: 32058ad61f0d8b457fa26e7860bbd8b903196d3f"
+                },
+                {
+                    "type": "website",
+                    "url": "https://github.com/package-url/packageurl-php#readme",
+                    "comment": "as detected from Composer manifest 'homepage'"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/package-url/packageurl-php/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/package-url/packageurl-php/tree/1.1.2",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "32058ad61f0d8b457fa26e7860bbd8b903196d3f"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "32058ad61f0d8b457fa26e7860bbd8b903196d3f"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "library"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "phpcompatibility/php-compatibility-9.3.5.0",
+            "type": "library",
+            "name": "php-compatibility",
+            "version": "9.3.5",
+            "group": "phpcompatibility",
+            "description": "A set of sniffs for PHP_CodeSniffer that checks for PHP cross-version compatibility.",
+            "author": "Wim Godden, Juliette Reinders Folmer, Contributors",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "LGPL-3.0-or-later"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/phpcompatibility/php-compatibility@9.3.5",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibility/zipball/9fb324479acf6f39452e0655d2429cc0d3914243",
+                    "comment": "dist reference: 9fb324479acf6f39452e0655d2429cc0d3914243"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCompatibility/PHPCompatibility.git",
+                    "comment": "source reference: 9fb324479acf6f39452e0655d2429cc0d3914243"
+                },
+                {
+                    "type": "website",
+                    "url": "http://techblog.wimgodden.be/tag/codesniffer/",
+                    "comment": "as detected from Composer manifest 'homepage'"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/PHPCompatibility/PHPCompatibility/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCompatibility/PHPCompatibility",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "9fb324479acf6f39452e0655d2429cc0d3914243"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "9fb324479acf6f39452e0655d2429cc0d3914243"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "phpcodesniffer-standard"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "phpcompatibility/phpcompatibility-paragonie-1.3.4.0",
+            "type": "library",
+            "name": "phpcompatibility-paragonie",
+            "version": "1.3.4",
+            "group": "phpcompatibility",
+            "description": "A set of rulesets for PHP_CodeSniffer to check for PHP cross-version compatibility issues in projects, while accounting for polyfills provided by the Paragonie polyfill libraries.",
+            "author": "Wim Godden, Juliette Reinders Folmer",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "LGPL-3.0-or-later"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/phpcompatibility/phpcompatibility-paragonie@1.3.4",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityParagonie/zipball/244d7b04fc4bc2117c15f5abe23eb933b5f02bbf",
+                    "comment": "dist reference: 244d7b04fc4bc2117c15f5abe23eb933b5f02bbf"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCompatibility/PHPCompatibilityParagonie.git",
+                    "comment": "source reference: 244d7b04fc4bc2117c15f5abe23eb933b5f02bbf"
+                },
+                {
+                    "type": "website",
+                    "url": "http://phpcompatibility.com/",
+                    "comment": "as detected from Composer manifest 'homepage'"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/PHPCompatibility/PHPCompatibilityParagonie/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "other",
+                    "url": "https://github.com/PHPCompatibility/PHPCompatibilityParagonie/security/policy",
+                    "comment": "as detected from Composer manifest 'support.security'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCompatibility/PHPCompatibilityParagonie",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "244d7b04fc4bc2117c15f5abe23eb933b5f02bbf"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "244d7b04fc4bc2117c15f5abe23eb933b5f02bbf"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "phpcodesniffer-standard"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "phpcompatibility/phpcompatibility-wp-2.1.8.0",
+            "type": "library",
+            "name": "phpcompatibility-wp",
+            "version": "2.1.8",
+            "group": "phpcompatibility",
+            "description": "A ruleset for PHP_CodeSniffer to check for PHP cross-version compatibility issues in projects, while accounting for polyfills provided by WordPress.",
+            "author": "Wim Godden, Juliette Reinders Folmer",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "LGPL-3.0-or-later"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/phpcompatibility/phpcompatibility-wp@2.1.8",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/PHPCompatibility/PHPCompatibilityWP/zipball/7c8d18b4d90dac9e86b0869a608fa09158e168fa",
+                    "comment": "dist reference: 7c8d18b4d90dac9e86b0869a608fa09158e168fa"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCompatibility/PHPCompatibilityWP.git",
+                    "comment": "source reference: 7c8d18b4d90dac9e86b0869a608fa09158e168fa"
+                },
+                {
+                    "type": "website",
+                    "url": "http://phpcompatibility.com/",
+                    "comment": "as detected from Composer manifest 'homepage'"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/PHPCompatibility/PHPCompatibilityWP/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "other",
+                    "url": "https://github.com/PHPCompatibility/PHPCompatibilityWP/security/policy",
+                    "comment": "as detected from Composer manifest 'support.security'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCompatibility/PHPCompatibilityWP",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "7c8d18b4d90dac9e86b0869a608fa09158e168fa"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "7c8d18b4d90dac9e86b0869a608fa09158e168fa"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "phpcodesniffer-standard"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "phpcsstandards/phpcsextra-1.5.0.0",
+            "type": "library",
+            "name": "phpcsextra",
+            "version": "1.5.0",
+            "group": "phpcsstandards",
+            "description": "A collection of sniffs and standards for use with PHP_CodeSniffer.",
+            "author": "Juliette Reinders Folmer, Contributors",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "LGPL-3.0-or-later"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/phpcsstandards/phpcsextra@1.5.0",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/PHPCSStandards/PHPCSExtra/zipball/b598aa890815b8df16363271b659d73280129101",
+                    "comment": "dist reference: b598aa890815b8df16363271b659d73280129101"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCSStandards/PHPCSExtra.git",
+                    "comment": "source reference: b598aa890815b8df16363271b659d73280129101"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/PHPCSStandards/PHPCSExtra/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "other",
+                    "url": "https://github.com/PHPCSStandards/PHPCSExtra/security/policy",
+                    "comment": "as detected from Composer manifest 'support.security'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCSStandards/PHPCSExtra",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "b598aa890815b8df16363271b659d73280129101"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "b598aa890815b8df16363271b659d73280129101"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "phpcodesniffer-standard"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "phpcsstandards/phpcsutils-1.2.2.0",
+            "type": "library",
+            "name": "phpcsutils",
+            "version": "1.2.2",
+            "group": "phpcsstandards",
+            "description": "A suite of utility functions for use with PHP_CodeSniffer",
+            "author": "Juliette Reinders Folmer, Contributors",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "LGPL-3.0-or-later"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/phpcsstandards/phpcsutils@1.2.2",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/PHPCSStandards/PHPCSUtils/zipball/c216317e96c8b3f5932808f9b0f1f7a14e3bbf55",
+                    "comment": "dist reference: c216317e96c8b3f5932808f9b0f1f7a14e3bbf55"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCSStandards/PHPCSUtils.git",
+                    "comment": "source reference: c216317e96c8b3f5932808f9b0f1f7a14e3bbf55"
+                },
+                {
+                    "type": "website",
+                    "url": "https://phpcsutils.com/",
+                    "comment": "as detected from Composer manifest 'homepage'"
+                },
+                {
+                    "type": "documentation",
+                    "url": "https://phpcsutils.com/",
+                    "comment": "as detected from Composer manifest 'support.docs'"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/PHPCSStandards/PHPCSUtils/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "other",
+                    "url": "https://github.com/PHPCSStandards/PHPCSUtils/security/policy",
+                    "comment": "as detected from Composer manifest 'support.security'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCSStandards/PHPCSUtils",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "c216317e96c8b3f5932808f9b0f1f7a14e3bbf55"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "c216317e96c8b3f5932808f9b0f1f7a14e3bbf55"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "phpcodesniffer-standard"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "squizlabs/php_codesniffer-3.13.5.0",
+            "type": "library",
+            "name": "php_codesniffer",
+            "version": "3.13.5",
+            "group": "squizlabs",
+            "description": "PHP_CodeSniffer tokenizes PHP, JavaScript and CSS files and detects violations of a defined set of coding standards.",
+            "author": "Greg Sherwood, Juliette Reinders Folmer, Contributors",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "BSD-3-Clause"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/squizlabs/php_codesniffer@3.13.5",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/PHPCSStandards/PHP_CodeSniffer/zipball/0ca86845ce43291e8f5692c7356fccf3bcf02bf4",
+                    "comment": "dist reference: 0ca86845ce43291e8f5692c7356fccf3bcf02bf4"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer.git",
+                    "comment": "source reference: 0ca86845ce43291e8f5692c7356fccf3bcf02bf4"
+                },
+                {
+                    "type": "website",
+                    "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer",
+                    "comment": "as detected from Composer manifest 'homepage'"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "other",
+                    "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer/security/policy",
+                    "comment": "as detected from Composer manifest 'support.security'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                },
+                {
+                    "type": "other",
+                    "url": "https://github.com/PHPCSStandards/PHP_CodeSniffer/wiki",
+                    "comment": "as detected from Composer manifest 'support.wiki'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "0ca86845ce43291e8f5692c7356fccf3bcf02bf4"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "0ca86845ce43291e8f5692c7356fccf3bcf02bf4"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "library"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        },
+        {
+            "bom-ref": "wp-coding-standards/wpcs-3.3.0.0",
+            "type": "library",
+            "name": "wpcs",
+            "version": "3.3.0",
+            "group": "wp-coding-standards",
+            "description": "PHP_CodeSniffer rules (sniffs) to enforce WordPress coding conventions",
+            "author": "Contributors",
+            "licenses": [
+                {
+                    "license": {
+                        "id": "MIT"
+                    }
+                }
+            ],
+            "purl": "pkg:composer/wp-coding-standards/wpcs@3.3.0",
+            "externalReferences": [
+                {
+                    "type": "distribution",
+                    "url": "https://api.github.com/repos/WordPress/WordPress-Coding-Standards/zipball/7795ec6fa05663d716a549d0b44e47ffc8b0d4a6",
+                    "comment": "dist reference: 7795ec6fa05663d716a549d0b44e47ffc8b0d4a6"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/WordPress/WordPress-Coding-Standards.git",
+                    "comment": "source reference: 7795ec6fa05663d716a549d0b44e47ffc8b0d4a6"
+                },
+                {
+                    "type": "issue-tracker",
+                    "url": "https://github.com/WordPress/WordPress-Coding-Standards/issues",
+                    "comment": "as detected from Composer manifest 'support.issues'"
+                },
+                {
+                    "type": "vcs",
+                    "url": "https://github.com/WordPress/WordPress-Coding-Standards",
+                    "comment": "as detected from Composer manifest 'support.source'"
+                },
+                {
+                    "type": "other",
+                    "url": "https://github.com/WordPress/WordPress-Coding-Standards/wiki",
+                    "comment": "as detected from Composer manifest 'support.wiki'"
+                }
+            ],
+            "properties": [
+                {
+                    "name": "cdx:composer:package:distReference",
+                    "value": "7795ec6fa05663d716a549d0b44e47ffc8b0d4a6"
+                },
+                {
+                    "name": "cdx:composer:package:sourceReference",
+                    "value": "7795ec6fa05663d716a549d0b44e47ffc8b0d4a6"
+                },
+                {
+                    "name": "cdx:composer:package:type",
+                    "value": "phpcodesniffer-standard"
+                },
+                {
+                    "name": "cdx:composer:package:isDevRequirement",
+                    "value": "true"
+                }
+            ]
+        }
+    ],
+    "dependencies": [
+        {
+            "ref": "composer/spdx-licenses-1.6.0.0"
+        },
+        {
+            "ref": "cyclonedx/cyclonedx-library-4.1.0.0",
+            "dependsOn": [
+                "opis/json-schema-2.6.0.0"
+            ]
+        },
+        {
+            "ref": "cyclonedx/cyclonedx-php-composer-6.2.0.0",
+            "dependsOn": [
+                "composer/spdx-licenses-1.6.0.0",
+                "cyclonedx/cyclonedx-library-4.1.0.0",
+                "package-url/packageurl-php-1.1.2.0"
+            ]
+        },
+        {
+            "ref": "dealerdirect/phpcodesniffer-composer-installer-1.2.0.0",
+            "dependsOn": [
+                "squizlabs/php_codesniffer-3.13.5.0"
+            ]
+        },
+        {
+            "ref": "opis/json-schema-2.6.0.0",
+            "dependsOn": [
+                "opis/string-2.1.0.0",
+                "opis/uri-1.1.0.0"
+            ]
+        },
+        {
+            "ref": "opis/string-2.1.0.0"
+        },
+        {
+            "ref": "opis/uri-1.1.0.0",
+            "dependsOn": [
+                "opis/string-2.1.0.0"
+            ]
+        },
+        {
+            "ref": "package-url/packageurl-php-1.1.2.0"
+        },
+        {
+            "ref": "phpcompatibility/php-compatibility-9.3.5.0",
+            "dependsOn": [
+                "squizlabs/php_codesniffer-3.13.5.0"
+            ]
+        },
+        {
+            "ref": "phpcompatibility/phpcompatibility-paragonie-1.3.4.0",
+            "dependsOn": [
+                "phpcompatibility/php-compatibility-9.3.5.0"
+            ]
+        },
+        {
+            "ref": "phpcompatibility/phpcompatibility-wp-2.1.8.0",
+            "dependsOn": [
+                "phpcompatibility/php-compatibility-9.3.5.0",
+                "phpcompatibility/phpcompatibility-paragonie-1.3.4.0",
+                "squizlabs/php_codesniffer-3.13.5.0"
+            ]
+        },
+        {
+            "ref": "phpcsstandards/phpcsextra-1.5.0.0",
+            "dependsOn": [
+                "phpcsstandards/phpcsutils-1.2.2.0",
+                "squizlabs/php_codesniffer-3.13.5.0"
+            ]
+        },
+        {
+            "ref": "phpcsstandards/phpcsutils-1.2.2.0",
+            "dependsOn": [
+                "dealerdirect/phpcodesniffer-composer-installer-1.2.0.0",
+                "squizlabs/php_codesniffer-3.13.5.0"
+            ]
+        },
+        {
+            "ref": "squizlabs/php_codesniffer-3.13.5.0"
+        },
+        {
+            "ref": "wp-coding-standards/wpcs-3.3.0.0",
+            "dependsOn": [
+                "phpcsstandards/phpcsextra-1.5.0.0",
+                "phpcsstandards/phpcsutils-1.2.2.0",
+                "squizlabs/php_codesniffer-3.13.5.0"
+            ]
+        },
+        {
+            "ref": "avalonbg/jetcredit-dev-main",
+            "dependsOn": [
+                "cyclonedx/cyclonedx-php-composer-6.2.0.0",
+                "phpcompatibility/phpcompatibility-wp-2.1.8.0",
+                "wp-coding-standards/wpcs-3.3.0.0"
+            ]
+        }
+    ]
+}

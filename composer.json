@@ -3,13 +3,14 @@
 	"description": "ПБ Лични Финанси — WooCommerce плъгин (dev tooling)",
 	"type": "wordpress-plugin",
 	"license": "GPL-2.0-or-later",
-	"require": {},
 	"require-dev": {
+		"cyclonedx/cyclonedx-php-composer": "^6.2",
 		"phpcompatibility/phpcompatibility-wp": "^2.1",
 		"wp-coding-standards/wpcs": "^3.1"
 	},
 	"config": {
 		"allow-plugins": {
+			"cyclonedx/cyclonedx-php-composer": true,
 			"dealerdirect/phpcodesniffer-composer-installer": true
 		},
 		"sort-packages": true
