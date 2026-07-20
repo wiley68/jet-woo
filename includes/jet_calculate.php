@@ -372,19 +372,19 @@
 
 		$body = "Данни за потребителя:\r\n";
 
-		$body .= "Собствено име: $jet_name;\r\n";
-		$body .= "Фамилия: $jet_lastname;\r\n";
-		$body .= "ЕГН: $jet_egn;\r\n";
-		$body .= "Телефон за връзка: $jet_phone;\r\n";
-		$body .= "Имейл адрес: $jet_email;\r\n\r\n";
+		$body .= 'Собствено име: ' . jet_sanitize_bank_email_field( $jet_name ) . ";\r\n";
+		$body .= 'Фамилия: ' . jet_sanitize_bank_email_field( $jet_lastname ) . ";\r\n";
+		$body .= 'ЕГН: ' . jet_sanitize_bank_email_field( $jet_egn ) . ";\r\n";
+		$body .= 'Телефон за връзка: ' . jet_sanitize_bank_email_field( $jet_phone ) . ";\r\n";
+		$body .= 'Имейл адрес: ' . jet_sanitize_bank_email_field( $jet_email ) . ";\r\n\r\n";
 
 		$body .= "Данни за стоката:\r\n";
 
-		$body .= "Тип стока: " . $product_c_txt . ";\r\n";
-		$body .= "Марка: " . "(" . $jet_product_id . ") " . $product_m_txt . ";\r\n";
-		$body .= "Единична цена с ДДС: " . number_format($product_p_txt, 2, ".", "") . ";\r\n";
-		$body .= "Брой стоки: " . $jet_quantity . ";\r\n";
-		$body .= "Обща сума с ДДС: " . number_format($jet_priceall, 2, ".", "") . ";\r\n\r\n";
+		$body .= 'Тип стока: ' . jet_sanitize_bank_email_field( $product_c_txt ) . ";\r\n";
+		$body .= 'Марка: ' . jet_sanitize_bank_email_field( '(' . $jet_product_id . ') ' . $product_m_txt ) . ";\r\n";
+		$body .= 'Единична цена с ДДС: ' . jet_sanitize_bank_email_field( number_format( $product_p_txt, 2, '.', '' ) ) . ";\r\n";
+		$body .= 'Брой стоки: ' . jet_sanitize_bank_email_field( $jet_quantity ) . ";\r\n";
+		$body .= 'Обща сума с ДДС: ' . jet_sanitize_bank_email_field( number_format( $jet_priceall, 2, '.', '' ) ) . ";\r\n\r\n";
 
 		if ($jet_card == 1){
 			$body .= "Тип стока: Кредитна Карта;\r\n";
@@ -396,10 +396,10 @@
 
 		$body .= "Данни за кредита:\r\n";
 
-		$body .= "Размер на кредита: " . number_format($jet_priceall - $jet_parva, 2, '.', '') . ";\r\n";
-		$body .= "Срок на изплащане в месеца: $jet_vnoski;\r\n";
-		$body .= "Месечна вноска: $jet_vnoska;\r\n";
-		$body .= "Първоначална вноска: " . number_format(floatval($jet_parva), 2, ".", "") . ";\r\n";
+		$body .= 'Размер на кредита: ' . jet_sanitize_bank_email_field( number_format( $jet_priceall - $jet_parva, 2, '.', '' ) ) . ";\r\n";
+		$body .= 'Срок на изплащане в месеца: ' . jet_sanitize_bank_email_field( $jet_vnoski ) . ";\r\n";
+		$body .= 'Месечна вноска: ' . jet_sanitize_bank_email_field( $jet_vnoska ) . ";\r\n";
+		$body .= 'Първоначална вноска: ' . jet_sanitize_bank_email_field( number_format( floatval( $jet_parva ), 2, '.', '' ) ) . ";\r\n";
 
 		$jet_count = (int)get_option("jet_count") + 1;
 		update_option("jet_count", $jet_count);
@@ -805,11 +805,11 @@
 
 		$body = "Данни за потребителя:\r\n";
 
-		$body .= "Собствено име: $jet_name;\r\n";
-		$body .= "Фамилия: $jet_lastname;\r\n";
-		$body .= "ЕГН: $jet_egn;\r\n";
-		$body .= "Телефон за връзка: $jet_phone;\r\n";
-		$body .= "Имейл адрес: $jet_email;\r\n\r\n";
+		$body .= 'Собствено име: ' . jet_sanitize_bank_email_field( $jet_name ) . ";\r\n";
+		$body .= 'Фамилия: ' . jet_sanitize_bank_email_field( $jet_lastname ) . ";\r\n";
+		$body .= 'ЕГН: ' . jet_sanitize_bank_email_field( $jet_egn ) . ";\r\n";
+		$body .= 'Телефон за връзка: ' . jet_sanitize_bank_email_field( $jet_phone ) . ";\r\n";
+		$body .= 'Имейл адрес: ' . jet_sanitize_bank_email_field( $jet_email ) . ";\r\n\r\n";
 
 		$body .= "Данни за стоката:\r\n";
 
@@ -862,11 +862,11 @@
 				$product_q_txt = 1;
 			}
 
-			$body .= "Тип стока: " . $product_c_txt . ";\r\n";
-			$body .= "Марка: " . "(" . $_product[$index] . ") " . $product_m_txt . ";\r\n";
-			$body .= "Единична цена с ДДС: " . number_format($product_p_txt, 2, ".", "") . ";\r\n";
-			$body .= "Брой стоки: " . $product_q_txt . ";\r\n";
-			$body .= "Обща сума с ДДС: " . number_format((float)$product_q_txt * (float)$product_p_txt, 2, ".", "") . ";\r\n\r\n";
+			$body .= 'Тип стока: ' . jet_sanitize_bank_email_field( $product_c_txt ) . ";\r\n";
+			$body .= 'Марка: ' . jet_sanitize_bank_email_field( '(' . $_product[ $index ] . ') ' . $product_m_txt ) . ";\r\n";
+			$body .= 'Единична цена с ДДС: ' . jet_sanitize_bank_email_field( number_format( $product_p_txt, 2, '.', '' ) ) . ";\r\n";
+			$body .= 'Брой стоки: ' . jet_sanitize_bank_email_field( $product_q_txt ) . ";\r\n";
+			$body .= 'Обща сума с ДДС: ' . jet_sanitize_bank_email_field( number_format( (float) $product_q_txt * (float) $product_p_txt, 2, '.', '' ) ) . ";\r\n\r\n";
 		}
 
 		if ($jet_card == 1) {
@@ -879,10 +879,10 @@
 
 		$body .= "Данни за кредита:\r\n";
 
-		$body .= "Размер на кредита: " . number_format($jet_priceall - $jet_parva, 2, '.', '') . ";\r\n";
-		$body .= "Срок на изплащане в месеца: $jet_vnoski;\r\n";
-		$body .= "Месечна вноска: $jet_vnoska;\r\n";
-		$body .= "Първоначална вноска: " . number_format(floatval($jet_parva), 2, ".", "") . ";\r\n";
+		$body .= 'Размер на кредита: ' . jet_sanitize_bank_email_field( number_format( $jet_priceall - $jet_parva, 2, '.', '' ) ) . ";\r\n";
+		$body .= 'Срок на изплащане в месеца: ' . jet_sanitize_bank_email_field( $jet_vnoski ) . ";\r\n";
+		$body .= 'Месечна вноска: ' . jet_sanitize_bank_email_field( $jet_vnoska ) . ";\r\n";
+		$body .= 'Първоначална вноска: ' . jet_sanitize_bank_email_field( number_format( floatval( $jet_parva ), 2, '.', '' ) ) . ";\r\n";
 
 		$jet_count = (int)get_option("jet_count") + 1;
 		update_option("jet_count", $jet_count);

@@ -1,6 +1,21 @@
 <?php
 require_once JET_INCLUDES_DIR . '/class-jet-button-schemes.php';
 
+/**
+ * Sanitize a field value for bank email rows.
+ * Rows end with ";" — any ";" or newlines inside values would break parsing.
+ *
+ * @param mixed $value Raw field value.
+ * @return string
+ */
+function jet_sanitize_bank_email_field( $value ) {
+	$value = (string) $value;
+	$value = str_replace( ';', '', $value );
+	$value = preg_replace( '/[\r\n]+/', ' ', $value );
+	$value = preg_replace( '/\s+/', ' ', $value );
+	return trim( $value );
+}
+
 function jet_do_output_buffer() {
 	ob_start();
 }

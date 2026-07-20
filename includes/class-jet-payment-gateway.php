@@ -693,11 +693,11 @@ class Jet_Payment_Gateway extends WC_Payment_Gateway {
 				break;
 		}
 		$body = "Данни за потребителя:\r\n";
-		$body .= "Собствено име: $jet_fname;\r\n";
-		$body .= "Фамилия: $jet_lastname;\r\n";
-		$body .= "ЕГН: $jet_egn;\r\n";
-		$body .= "Телефон за връзка: $jet_phone;\r\n";
-		$body .= "Имейл адрес: $jet_email;\r\n\r\n";
+		$body .= 'Собствено име: ' . jet_sanitize_bank_email_field( $jet_fname ) . ";\r\n";
+		$body .= 'Фамилия: ' . jet_sanitize_bank_email_field( $jet_lastname ) . ";\r\n";
+		$body .= 'ЕГН: ' . jet_sanitize_bank_email_field( $jet_egn ) . ";\r\n";
+		$body .= 'Телефон за връзка: ' . jet_sanitize_bank_email_field( $jet_phone ) . ";\r\n";
+		$body .= 'Имейл адрес: ' . jet_sanitize_bank_email_field( $jet_email ) . ";\r\n\r\n";
 		$body .= "Данни за стоката:\r\n";
 		$_product = explode('_', $jet_products);
 		$product_q = explode('_', $jet_products_qt);
@@ -744,17 +744,17 @@ class Jet_Payment_Gateway extends WC_Payment_Gateway {
 			}else{
 				$product_q_txt = 1;
 			}
-			$body .= "Тип стока: " . $product_c_txt . ";\r\n";
-			$body .= "Марка: " . "(" . $_product[$index] . ") " . $product_m_txt . ";\r\n";
-			$body .= "Единична цена с ДДС: " . number_format($product_p_txt, 2, ".", "") . ";\r\n";
-			$body .= "Брой стоки: " . $product_q_txt . ";\r\n";
-			$body .= "Обща сума с ДДС: " . number_format((float)$product_q_txt * (float)$product_p_txt, 2, ".", "") . ";\r\n\r\n";
+			$body .= 'Тип стока: ' . jet_sanitize_bank_email_field( $product_c_txt ) . ";\r\n";
+			$body .= 'Марка: ' . jet_sanitize_bank_email_field( '(' . $_product[ $index ] . ') ' . $product_m_txt ) . ";\r\n";
+			$body .= 'Единична цена с ДДС: ' . jet_sanitize_bank_email_field( number_format( $product_p_txt, 2, '.', '' ) ) . ";\r\n";
+			$body .= 'Брой стоки: ' . jet_sanitize_bank_email_field( $product_q_txt ) . ";\r\n";
+			$body .= 'Обща сума с ДДС: ' . jet_sanitize_bank_email_field( number_format( (float) $product_q_txt * (float) $product_p_txt, 2, '.', '' ) ) . ";\r\n\r\n";
 		}
 		$body .= "Данни за кредита:\r\n";
-		$body .= "Размер на кредита: " . number_format($jet_priceall - $jet_parva, 2, '.', '') . ";\r\n";
-		$body .= "Срок на изплащане в месеца: $jet_vnoski;\r\n";
-		$body .= "Месечна вноска: " . number_format($jet_vnoska, 2, '.', '') . ";\r\n";
-		$body .= "Първоначална вноска: " . number_format((float)$jet_parva, 2, ".", "") . ";\r\n";
+		$body .= 'Размер на кредита: ' . jet_sanitize_bank_email_field( number_format( $jet_priceall - $jet_parva, 2, '.', '' ) ) . ";\r\n";
+		$body .= 'Срок на изплащане в месеца: ' . jet_sanitize_bank_email_field( $jet_vnoski ) . ";\r\n";
+		$body .= 'Месечна вноска: ' . jet_sanitize_bank_email_field( number_format( $jet_vnoska, 2, '.', '' ) ) . ";\r\n";
+		$body .= 'Първоначална вноска: ' . jet_sanitize_bank_email_field( number_format( (float) $jet_parva, 2, '.', '' ) ) . ";\r\n";
 		$jet_count = (int)get_option("jet_count") + 1;
 		update_option("jet_count", $jet_count);
 		$subject = $jet_id . ", онлайн заявка по поръчка $jet_count";
