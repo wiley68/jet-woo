@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: ПБ Лични Финанси WooCommerce
+ * Plugin Name: ПБ Лични Финанси
  * Plugin URI: https://avalonbg.com/software/cc-woo.html
  * Description: Дава възможност на Вашите клиенти да закупуват стока на изплащане с ПБ Лични Финанси
  * Version: 1.9.1
