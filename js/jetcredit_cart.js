@@ -1,6 +1,76 @@
 jQuery(document).ready(function ($) {
 	let card;
 	card = 0;
+	// Share the lock if a theme or script optimizer initializes this file twice.
+	const jetSubmission = window.jetCartSubmissionState || {
+		locked: false,
+		alert: null,
+		id: null,
+		previousFocus: null,
+		submitWasDisabled: false
+	};
+	window.jetCartSubmissionState = jetSubmission;
+	const jetOverlay = document.getElementById('jet_alert_overlay') || document.createElement('div');
+	jetOverlay.id = 'jet_alert_overlay';
+	jetOverlay.classList.add('jet_alert_overlay');
+	// Escape stacking contexts, hidden containers and pointer rules inherited from the theme.
+	document.body.appendChild(jetOverlay);
+	jetOverlay.style.setProperty('pointer-events', 'auto', 'important');
+
+	const jetBlockInteraction = (event) => {
+		if (!jetSubmission.locked || (jetSubmission.alert && jetSubmission.alert.contains(event.target))) {
+			return;
+		}
+		if (event.cancelable) {
+			event.preventDefault();
+		}
+		event.stopImmediatePropagation();
+	};
+	// Capture events before theme handlers; this does not depend on theme selectors or z-index.
+	const jetBlockedEvents = ['click', 'dblclick', 'auxclick', 'pointerdown', 'pointerup',
+		'mousedown', 'mouseup', 'touchstart', 'touchend', 'touchmove', 'keydown', 'keyup',
+		'keypress', 'submit', 'contextmenu', 'wheel', 'dragstart', 'drop'];
+	jetBlockedEvents.forEach((type) => {
+		window.addEventListener(type, jetBlockInteraction, { capture: true, passive: false });
+	});
+	window.addEventListener('focusin', (event) => {
+		if (jetSubmission.locked && (!jetSubmission.alert || !jetSubmission.alert.contains(event.target))) {
+			jetBlockInteraction(event);
+			(jetSubmission.alert ? jetSubmission.alert.querySelector('button') : jetOverlay).focus();
+		}
+	}, true);
+
+	const jetLockSubmission = () => {
+		jetSubmission.locked = true;
+		jetSubmission.previousFocus = document.activeElement;
+		jetSubmission.submitWasDisabled = $('#buy2_jetcredit').prop('disabled');
+		$('#buy2_jetcredit').prop('disabled', true).attr('aria-busy', 'true');
+		jetOverlay.classList.add('show');
+		jetOverlay.tabIndex = -1;
+		jetOverlay.setAttribute('role', 'status');
+		jetOverlay.textContent = 'Изпращане на заявката. Моля, изчакайте…';
+		jetOverlay.focus();
+	};
+
+	const jetUnlockSubmission = () => {
+		jetSubmission.locked = false;
+		jetSubmission.alert = null;
+		jetOverlay.textContent = '';
+		jetOverlay.removeAttribute('role');
+		$('#buy2_jetcredit').prop('disabled', jetSubmission.submitWasDisabled).removeAttr('aria-busy');
+		if (jetSubmission.previousFocus && jetSubmission.previousFocus.isConnected) {
+			jetSubmission.previousFocus.focus();
+		}
+	};
+
+	const jetCreateSubmissionId = () => {
+		if (window.crypto && window.crypto.getRandomValues) {
+			const bytes = new Uint8Array(16);
+			window.crypto.getRandomValues(bytes);
+			return Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('');
+		}
+		return Date.now().toString(16) + Math.random().toString(16).slice(2);
+	};
 
 	const jetMovePopupToBodyStart = () => {
 		const popup = document.getElementById('jet-product-popup-container');
@@ -18,33 +88,36 @@ jQuery(document).ready(function ($) {
 	jetMovePopupToBodyStart();
 
 	const jetLoad = () => {
+		if (jetSubmission.locked) {
+			return;
+		}
 		if ($('#btn_jet').length !== 0) {
 			$('#jet_step_1').css('display', 'block');
 			$('#jet_step_2').css('display', 'none');
 
-			$('#btn_jet').on('click', function (event) {
+			$('#btn_jet').off('click.jetCart').on('click.jetCart', function (event) {
 				card = 0;
 				jetCalculate();
 				$('#jet-product-popup-container').css('display', 'block');
 			});
 
 			if ($('#btn_jet_card').length !== 0) {
-				$('#btn_jet_card').on('click', function (event) {
+				$('#btn_jet_card').off('click.jetCart').on('click.jetCart', function (event) {
 					card = 1;
 					jetCalculate();
 					$('#jet-product-popup-container').css('display', 'block');
 				});
 			}
 
-			$('#back_jetcredit').on('click', function (event) {
+			$('#back_jetcredit').off('click.jetCart').on('click.jetCart', function (event) {
 				jetClose();
 			});
 
-			$('#close_jetcredit').on('click', function (event) {
+			$('#close_jetcredit').off('click.jetCart').on('click.jetCart', function (event) {
 				jetClose();
 			});
 
-			$('#buy_jetcredit').on('click', function (event) {
+			$('#buy_jetcredit').off('click.jetCart').on('click.jetCart', function (event) {
 				let _taxa = parseFloat($('#jet_vnoska_popup').text());
 				if (card == 1 && $('#jet_vnoska_popup').length !== 0) {
 					_taxa = parseFloat($('#jet_vnoska_popup').text());
@@ -58,12 +131,12 @@ jQuery(document).ready(function ($) {
 				}
 			});
 
-			$('#back2_jetcredit').on('click', function (event) {
+			$('#back2_jetcredit').off('click.jetCart').on('click.jetCart', function (event) {
 				$('#jet_step_2').css('display', 'none');
 				$('#jet_step_1').css('display', 'block');
 			});
 
-			$('#jet_egn').on('input', function (event) {
+			$('#jet_egn').off('input.jetCart').on('input.jetCart', function (event) {
 				const input = $(this).val();
 				const regex = /^[0-9]{0,10}$/;
 				if (!regex.test(input)) {
@@ -71,7 +144,7 @@ jQuery(document).ready(function ($) {
 				}
 			});
 
-			$('#jet_phone').on('input', function (event) {
+			$('#jet_phone').off('input.jetCart').on('input.jetCart', function (event) {
 				const input = $(this).val();
 				const regex = /^[+0-9]+$/;
 				if (!regex.test(input)) {
@@ -79,13 +152,14 @@ jQuery(document).ready(function ($) {
 				}
 			});
 
-			$('#buy2_jetcredit').on('click', function (event) {
-				if (checkForm()) {
+			$('#buy2_jetcredit').off('click.jetCart').on('click.jetCart', function (event) {
+				event.preventDefault();
+				if (!jetSubmission.locked && checkForm()) {
 					jetSend();
 				}
 			});
 
-			$('.jet_input_text_active').on('click', function (event) {
+			$('.jet_input_text_active').off('click.jetCart').on('click.jetCart', function (event) {
 				if ($(this).hasClass('error')) {
 					$(this).removeClass('error');
 				}
@@ -195,7 +269,7 @@ jQuery(document).ready(function ($) {
 				padding: '20px',
 				borderRadius: '5px',
 				boxShadow: '0 0 10px rgba(0, 0, 0, 0.1)',
-				zIndex: '5000001',
+				zIndex: '2147483647',
 				width: '300px',
 				textAlign: 'center'
 			}
@@ -225,55 +299,84 @@ jQuery(document).ready(function ($) {
 		jetCloseButton.on('click', function () {
 			jetAlertBox.remove();
 			if (exit) {
+				// Keep the completed application locked until navigation finishes.
+				jetSubmission.alert = null;
+				jetOverlay.textContent = 'Пренасочване…';
+				jetOverlay.focus();
 				window.location.href = window.location.origin;
+				return;
+			}
+			if (jetSubmission.alert === jetAlertBox[0]) {
+				jetUnlockSubmission();
 			}
 			$('#jet_alert_overlay').removeClass('show');
 		});
 		jetAlertBox.append(jetCloseButton);
 		$('body').append(jetAlertBox);
+		if (jetSubmission.locked) {
+			jetSubmission.alert = jetAlertBox[0];
+			jetOverlay.textContent = '';
+			jetAlertBox.attr({ role: 'alertdialog', 'aria-modal': 'true', 'aria-label': message });
+			jetAlertBox[0].style.setProperty('z-index', '2147483647', 'important');
+			jetCloseButton[0].focus();
+		}
 	}
 
 	const jetSend = () => {
-		$("#jet_alert_overlay").addClass("show");
-		const jetFormSendData = new FormData();
-		jetFormSendData.append('jet_priceall', $('#jet_priceall').text());
-		jetFormSendData.append('jet_vnoski', $('#jet_vnoski').val());
-		jetFormSendData.append('jet_vnoska', $('#jet_vnoska_popup').text());
-		jetFormSendData.append('jet_parva', $('#jet_parva').val());
-		jetFormSendData.append('jet_total_credit_price', $('#jet_total_credit_price').text());
-		jetFormSendData.append('jet_obshto', $('#jet_obshto').text());
-		jetFormSendData.append('jet_gpr', $('#jet_gpr').text());
-		jetFormSendData.append('jet_glp', $('#jet_glp').text());
-		jetFormSendData.append('jet_name', $('#jet_name').val());
-		jetFormSendData.append('jet_lastname', $('#jet_lastname').val());
-		jetFormSendData.append('jet_egn', $('#jet_egn').val());
-		jetFormSendData.append('jet_email', $('#jet_email').val());
-		jetFormSendData.append('jet_phone', $('#jet_phone').val());
-		jetFormSendData.append('jet_lname', $('#jet_lname').val());
-		jetFormSendData.append('jet_card', card);
-		jetFormSendData.append('jet_products', $('#jet_products').val());
-		jetFormSendData.append('jet_products_qt', $('#jet_products_qt').val());
-		jetFormSendData.append('jet_products_pr', $('#jet_products_pr').val());
-		jetFormSendData.append('jet_products_vr', $('#jet_products_vr').val());
-		jetFormSendData.append('security', jet_cart_js.nonce);
+		if (jetSubmission.locked) {
+			return;
+		}
+		jetSubmission.id = jetSubmission.id || jetCreateSubmissionId();
+		jetLockSubmission();
+		try {
+			const jetFormSendData = new FormData();
+			jetFormSendData.append('jet_priceall', $('#jet_priceall').text());
+			jetFormSendData.append('jet_vnoski', $('#jet_vnoski').val());
+			jetFormSendData.append('jet_vnoska', $('#jet_vnoska_popup').text());
+			jetFormSendData.append('jet_parva', $('#jet_parva').val());
+			jetFormSendData.append('jet_total_credit_price', $('#jet_total_credit_price').text());
+			jetFormSendData.append('jet_obshto', $('#jet_obshto').text());
+			jetFormSendData.append('jet_gpr', $('#jet_gpr').text());
+			jetFormSendData.append('jet_glp', $('#jet_glp').text());
+			jetFormSendData.append('jet_name', $('#jet_name').val());
+			jetFormSendData.append('jet_lastname', $('#jet_lastname').val());
+			jetFormSendData.append('jet_egn', $('#jet_egn').val());
+			jetFormSendData.append('jet_email', $('#jet_email').val());
+			jetFormSendData.append('jet_phone', $('#jet_phone').val());
+			jetFormSendData.append('jet_lname', $('#jet_lname').val());
+			jetFormSendData.append('jet_card', card);
+			jetFormSendData.append('jet_products', $('#jet_products').val());
+			jetFormSendData.append('jet_products_qt', $('#jet_products_qt').val());
+			jetFormSendData.append('jet_products_pr', $('#jet_products_pr').val());
+			jetFormSendData.append('jet_products_vr', $('#jet_products_vr').val());
+			jetFormSendData.append('security', jet_cart_js.nonce);
+			jetFormSendData.append('jet_submission_id', jetSubmission.id);
 
-		$.ajax({
-			url: jet_cart_js.ajax_url + '?action=jet_send_card',
-			method: 'POST',
-			data: jetFormSendData,
-			processData: false,
-			contentType: false,
-			success: function (json) {
-				if (json.success === 'success') {
-					jetShowCustomAlert('Успешно изпратихте Вашата заявка за лизинг към ПБ Лични Финанси. Очаквайте контакт за потвърждаване на направената от Вас заявка.', true);
-				} else {
-					jetShowCustomAlert('Не можете да изпратите Вашата заявка за лизинг към ПБ Лични Финанси. Моля опитайте по-късно.', false);
+			$.ajax({
+				url: jet_cart_js.ajax_url + '?action=jet_send_card',
+				method: 'POST',
+				data: jetFormSendData,
+				processData: false,
+				contentType: false,
+				dataType: 'json',
+				success: function (json) {
+					if (json && json.success === 'success') {
+						jetShowCustomAlert('Успешно изпратихте Вашата заявка за лизинг към ПБ Лични Финанси. Очаквайте контакт за потвърждаване на направената от Вас заявка.', true);
+					} else if (json && (json.code === 'processing' || json.code === 'uncertain')) {
+						jetShowCustomAlert('Заявката вече е приета за обработка, но резултатът още не е потвърден. Моля, свържете се с магазина за проверка, преди да правите нова заявка.', false);
+					} else {
+						jetShowCustomAlert('Не можете да изпратите Вашата заявка за лизинг към ПБ Лични Финанси. Моля опитайте по-късно.', false);
+					}
+				},
+				error: function (error) {
+					console.error('Error:', error);
+					jetShowCustomAlert('Връзката прекъсна или получихме неочакван отговор. Заявката може да е приета. При повторно натискане на „Изпрати“ ще проверим същата заявка.', false);
 				}
-			},
-			error: function (error) {
-				console.error('Error:', error);
-			}
-		});
+			});
+		} catch (error) {
+			console.error('Error:', error);
+			jetShowCustomAlert('Възникна грешка при изпращането. Моля, опитайте отново.', false);
+		}
 	}
 
 	const jetHideOptions401 = () => {
@@ -387,6 +490,9 @@ jQuery(document).ready(function ($) {
 	}
 
 	const changeBtnJetcreditBuy = () => {
+		if (jetSubmission.locked) {
+			return;
+		}
 		if ($('#uslovia2').is(':checked')) {
 			$('#buy2_jetcredit').prop('disabled', false).css({
 				opacity: 1.00

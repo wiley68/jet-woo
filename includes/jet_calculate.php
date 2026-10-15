@@ -1,4 +1,5 @@
 <?php
+	require_once __DIR__ . '/jet-product-submission.php';
 	if (!defined('JETCREDIT_FINANCIAL_MAX_ITERATIONS')) define('JETCREDIT_FINANCIAL_MAX_ITERATIONS', 128);
 	if (!defined('JETCREDIT_FINANCIAL_PRECISION')) define('JETCREDIT_FINANCIAL_PRECISION', 1.0e-08);
 
@@ -231,6 +232,25 @@
 
 		if(!empty((string)$_POST['jet_lname'])) die();
 
+		$submission_key = jet_claim_product_submission( wp_unslash( $_POST ) );
+		try {
+			$json = jet_process_product_submission();
+			if ( 'success' === $json['success'] ) {
+				update_option( $submission_key, $json, false );
+			} else {
+				// A rejected mail submission has no order; a deliberate retry is safe.
+				delete_option( $submission_key );
+			}
+		} catch ( Throwable $error ) {
+			// Mail or order hooks may already have run. Keep the claim to prevent replay.
+			$json = array( 'success' => 'unsuccess', 'code' => 'uncertain' );
+			update_option( $submission_key, $json, false );
+		}
+
+		wp_send_json( $json );
+	}
+
+	function jet_process_product_submission() {
 		$json = [];
 		if (isset($_POST['jet_priceall'])) {
 			$jet_priceall = filter_var($_POST['jet_priceall'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
@@ -443,6 +463,9 @@
 			}
 
 			$order = wc_create_order();
+			if ( is_wp_error( $order ) ) {
+				throw new RuntimeException( 'Unable to create the application order.' );
+			}
 			$addressBilling = array(
 				'first_name' => $jet_name,
 				'email'	  => $jet_email,
@@ -471,7 +494,7 @@
 				$product_order = new WC_Product( $jet_product_id );
 			}
 			if (!$product_order) {
-				return new WP_Error('invalid_product', __('Invalid product ID.'));
+				throw new RuntimeException( 'Invalid application product.' );
 			}
 			$order->add_product($product_order, $jet_quantity);
 			$order->set_payment_method('jetpayment');
@@ -491,8 +514,7 @@
 			$json['success'] = 'unsuccess';
 		}
 
-		wp_send_json($json);
-		die();
+		return $json;
 	}
 	add_action( 'wp_ajax_jet_send', 'jet_send' );
 	add_action( 'wp_ajax_nopriv_jet_send', 'jet_send' );
@@ -690,6 +712,24 @@
 
 		if(!empty((string)$_POST['jet_lname'])) die();
 
+		$submission_key = jet_claim_product_submission( wp_unslash( $_POST ), 'cart' );
+		try {
+			$json = jet_process_cart_submission();
+			if ( 'success' === $json['success'] ) {
+				update_option( $submission_key, $json, false );
+			} else {
+				delete_option( $submission_key );
+			}
+		} catch ( Throwable $error ) {
+			// Preserve the claim if mail, order or cart hooks may already have run.
+			$json = array( 'success' => 'unsuccess', 'code' => 'uncertain' );
+			update_option( $submission_key, $json, false );
+		}
+
+		wp_send_json( $json );
+	}
+
+	function jet_process_cart_submission() {
 		$json = [];
 		if (isset($_POST['jet_priceall'])) {
 			$jet_priceall = filter_var($_POST['jet_priceall'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
@@ -926,6 +966,9 @@
 			}
 
 			$order = wc_create_order();
+			if ( is_wp_error( $order ) ) {
+				throw new RuntimeException( 'Unable to create the cart application order.' );
+			}
 			$addressBilling = array(
 				'first_name' => $jet_name,
 				'email'	  => $jet_email,
@@ -960,7 +1003,7 @@
 					$product = new WC_Product($jet_product_id);
 				}
 				if (!$product) {
-					return new WP_Error('invalid_product', __('Invalid product ID.'));
+					throw new RuntimeException( 'Invalid cart application product.' );
 				}
 				$order->add_product($product, $jet_product_qt);
 			}
@@ -986,8 +1029,7 @@
 			$json['success'] = 'unsuccess';
 		}
 
-		wp_send_json($json);
-		die();
+		return $json;
 	}
 	add_action( 'wp_ajax_jet_send_card', 'jet_send_card' );
 	add_action( 'wp_ajax_nopriv_jet_send_card', 'jet_send_card' );

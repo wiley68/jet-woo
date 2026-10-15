@@ -546,7 +546,14 @@ input[type="checkbox"].jet_uslovia {
 	width: 100% !important;
 	height: 100% !important;
 	background-color: rgba(0, 0, 0, 0.5) !important;
-	z-index: 5000000 !important;
+	z-index: 2147483646 !important;
+	pointer-events: auto !important;
+	touch-action: none !important;
+	cursor: wait !important;
+	color: #fff !important;
+	text-align: center !important;
+	padding-top: 35vh !important;
+	box-sizing: border-box !important;
 }
 
 .jet_alert_overlay.show {

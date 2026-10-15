@@ -50,6 +50,14 @@ foreach ( $options as $option ) {
 }
 
 /**
+ * Remove temporary application claims and their scheduled cleanup events.
+ */
+global $wpdb;
+wp_unschedule_hook( 'jet_cleanup_product_submission' );
+// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Uninstall removes all plugin claims; caches are flushed below.
+$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( 'jet_submission_' ) . '%' ) );
+
+/**
  * Flush the cache after options are deleted.
  */
 wp_cache_flush();
