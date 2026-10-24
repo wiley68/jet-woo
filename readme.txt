@@ -3,7 +3,7 @@ Contributors: wiley68
 Tags: credit, calculator
 Requires at least: 6.9.0
 Tested up to: 7.0.2
-Stable tag: 1.9.2
+Stable tag: 1.9.3
 License: GPLv3 or later License
 URI: http://www.gnu.org/licenses/gpl-3.0.html
 WC requires at least: 9.1
