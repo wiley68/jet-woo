@@ -1,0 +1,282 @@
+{
+    "source_commit": "06d0e10013719b1afdef826cd3e510408061a903",
+    "source_sha256": {
+        "includes/jet_calculate.php": "2fb0bd66756c69d9e820add1f81049285f5383aa00dc23517b7f95ca49b5cfed",
+        "includes/functions.php": "6850de0422f6c6699ee75958d73ec28b206a533fbd45b585624177d0fac4ef66"
+    },
+    "provenance": "Captured before remediation by executing the original submission functions with standalone wp_mail/order/database doubles and the original bank field sanitizer. Original To/Cc retained as evidence; new delivery must preserve subject, body and the first three headers exactly.",
+    "cases": {
+        "product-standard": {
+            "context": "product",
+            "post": {
+                "security": "valid",
+                "jet_lname": "",
+                "jet_submission_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "jet_name": "Синтетично; Име",
+                "jet_lastname": "Тестова\r\nФамилия",
+                "jet_egn": "0000000000",
+                "jet_phone": "0000000001",
+                "jet_email": "fixture@example.test",
+                "jet_product_id": "42",
+                "jet_variation_id": "0",
+                "jet_quantity": "3",
+                "jet_priceall": "1250.25",
+                "jet_vnoski": "12",
+                "jet_vnoska": "109.75",
+                "jet_parva": "50.10",
+                "jet_total_credit_price": "1200.15",
+                "jet_obshto": "1317.00",
+                "jet_gpr": "19.11",
+                "jet_glp": "17.61",
+                "jet_products": "42_43",
+                "jet_products_qt": "2_1",
+                "jet_products_pr": "500.10_250.05",
+                "jet_products_vr": "0_77",
+                "jet_card": "0"
+            },
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 0
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: Синтетично Име;\r\nФамилия: Тестова Фамилия;\r\nЕГН: 0000000000;\r\nТелефон за връзка: 0000000001;\r\nИмейл адрес: fixture@example.test;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена с ДДС: 416.75;\r\nБрой стоки: 3;\r\nОбща сума с ДДС: 1250.25;\r\n\r\nДанни за кредита:\r\nРазмер на кредита: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска: 109.75;\r\nПървоначална вноска: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test, fixture@example.test"
+                ]
+            ]
+        },
+        "product-variation-card-eur": {
+            "context": "product",
+            "post": {
+                "security": "valid",
+                "jet_lname": "",
+                "jet_submission_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "jet_name": "Синтетично; Име",
+                "jet_lastname": "Тестова\r\nФамилия",
+                "jet_egn": "0000000000",
+                "jet_phone": "0000000001",
+                "jet_email": "fixture@example.test",
+                "jet_product_id": "42",
+                "jet_variation_id": "77",
+                "jet_quantity": "3",
+                "jet_priceall": "1250.25",
+                "jet_vnoski": "12",
+                "jet_vnoska": "109.75",
+                "jet_parva": "50.10",
+                "jet_total_credit_price": "1200.15",
+                "jet_obshto": "1317.00",
+                "jet_gpr": "19.11",
+                "jet_glp": "17.61",
+                "jet_products": "42_43",
+                "jet_products_qt": "2_1",
+                "jet_products_pr": "500.10_250.05",
+                "jet_products_vr": "0_77",
+                "jet_card": "1"
+            },
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 2
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: Синтетично Име;\r\nФамилия: Тестова Фамилия;\r\nЕГН: 0000000000;\r\nТелефон за връзка: 0000000001;\r\nИмейл адрес: fixture@example.test;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓,;\r\nЕдинична цена с ДДС: 416.75;\r\nБрой стоки: 3;\r\nОбща сума с ДДС: 1250.25;\r\n\r\nТип стока: Кредитна Карта;\r\nМарка: -;\r\nЕдинична цена с ДДС: 0.00;\r\nБрой стоки: 1;\r\nОбща сума с ДДС: 0.00;\r\n\r\nДанни за кредита:\r\nРазмер на кредита: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска: 109.75;\r\nПървоначална вноска: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test, fixture@example.test"
+                ]
+            ]
+        },
+        "product-missing-personal": {
+            "context": "product",
+            "post": {
+                "security": "valid",
+                "jet_lname": "",
+                "jet_submission_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "jet_product_id": "42",
+                "jet_variation_id": "0",
+                "jet_quantity": "3",
+                "jet_priceall": "1250.25",
+                "jet_vnoski": "12",
+                "jet_vnoska": "109.75",
+                "jet_parva": "50.10",
+                "jet_total_credit_price": "1200.15",
+                "jet_obshto": "1317.00",
+                "jet_gpr": "19.11",
+                "jet_glp": "17.61",
+                "jet_products": "42_43",
+                "jet_products_qt": "2_1",
+                "jet_products_pr": "500.10_250.05",
+                "jet_products_vr": "0_77",
+                "jet_card": "0"
+            },
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 0
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: -;\r\nФамилия: -;\r\nЕГН: -;\r\nТелефон за връзка: -;\r\nИмейл адрес: -;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена с ДДС: 416.75;\r\nБрой стоки: 3;\r\nОбща сума с ДДС: 1250.25;\r\n\r\nДанни за кредита:\r\nРазмер на кредита: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска: 109.75;\r\nПървоначална вноска: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test,  - "
+                ]
+            ]
+        },
+        "cart-standard": {
+            "context": "cart",
+            "post": {
+                "security": "valid",
+                "jet_lname": "",
+                "jet_submission_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "jet_name": "Синтетично; Име",
+                "jet_lastname": "Тестова\r\nФамилия",
+                "jet_egn": "0000000000",
+                "jet_phone": "0000000001",
+                "jet_email": "fixture@example.test",
+                "jet_product_id": "42",
+                "jet_variation_id": "0",
+                "jet_quantity": "3",
+                "jet_priceall": "1250.25",
+                "jet_vnoski": "12",
+                "jet_vnoska": "109.75",
+                "jet_parva": "50.10",
+                "jet_total_credit_price": "1200.15",
+                "jet_obshto": "1317.00",
+                "jet_gpr": "19.11",
+                "jet_glp": "17.61",
+                "jet_products": "42_43",
+                "jet_products_qt": "2_1",
+                "jet_products_pr": "500.10_250.05",
+                "jet_products_vr": "0_77",
+                "jet_card": "0"
+            },
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 0
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: Синтетично Име;\r\nФамилия: Тестова Фамилия;\r\nЕГН: 0000000000;\r\nТелефон за връзка: 0000000001;\r\nИмейл адрес: fixture@example.test;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена с ДДС: 500.10;\r\nБрой стоки: 2;\r\nОбща сума с ДДС: 1000.20;\r\n\r\nТип стока: -;\r\nМарка: (43) Синтетичен продукт модел ✓,;\r\nЕдинична цена с ДДС: 250.05;\r\nБрой стоки: 1;\r\nОбща сума с ДДС: 250.05;\r\n\r\nДанни за кредита:\r\nРазмер на кредита: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска: 109.75;\r\nПървоначална вноска: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test, fixture@example.test"
+                ]
+            ]
+        },
+        "cart-variation-card-eur": {
+            "context": "cart",
+            "post": {
+                "security": "valid",
+                "jet_lname": "",
+                "jet_submission_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "jet_name": "Синтетично; Име",
+                "jet_lastname": "Тестова\r\nФамилия",
+                "jet_egn": "0000000000",
+                "jet_phone": "0000000001",
+                "jet_email": "fixture@example.test",
+                "jet_product_id": "42",
+                "jet_variation_id": "77",
+                "jet_quantity": "3",
+                "jet_priceall": "1250.25",
+                "jet_vnoski": "12",
+                "jet_vnoska": "109.75",
+                "jet_parva": "50.10",
+                "jet_total_credit_price": "1200.15",
+                "jet_obshto": "1317.00",
+                "jet_gpr": "19.11",
+                "jet_glp": "17.61",
+                "jet_products": "42_43",
+                "jet_products_qt": "2_1",
+                "jet_products_pr": "500.10_250.05",
+                "jet_products_vr": "0_77",
+                "jet_card": "1"
+            },
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 2
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: Синтетично Име;\r\nФамилия: Тестова Фамилия;\r\nЕГН: 0000000000;\r\nТелефон за връзка: 0000000001;\r\nИмейл адрес: fixture@example.test;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена с ДДС: 500.10;\r\nБрой стоки: 2;\r\nОбща сума с ДДС: 1000.20;\r\n\r\nТип стока: -;\r\nМарка: (43) Синтетичен продукт модел ✓,;\r\nЕдинична цена с ДДС: 250.05;\r\nБрой стоки: 1;\r\nОбща сума с ДДС: 250.05;\r\n\r\nТип стока: Кредитна Карта;\r\nМарка: -;\r\nЕдинична цена с ДДС: 0.00;\r\nБрой стоки: 1;\r\nОбща сума с ДДС: 0.00;\r\n\r\nДанни за кредита:\r\nРазмер на кредита: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска: 109.75;\r\nПървоначална вноска: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test, fixture@example.test"
+                ]
+            ]
+        },
+        "cart-missing-personal": {
+            "context": "cart",
+            "post": {
+                "security": "valid",
+                "jet_lname": "",
+                "jet_submission_id": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+                "jet_product_id": "42",
+                "jet_variation_id": "0",
+                "jet_quantity": "3",
+                "jet_priceall": "1250.25",
+                "jet_vnoski": "12",
+                "jet_vnoska": "109.75",
+                "jet_parva": "50.10",
+                "jet_total_credit_price": "1200.15",
+                "jet_obshto": "1317.00",
+                "jet_gpr": "19.11",
+                "jet_glp": "17.61",
+                "jet_products": "42_43",
+                "jet_products_qt": "2_1",
+                "jet_products_pr": "500.10_250.05",
+                "jet_products_vr": "0_77",
+                "jet_card": "0"
+            },
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 0
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: -;\r\nФамилия: -;\r\nЕГН: -;\r\nТелефон за връзка: -;\r\nИмейл адрес: -;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена с ДДС: 500.10;\r\nБрой стоки: 2;\r\nОбща сума с ДДС: 1000.20;\r\n\r\nТип стока: -;\r\nМарка: (43) Синтетичен продукт модел ✓,;\r\nЕдинична цена с ДДС: 250.05;\r\nБрой стоки: 1;\r\nОбща сума с ДДС: 250.05;\r\n\r\nДанни за кредита:\r\nРазмер на кредита: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска: 109.75;\r\nПървоначална вноска: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test,  - "
+                ]
+            ]
+        }
+    }
+}

@@ -1,0 +1,510 @@
+{
+    "source_commit": "06d0e10013719b1afdef826cd3e510408061a903",
+    "source_sha256": {
+        "includes/class-jet-payment-gateway.php": "8adedac7b975bdd486f35a56a9f361820c93a04872906170b3668015510f7775",
+        "includes/class-card-jet-payment-gateway.php": "f4372c2302511887151cf30292b3b21817c49796bf1400f17dca25e9723b1083",
+        "includes/functions.php": "6850de0422f6c6699ee75958d73ec28b206a533fbd45b585624177d0fac4ef66"
+    },
+    "provenance": "Captured by executing both original process_payment methods from a clean git archive before checkout remediation, with offline mail/order/options/session doubles. Native CLI filter_input uses the original order-getter fallback. Billing/shipping sentinels are supplied; these addresses are read but never appended to either original message. Original card Cc references undefined $jet_email; only that known warning was captured without modifying original source.",
+    "cases": {
+        "standard-bgn-normal": {
+            "method": "standard",
+            "order_id": 314,
+            "order_fields": {
+                "billing_first_name": "Синтетично; Име\r\n тест",
+                "billing_last_name": "Синтетична Фамилия",
+                "billing_phone": "0000000001",
+                "billing_email": "applicant@example.test",
+                "billing_city": "SyntheticBillingCity",
+                "billing_address_1": "SyntheticBillingStreet 42",
+                "billing_postcode": "SYN-BG-000",
+                "shipping_city": "SyntheticShippingCity",
+                "shipping_address_1": "SyntheticShippingStreet 77",
+                "shipping_first_name": "SyntheticShippingFirst",
+                "shipping_last_name": "SyntheticShippingLast"
+            },
+            "post": {
+                "billing_email": "applicant@example.test",
+                "jet_priceall_input": "1250.25",
+                "jet_vnoski_input": "12",
+                "jet_vnoska_input": "109.75",
+                "jet_parva_input": "50.10",
+                "jet_total_credit_price_input": "1200.15",
+                "jet_obshto_input": "1317.00",
+                "jet_gpr_input": "19.11",
+                "jet_glp_input": "17.61",
+                "jet_products": "42_43",
+                "jet_products_qt": "2_1",
+                "jet_products_pr": "500.10_250.05",
+                "jet_products_vr": "0_0",
+                "jet_egn": "0000000000"
+            },
+            "session": [],
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 0
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: Синтетично Име тест;\r\nФамилия: Синтетична Фамилия;\r\nЕГН: 0000000000;\r\nТелефон за връзка: 0000000001;\r\nИмейл адрес: applicant@example.test;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена с ДДС: 500.10;\r\nБрой стоки: 2;\r\nОбща сума с ДДС: 1000.20;\r\n\r\nТип стока: -;\r\nМарка: (43) Синтетичен продукт модел ✓;\r\nЕдинична цена с ДДС: 250.05;\r\nБрой стоки: 1;\r\nОбща сума с ДДС: 250.05;\r\n\r\nДанни за кредита:\r\nРазмер на кредита: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска: 109.75;\r\nПървоначална вноска: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test, applicant@example.test"
+                ]
+            ],
+            "result": {
+                "result": "success",
+                "redirect": "https://shop.example.test/order-received/314/?key=synthetic-order-key"
+            },
+            "statuses": [
+                [
+                    "on-hold",
+                    "Статусът на поръчката е зададен от платежния метод ПБ Лични Финанси."
+                ]
+            ]
+        },
+        "standard-bgn-variation": {
+            "method": "standard",
+            "order_id": 314,
+            "order_fields": {
+                "billing_first_name": "Синтетично; Име\r\n тест",
+                "billing_last_name": "Синтетична Фамилия",
+                "billing_phone": "0000000001",
+                "billing_email": "applicant@example.test",
+                "billing_city": "SyntheticBillingCity",
+                "billing_address_1": "SyntheticBillingStreet 42",
+                "billing_postcode": "SYN-BG-000",
+                "shipping_city": "SyntheticShippingCity",
+                "shipping_address_1": "SyntheticShippingStreet 77",
+                "shipping_first_name": "SyntheticShippingFirst",
+                "shipping_last_name": "SyntheticShippingLast"
+            },
+            "post": {
+                "billing_email": "applicant@example.test",
+                "jet_priceall_input": "1250.25",
+                "jet_vnoski_input": "12",
+                "jet_vnoska_input": "109.75",
+                "jet_parva_input": "50.10",
+                "jet_total_credit_price_input": "1200.15",
+                "jet_obshto_input": "1317.00",
+                "jet_gpr_input": "19.11",
+                "jet_glp_input": "17.61",
+                "jet_products": "42_43",
+                "jet_products_qt": "2_1",
+                "jet_products_pr": "500.10_250.05",
+                "jet_products_vr": "0_77",
+                "jet_egn": "0000000000"
+            },
+            "session": [],
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 1
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: Синтетично Име тест;\r\nФамилия: Синтетична Фамилия;\r\nЕГН: 0000000000;\r\nТелефон за връзка: 0000000001;\r\nИмейл адрес: applicant@example.test;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена с ДДС: 500.10;\r\nБрой стоки: 2;\r\nОбща сума с ДДС: 1000.20;\r\n\r\nТип стока: -;\r\nМарка: (43) Синтетичен продукт модел ✓,;\r\nЕдинична цена с ДДС: 250.05;\r\nБрой стоки: 1;\r\nОбща сума с ДДС: 250.05;\r\n\r\nДанни за кредита:\r\nРазмер на кредита: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска: 109.75;\r\nПървоначална вноска: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test, applicant@example.test"
+                ]
+            ],
+            "result": {
+                "result": "success",
+                "redirect": "https://shop.example.test/order-received/314/?key=synthetic-order-key"
+            },
+            "statuses": [
+                [
+                    "on-hold",
+                    "Статусът на поръчката е зададен от платежния метод ПБ Лични Финанси."
+                ]
+            ]
+        },
+        "standard-eur-variation": {
+            "method": "standard",
+            "order_id": 314,
+            "order_fields": {
+                "billing_first_name": "Синтетично; Име\r\n тест",
+                "billing_last_name": "Синтетична Фамилия",
+                "billing_phone": "0000000001",
+                "billing_email": "applicant@example.test",
+                "billing_city": "SyntheticBillingCity",
+                "billing_address_1": "SyntheticBillingStreet 42",
+                "billing_postcode": "SYN-BG-000",
+                "shipping_city": "SyntheticShippingCity",
+                "shipping_address_1": "SyntheticShippingStreet 77",
+                "shipping_first_name": "SyntheticShippingFirst",
+                "shipping_last_name": "SyntheticShippingLast"
+            },
+            "post": {
+                "billing_email": "applicant@example.test",
+                "jet_priceall_input": "1250.25",
+                "jet_vnoski_input": "12",
+                "jet_vnoska_input": "109.75",
+                "jet_parva_input": "50.10",
+                "jet_total_credit_price_input": "1200.15",
+                "jet_obshto_input": "1317.00",
+                "jet_gpr_input": "19.11",
+                "jet_glp_input": "17.61",
+                "jet_products": "42_43",
+                "jet_products_qt": "2_1",
+                "jet_products_pr": "500.10_250.05",
+                "jet_products_vr": "0_77",
+                "jet_egn": "0000000000"
+            },
+            "session": [],
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 2
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: Синтетично Име тест;\r\nФамилия: Синтетична Фамилия;\r\nЕГН: 0000000000;\r\nТелефон за връзка: 0000000001;\r\nИмейл адрес: applicant@example.test;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена с ДДС: 500.10;\r\nБрой стоки: 2;\r\nОбща сума с ДДС: 1000.20;\r\n\r\nТип стока: -;\r\nМарка: (43) Синтетичен продукт модел ✓,;\r\nЕдинична цена с ДДС: 250.05;\r\nБрой стоки: 1;\r\nОбща сума с ДДС: 250.05;\r\n\r\nДанни за кредита:\r\nРазмер на кредита: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска: 109.75;\r\nПървоначална вноска: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test, applicant@example.test"
+                ]
+            ],
+            "result": {
+                "result": "success",
+                "redirect": "https://shop.example.test/order-received/314/?key=synthetic-order-key"
+            },
+            "statuses": [
+                [
+                    "on-hold",
+                    "Статусът на поръчката е зададен от платежния метод ПБ Лични Финанси."
+                ]
+            ]
+        },
+        "standard-eur-session": {
+            "method": "standard",
+            "order_id": 314,
+            "order_fields": {
+                "billing_first_name": "Синтетично; Име\r\n тест",
+                "billing_last_name": "Синтетична Фамилия",
+                "billing_phone": "0000000001",
+                "billing_email": "applicant@example.test",
+                "billing_city": "SyntheticBillingCity",
+                "billing_address_1": "SyntheticBillingStreet 42",
+                "billing_postcode": "SYN-BG-000",
+                "shipping_city": "SyntheticShippingCity",
+                "shipping_address_1": "SyntheticShippingStreet 77",
+                "shipping_first_name": "SyntheticShippingFirst",
+                "shipping_last_name": "SyntheticShippingLast"
+            },
+            "post": {
+                "billing_email": "applicant@example.test"
+            },
+            "session": {
+                "jet_priceall": "1250.25",
+                "jet_vnoski": "12",
+                "jet_vnoska": "109.75",
+                "jet_parva": "50.10",
+                "jet_total_credit_price": "1200.15",
+                "jet_obshto": "1317.00",
+                "jet_gpr": "19.11",
+                "jet_glp": "17.61",
+                "jet_products": "42_43",
+                "jet_products_qt": "2_1",
+                "jet_products_pr": "500.10_250.05",
+                "jet_products_vr": "0_77",
+                "jet_egn": "0000000000"
+            },
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 3
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: Синтетично Име тест;\r\nФамилия: Синтетична Фамилия;\r\nЕГН: 0000000000;\r\nТелефон за връзка: 0000000001;\r\nИмейл адрес: applicant@example.test;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена с ДДС: 500.10;\r\nБрой стоки: 2;\r\nОбща сума с ДДС: 1000.20;\r\n\r\nТип стока: -;\r\nМарка: (43) Синтетичен продукт модел ✓,;\r\nЕдинична цена с ДДС: 250.05;\r\nБрой стоки: 1;\r\nОбща сума с ДДС: 250.05;\r\n\r\nДанни за кредита:\r\nРазмер на кредита: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска: 109.75;\r\nПървоначална вноска: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test, applicant@example.test"
+                ]
+            ],
+            "result": {
+                "result": "success",
+                "redirect": "https://shop.example.test/order-received/314/?key=synthetic-order-key"
+            },
+            "statuses": [
+                [
+                    "on-hold",
+                    "Статусът на поръчката е зададен от платежния метод ПБ Лични Финанси."
+                ]
+            ]
+        },
+        "card-bgn-normal": {
+            "method": "card",
+            "order_id": 314,
+            "order_fields": {
+                "billing_first_name": "Синтетично; Име\r\n тест",
+                "billing_last_name": "Синтетична Фамилия",
+                "billing_phone": "0000000001",
+                "billing_email": "applicant@example.test",
+                "billing_city": "SyntheticBillingCity",
+                "billing_address_1": "SyntheticBillingStreet 42",
+                "billing_postcode": "SYN-BG-000",
+                "shipping_city": "SyntheticShippingCity",
+                "shipping_address_1": "SyntheticShippingStreet 77",
+                "shipping_first_name": "SyntheticShippingFirst",
+                "shipping_last_name": "SyntheticShippingLast"
+            },
+            "post": {
+                "billing_email": "applicant@example.test",
+                "jet_card_priceall_input": "1250.25",
+                "jet_card_vnoski_input": "12",
+                "jet_card_vnoska_input": "109.75",
+                "jet_card_parva_input": "50.10",
+                "jet_card_total_credit_price_input": "1200.15",
+                "jet_card_obshto_input": "1317.00",
+                "jet_card_gpr_input": "19.11",
+                "jet_card_glp_input": "17.61",
+                "jet_card_products": "42_43",
+                "jet_card_products_qt": "2_1",
+                "jet_card_products_pr": "500.10_250.05",
+                "jet_card_products_vr": "0_0",
+                "jet_card_egn": "0000000000"
+            },
+            "session": [],
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 0
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: Синтетично Име тест;\r\nФамилия: Синтетична Фамилия;\r\nЕГН: 0000000000;\r\nТелефон за връзка: 0000000001;\r\nИмейл адрес: applicant@example.test;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена в лева с ДДС: 500.10;\r\nБрой стоки: 2;\r\nОбща сума в лева с ДДС: 1000.20;\r\n\r\nТип стока: -;\r\nМарка: (43) Синтетичен продукт модел ✓;\r\nЕдинична цена в лева с ДДС: 250.05;\r\nБрой стоки: 1;\r\nОбща сума в лева с ДДС: 250.05;\r\n\r\nТип стока: Кредитна Карта;\r\nМарка: -;\r\nЕдинична цена в лева с ДДС: 0.00;\r\nБрой стоки: 1;\r\nОбща сума в лева с ДДС: 0.00;\r\n\r\nДанни за кредита:\r\nРазмер на кредита в лева: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска в лева: 109.75;\r\nПървоначална вноска в лева: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test, "
+                ]
+            ],
+            "result": {
+                "result": "success",
+                "redirect": "https://shop.example.test/order-received/314/?key=synthetic-order-key"
+            },
+            "statuses": [
+                [
+                    "on-hold",
+                    "Статусът на поръчката е зададен от платежния метод ПБ Лични Финанси - на вноски с кредитна карта."
+                ]
+            ]
+        },
+        "card-bgn-variation": {
+            "method": "card",
+            "order_id": 314,
+            "order_fields": {
+                "billing_first_name": "Синтетично; Име\r\n тест",
+                "billing_last_name": "Синтетична Фамилия",
+                "billing_phone": "0000000001",
+                "billing_email": "applicant@example.test",
+                "billing_city": "SyntheticBillingCity",
+                "billing_address_1": "SyntheticBillingStreet 42",
+                "billing_postcode": "SYN-BG-000",
+                "shipping_city": "SyntheticShippingCity",
+                "shipping_address_1": "SyntheticShippingStreet 77",
+                "shipping_first_name": "SyntheticShippingFirst",
+                "shipping_last_name": "SyntheticShippingLast"
+            },
+            "post": {
+                "billing_email": "applicant@example.test",
+                "jet_card_priceall_input": "1250.25",
+                "jet_card_vnoski_input": "12",
+                "jet_card_vnoska_input": "109.75",
+                "jet_card_parva_input": "50.10",
+                "jet_card_total_credit_price_input": "1200.15",
+                "jet_card_obshto_input": "1317.00",
+                "jet_card_gpr_input": "19.11",
+                "jet_card_glp_input": "17.61",
+                "jet_card_products": "42_43",
+                "jet_card_products_qt": "2_1",
+                "jet_card_products_pr": "500.10_250.05",
+                "jet_card_products_vr": "0_77",
+                "jet_card_egn": "0000000000"
+            },
+            "session": [],
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 1
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: Синтетично Име тест;\r\nФамилия: Синтетична Фамилия;\r\nЕГН: 0000000000;\r\nТелефон за връзка: 0000000001;\r\nИмейл адрес: applicant@example.test;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена в лева с ДДС: 500.10;\r\nБрой стоки: 2;\r\nОбща сума в лева с ДДС: 1000.20;\r\n\r\nТип стока: -;\r\nМарка: (43) Синтетичен продукт модел ✓,;\r\nЕдинична цена в лева с ДДС: 250.05;\r\nБрой стоки: 1;\r\nОбща сума в лева с ДДС: 250.05;\r\n\r\nТип стока: Кредитна Карта;\r\nМарка: -;\r\nЕдинична цена в лева с ДДС: 0.00;\r\nБрой стоки: 1;\r\nОбща сума в лева с ДДС: 0.00;\r\n\r\nДанни за кредита:\r\nРазмер на кредита в лева: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска в лева: 109.75;\r\nПървоначална вноска в лева: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test, "
+                ]
+            ],
+            "result": {
+                "result": "success",
+                "redirect": "https://shop.example.test/order-received/314/?key=synthetic-order-key"
+            },
+            "statuses": [
+                [
+                    "on-hold",
+                    "Статусът на поръчката е зададен от платежния метод ПБ Лични Финанси - на вноски с кредитна карта."
+                ]
+            ]
+        },
+        "card-eur-variation": {
+            "method": "card",
+            "order_id": 314,
+            "order_fields": {
+                "billing_first_name": "Синтетично; Име\r\n тест",
+                "billing_last_name": "Синтетична Фамилия",
+                "billing_phone": "0000000001",
+                "billing_email": "applicant@example.test",
+                "billing_city": "SyntheticBillingCity",
+                "billing_address_1": "SyntheticBillingStreet 42",
+                "billing_postcode": "SYN-BG-000",
+                "shipping_city": "SyntheticShippingCity",
+                "shipping_address_1": "SyntheticShippingStreet 77",
+                "shipping_first_name": "SyntheticShippingFirst",
+                "shipping_last_name": "SyntheticShippingLast"
+            },
+            "post": {
+                "billing_email": "applicant@example.test",
+                "jet_card_priceall_input": "1250.25",
+                "jet_card_vnoski_input": "12",
+                "jet_card_vnoska_input": "109.75",
+                "jet_card_parva_input": "50.10",
+                "jet_card_total_credit_price_input": "1200.15",
+                "jet_card_obshto_input": "1317.00",
+                "jet_card_gpr_input": "19.11",
+                "jet_card_glp_input": "17.61",
+                "jet_card_products": "42_43",
+                "jet_card_products_qt": "2_1",
+                "jet_card_products_pr": "500.10_250.05",
+                "jet_card_products_vr": "0_77",
+                "jet_card_egn": "0000000000"
+            },
+            "session": [],
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 2
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: Синтетично Име тест;\r\nФамилия: Синтетична Фамилия;\r\nЕГН: 0000000000;\r\nТелефон за връзка: 0000000001;\r\nИмейл адрес: applicant@example.test;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена в евро с ДДС: 500.10;\r\nБрой стоки: 2;\r\nОбща сума в евро с ДДС: 1000.20;\r\n\r\nТип стока: -;\r\nМарка: (43) Синтетичен продукт модел ✓,;\r\nЕдинична цена в евро с ДДС: 250.05;\r\nБрой стоки: 1;\r\nОбща сума в евро с ДДС: 250.05;\r\n\r\nТип стока: Кредитна Карта;\r\nМарка: -;\r\nЕдинична цена в евро с ДДС: 0.00;\r\nБрой стоки: 1;\r\nОбща сума в евро с ДДС: 0.00;\r\n\r\nДанни за кредита:\r\nРазмер на кредита в евро: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска в евро: 109.75;\r\nПървоначална вноска в евро: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test, "
+                ]
+            ],
+            "result": {
+                "result": "success",
+                "redirect": "https://shop.example.test/order-received/314/?key=synthetic-order-key"
+            },
+            "statuses": [
+                [
+                    "on-hold",
+                    "Статусът на поръчката е зададен от платежния метод ПБ Лични Финанси - на вноски с кредитна карта."
+                ]
+            ]
+        },
+        "card-eur-session": {
+            "method": "card",
+            "order_id": 314,
+            "order_fields": {
+                "billing_first_name": "Синтетично; Име\r\n тест",
+                "billing_last_name": "Синтетична Фамилия",
+                "billing_phone": "0000000001",
+                "billing_email": "applicant@example.test",
+                "billing_city": "SyntheticBillingCity",
+                "billing_address_1": "SyntheticBillingStreet 42",
+                "billing_postcode": "SYN-BG-000",
+                "shipping_city": "SyntheticShippingCity",
+                "shipping_address_1": "SyntheticShippingStreet 77",
+                "shipping_first_name": "SyntheticShippingFirst",
+                "shipping_last_name": "SyntheticShippingLast"
+            },
+            "post": {
+                "billing_email": "applicant@example.test"
+            },
+            "session": {
+                "jet_card_priceall": "1250.25",
+                "jet_card_vnoski": "12",
+                "jet_card_vnoska": "109.75",
+                "jet_card_parva": "50.10",
+                "jet_card_total_credit_price": "1200.15",
+                "jet_card_obshto": "1317.00",
+                "jet_card_gpr": "19.11",
+                "jet_card_glp": "17.61",
+                "jet_card_products": "42_43",
+                "jet_card_products_qt": "2_1",
+                "jet_card_products_pr": "500.10_250.05",
+                "jet_card_products_vr": "0_77",
+                "jet_card_egn": "0000000000"
+            },
+            "options": {
+                "jet_email": "bank@example.test",
+                "jet_id": "TEST-МАГАЗИН",
+                "jet_count": 40,
+                "jet_eur": 3
+            },
+            "product_title": "Синтетичен; продукт\r\n модел \t✓",
+            "mail": [
+                "shop@example.test",
+                "TEST-МАГАЗИН, онлайн заявка по поръчка 41",
+                "Данни за потребителя:\r\nСобствено име: Синтетично Име тест;\r\nФамилия: Синтетична Фамилия;\r\nЕГН: 0000000000;\r\nТелефон за връзка: 0000000001;\r\nИмейл адрес: applicant@example.test;\r\n\r\nДанни за стоката:\r\nТип стока: -;\r\nМарка: (42) Синтетичен продукт модел ✓;\r\nЕдинична цена в евро с ДДС: 500.10;\r\nБрой стоки: 2;\r\nОбща сума в евро с ДДС: 1000.20;\r\n\r\nТип стока: -;\r\nМарка: (43) Синтетичен продукт модел ✓,;\r\nЕдинична цена в евро с ДДС: 250.05;\r\nБрой стоки: 1;\r\nОбща сума в евро с ДДС: 250.05;\r\n\r\nТип стока: Кредитна Карта;\r\nМарка: -;\r\nЕдинична цена в евро с ДДС: 0.00;\r\nБрой стоки: 1;\r\nОбща сума в евро с ДДС: 0.00;\r\n\r\nДанни за кредита:\r\nРазмер на кредита в евро: 1200.15;\r\nСрок на изплащане в месеца: 12;\r\nМесечна вноска в евро: 109.75;\r\nПървоначална вноска в евро: 50.10;\r\n",
+                [
+                    "MIME-Version: 1.0",
+                    "Content-type: text/plain; charset=utf-8",
+                    "From: =?UTF-8?B?VEVTVC3QnNCQ0JPQkNCX0JjQnQ==?= <shop@example.test>",
+                    "Cc: bank@example.test, "
+                ]
+            ],
+            "result": {
+                "result": "success",
+                "redirect": "https://shop.example.test/order-received/314/?key=synthetic-order-key"
+            },
+            "statuses": [
+                [
+                    "on-hold",
+                    "Статусът на поръчката е зададен от платежния метод ПБ Лични Финанси - на вноски с кредитна карта."
+                ]
+            ]
+        }
+    },
+    "known_original_warning_count": 4
+}

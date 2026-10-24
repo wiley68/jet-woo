@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/jet-checkout-submission.php';
 class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 	public $domain;
 	public $instructions;
@@ -483,9 +484,25 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 	}
 
 	public function process_payment($order_id) {
-		$order = wc_get_order($order_id);
-		$new_status = 'wc-' === substr( $this->order_status, 0, 3 ) ? substr( $this->order_status, 3 ) : $this->order_status;
-		$order->update_status( $new_status, 'Статусът на поръчката е зададен от платежния метод ПБ Лични Финанси - на вноски с кредитна карта.');
+		return jet_checkout_process_submission(
+			$this,
+			$order_id,
+			function ( $order, $bank_recipients, $claim_key, &$notification ) {
+				return $this->process_credit_application( $order, $bank_recipients, $claim_key, $notification );
+			}
+		);
+	}
+
+	/**
+	 * Run the original template builder only after owning the order's delivery claim.
+	 *
+	 * @param WC_Order $order           Existing checkout order.
+	 * @param array    $bank_recipients Validated configured bank addresses.
+	 * @param string   $claim_key       Owned per-order delivery claim.
+	 * @param array    $notification    In-memory secondary message data.
+	 * @return array|null Successful payment result, or null on bank rejection.
+	 */
+	protected function process_credit_application( $order, $bank_recipients, $claim_key, &$notification ) {
 		$jet_card_fname = filter_input(INPUT_POST, 'billing_first_name', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? $order->get_billing_first_name();
 		$jet_card_lastname = filter_input(INPUT_POST, 'billing_last_name', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? $order->get_billing_last_name();
 		$jet_card_phone = filter_input(INPUT_POST, 'billing_phone', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? $order->get_billing_phone();
@@ -678,7 +695,6 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 			}
 		}
 		$toEmail_admin = get_bloginfo('admin_email');
-		$toEmail_other = get_option('jet_email');
 		$jet_id = get_option('jet_id');
 		$jet_card_eur = (int)get_option("jet_eur");
 		$jet_card_sign = 'лева';
@@ -767,15 +783,24 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 		$jet_card_count = (int)get_option("jet_count") + 1;
 		update_option("jet_count", $jet_card_count);
 		$subject = $jet_id . ", онлайн заявка по поръчка $jet_card_count";
-		$cc = $toEmail_other . ", " . $jet_email;
 		$headers = [
 			'MIME-Version: 1.0',
 			'Content-type: text/plain; charset=utf-8',
 			'From: ' . mb_encode_mimeheader($jet_id,"UTF-8") . ' <' . $toEmail_admin . '>',
-			'Cc: ' . $cc
 		];
-		if (wp_mail($toEmail_admin, $subject, $body, $headers)) {
+		if ( wp_mail( $bank_recipients, $subject, $body, $headers ) ) {
+			jet_checkout_submission_state( $claim_key, 'bank_sent' );
+			$new_status = 'wc-' === substr( $this->order_status, 0, 3 ) ? substr( $this->order_status, 3 ) : $this->order_status;
+			$order->update_status( $new_status, 'Статусът на поръчката е зададен от платежния метод ПБ Лични Финанси - на вноски с кредитна карта.' );
 			WC()->cart->empty_cart();
+			$notification = array(
+				'admin'    => get_bloginfo( 'admin_email' ),
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- WooCommerce validates checkout; delivery validates the raw single address without changing the bank template.
+				'customer' => isset( $_POST['billing_email'] ) ? wp_unslash( $_POST['billing_email'] ) : $order->get_billing_email(),
+				'subject'  => $subject,
+				'body'     => $body,
+				'headers'  => $headers,
+			);
 			return array(
 				'result'   => 'success',
 				'redirect' => $this->get_return_url($order),

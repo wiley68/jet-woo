@@ -1,5 +1,6 @@
 <?php
 	require_once __DIR__ . '/jet-product-submission.php';
+	require_once __DIR__ . '/jet-submission-mail.php';
 	if (!defined('JETCREDIT_FINANCIAL_MAX_ITERATIONS')) define('JETCREDIT_FINANCIAL_MAX_ITERATIONS', 128);
 	if (!defined('JETCREDIT_FINANCIAL_PRECISION')) define('JETCREDIT_FINANCIAL_PRECISION', 1.0e-08);
 
@@ -234,7 +235,8 @@
 
 		$submission_key = jet_claim_product_submission( wp_unslash( $_POST ) );
 		try {
-			$json = jet_process_product_submission();
+			$notifications = array();
+			$json          = jet_process_product_submission( $notifications );
 			if ( 'success' === $json['success'] ) {
 				update_option( $submission_key, $json, false );
 			} else {
@@ -247,10 +249,14 @@
 			update_option( $submission_key, $json, false );
 		}
 
+		if ( 'success' === $json['success'] ) {
+			jet_submission_notify( $notifications );
+		}
 		wp_send_json( $json );
 	}
 
-	function jet_process_product_submission() {
+	function jet_process_product_submission( &$notifications = null ) {
+		$notifications = array();
 		$json = [];
 		if (isset($_POST['jet_priceall'])) {
 			$jet_priceall = filter_var($_POST['jet_priceall'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
@@ -339,7 +345,13 @@
 		}
 
 		$toEmail_admin = get_bloginfo('admin_email');
-		$toEmail_other = get_option('jet_email');
+		$bank_recipients = jet_submission_bank_recipients();
+		if ( empty( $bank_recipients ) ) {
+			return array(
+				'success' => 'unsuccess',
+				'code'    => 'invalid_bank_recipient',
+			);
+		}
 		$jet_id = get_option('jet_id');
 		$term_list = wp_get_post_terms($jet_product_id,'product_cat',array('fields'=>'ids'));
 		$cat_id = empty($term_list[0]) ? 0 : (int)$term_list[0];
@@ -424,16 +436,14 @@
 		$jet_count = (int)get_option("jet_count") + 1;
 		update_option("jet_count", $jet_count);
 		$subject = $jet_id . ", онлайн заявка по поръчка $jet_count";
-		$cc = $toEmail_other . ", " . $jet_email;
 
 		$headers = [
 			'MIME-Version: 1.0',
 			'Content-type: text/plain; charset=utf-8',
 			'From: ' . mb_encode_mimeheader($jet_id,"UTF-8") . ' <' . $toEmail_admin . '>',
-			'Cc: ' . $cc
 		];
 
-		if (wp_mail($toEmail_admin, $subject, $body, $headers)) {
+		if ( wp_mail( $bank_recipients, $subject, $body, $headers ) ) {
 			$jet_billing_address_1 = '';
 			$jet_billing_address_2 = '';
 			$jet_billing_city = '';
@@ -510,6 +520,14 @@
 			$order->save();
 
 			$json['success'] = 'success';
+			$notifications   = array(
+				'admin'    => $toEmail_admin,
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Wrapper verifies the nonce; delivery validates one address without altering the bank field.
+				'customer' => isset( $_POST['jet_email'] ) ? wp_unslash( $_POST['jet_email'] ) : '',
+				'subject'  => $subject,
+				'body'     => $body,
+				'headers'  => $headers,
+			);
 		}else{
 			$json['success'] = 'unsuccess';
 		}
@@ -714,7 +732,8 @@
 
 		$submission_key = jet_claim_product_submission( wp_unslash( $_POST ), 'cart' );
 		try {
-			$json = jet_process_cart_submission();
+			$notifications = array();
+			$json          = jet_process_cart_submission( $notifications );
 			if ( 'success' === $json['success'] ) {
 				update_option( $submission_key, $json, false );
 			} else {
@@ -726,10 +745,14 @@
 			update_option( $submission_key, $json, false );
 		}
 
+		if ( 'success' === $json['success'] ) {
+			jet_submission_notify( $notifications );
+		}
 		wp_send_json( $json );
 	}
 
-	function jet_process_cart_submission() {
+	function jet_process_cart_submission( &$notifications = null ) {
+		$notifications = array();
 		$json = [];
 		if (isset($_POST['jet_priceall'])) {
 			$jet_priceall = filter_var($_POST['jet_priceall'], FILTER_SANITIZE_NUMBER_FLOAT, FILTER_FLAG_ALLOW_FRACTION);
@@ -823,7 +846,13 @@
 		}
 
 		$toEmail_admin = get_bloginfo('admin_email');
-		$toEmail_other = get_option('jet_email');
+		$bank_recipients = jet_submission_bank_recipients();
+		if ( empty( $bank_recipients ) ) {
+			return array(
+				'success' => 'unsuccess',
+				'code'    => 'invalid_bank_recipient',
+			);
+		}
 		$jet_id = get_option('jet_id');
 
 		$jet_eur = (int)get_option("jet_eur");
@@ -927,16 +956,14 @@
 		$jet_count = (int)get_option("jet_count") + 1;
 		update_option("jet_count", $jet_count);
 		$subject = $jet_id . ", онлайн заявка по поръчка $jet_count";
-		$cc = $toEmail_other . ", " . $jet_email;
 
 		$headers = [
 			'MIME-Version: 1.0',
 			'Content-type: text/plain; charset=utf-8',
 			'From: ' . mb_encode_mimeheader($jet_id,"UTF-8") . ' <' . $toEmail_admin . '>',
-			'Cc: ' . $cc
 		];
 
-		if (wp_mail($toEmail_admin, $subject, $body, $headers)) {
+		if ( wp_mail( $bank_recipients, $subject, $body, $headers ) ) {
 			$jet_billing_address_1 = '';
 			$jet_billing_address_2 = '';
 			$jet_billing_city = '';
@@ -1025,6 +1052,14 @@
 				$woocommerce->cart->remove_cart_item($cart_item_key);
 			}
 			$json['success'] = 'success';
+			$notifications   = array(
+				'admin'    => $toEmail_admin,
+				// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Wrapper verifies the nonce; delivery validates one address without altering the bank field.
+				'customer' => isset( $_POST['jet_email'] ) ? wp_unslash( $_POST['jet_email'] ) : '',
+				'subject'  => $subject,
+				'body'     => $body,
+				'headers'  => $headers,
+			);
 		}else{
 			$json['success'] = 'unsuccess';
 		}
