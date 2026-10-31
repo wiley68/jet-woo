@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/jet-financial-rules.php';
 require_once JET_INCLUDES_DIR . '/class-jet-button-schemes.php';
 
 /**
@@ -41,6 +42,11 @@ add_action('wp_ajax_nopriv_jet_get_nonce', 'jet_get_nonce');
 add_action('wp_ajax_jet_get_nonce', 'jet_get_nonce');
 
 function jet_get_nonce() {
+	try {
+		jet_ensure_offer_session();
+	} catch ( Jet_Financial_Validation_Exception $error ) {
+		wp_send_json_error( array( 'code' => $error->getMessage() ) );
+	}
 	wp_send_json_success([
 		'nonce' => wp_create_nonce('jet_nonce'),
 	]);
@@ -79,8 +85,27 @@ function jet_add_meta_admin() {
 }
 add_action( 'admin_enqueue_scripts', 'jet_add_meta_admin' );
 
+function jet_frontend_configuration() {
+	$rules = jet_financial_rules();
+	$available = true;
+	try {
+		jet_require_eur_context();
+		$rules['min_principal'] = jet_minimum_principal();
+	} catch ( Jet_Financial_Validation_Exception $error ) {
+		$available = false;
+	}
+	return array( 'ajax_url' => admin_url( 'admin-ajax.php' ), 'nonce' => wp_create_nonce( 'jet_nonce' ), 'rules' => $rules, 'available' => $available );
+}
+
+function jet_register_offer_script() {
+	if ( ! wp_script_is( 'jet-offers', 'registered' ) ) {
+		wp_register_script( 'jet-offers', JET_JS_URI . 'jetcredit_offers.js', array( 'jquery' ), filemtime( JET_PLUGIN_DIR . '/js/jetcredit_offers.js' ), true );
+	}
+}
+
 function jet_add_meta() {
 	global $post;
+	if ( is_product() || is_cart() || is_checkout() ) { jet_register_offer_script(); }
 	if ( is_product() ) {
 		wp_enqueue_style(
 			'jet_styles',
@@ -92,17 +117,14 @@ function jet_add_meta() {
 		wp_enqueue_script(
 			'jet_js',
 			JET_JS_URI . '/jetcredit_product.js',
-			array( 'jquery' ),
+			array( 'jquery', 'jet-offers' ),
 			filemtime(JET_PLUGIN_DIR . '/js/jetcredit_product.js'),
 			true
 		);
 		wp_localize_script(
 			'jet_js',
 			'jet_js',
-			array(
-				'ajax_url' => admin_url( 'admin-ajax.php' ),
-				'nonce'    => wp_create_nonce( 'jet_nonce' ),
-			)
+			jet_frontend_configuration()
 		);
 	}
 	if ( is_cart() ) {
@@ -116,17 +138,14 @@ function jet_add_meta() {
 		wp_enqueue_script(
 			'jet_cart_js',
 			JET_JS_URI . '/jetcredit_cart.js',
-			array( 'jquery' ),
+			array( 'jquery', 'jet-offers' ),
 			filemtime(JET_PLUGIN_DIR . '/js/jetcredit_cart.js'),
 			true
 		);
 		wp_localize_script(
 			'jet_cart_js',
 			'jet_cart_js',
-			array(
-				'ajax_url' => admin_url( 'admin-ajax.php' ),
-				'nonce'    => wp_create_nonce( 'jet_nonce' ),
-			)
+			jet_frontend_configuration()
 		);
 	}
 	if ( is_checkout() ) {
@@ -140,17 +159,14 @@ function jet_add_meta() {
 		wp_enqueue_script(
 			'jet_checkout_js',
 			JET_JS_URI . '/jetcredit_checkout.js',
-			array( 'jquery' ),
+			array( 'jquery', 'jet-offers' ),
 			filemtime(JET_PLUGIN_DIR . '/js/jetcredit_checkout.js'),
 			true
 		);
 		wp_localize_script(
 			'jet_checkout_js',
 			'jet_checkout_js',
-			array(
-				'ajax_url' => admin_url( 'admin-ajax.php' ),
-				'nonce'    => wp_create_nonce( 'jet_nonce' ),
-			)
+			jet_frontend_configuration()
 		);
 	}
 }
@@ -182,13 +198,6 @@ function jet_create_tables() {
 		) $charset_collate;";
 		dbDelta( $sql_kop );
 	}
-}
-
-function jet_remove_tables() {
-	global $wpdb;
-	$table_kop_name = $wpdb->prefix . 'jet_kop';
-	$sql_kop = "DROP TABLE IF EXISTS $table_kop_name;";
-	$wpdb->query( $sql_kop );
 }
 
 function jet_read_kop() {
@@ -245,6 +254,13 @@ function jet_get_promo( $jet_product_id, $jet_vnoski, $jet_total_credit_price ) 
 }
 
 function jet_credit_button() {
+	try {
+		jet_require_eur_context();
+		$jet_minimum = jet_minimum_principal();
+	} catch ( Jet_Financial_Validation_Exception $error ) {
+		return null;
+	}
+
 	$jet_product = wc_get_product();
 
 	$jet_price = (float) wc_get_price_including_tax( $jet_product );
@@ -253,7 +269,7 @@ function jet_credit_button() {
 	}
 
 	$jet_currency_code = get_woocommerce_currency();
-	if ( 'EUR' !== $jet_currency_code && 'BGN' !== $jet_currency_code ) {
+	if ( 'EUR' !== $jet_currency_code || 'EUR' !== get_option( 'woocommerce_currency' ) ) {
 		return null;
 	}
 
@@ -262,42 +278,11 @@ function jet_credit_button() {
 		return null;
 	}
 
-	$jet_eur         = (int) get_option( 'jet_eur' );
-	$jet_sign        = 'лв.';
-	$jet_sign_second = 'евро';
-	$jet_min_250     = JET_MIN_250;
+	$jet_sign = 'евро';
 
-	switch ( $jet_eur ) {
-		case 0:
-			$jet_sign        = 'лв.';
-			$jet_sign_second = '';
-			break;
-		case 1:
-			if ( 'EUR' === $jet_currency_code ) {
-				$jet_price = number_format( $jet_price * 1.95583, 2, '.', '' );
-			}
-			$jet_sign        = 'лв.';
-			$jet_sign_second = 'евро';
-			break;
-		case 2:
-			if ( 'BGN' === $jet_currency_code ) {
-				$jet_price = number_format( $jet_price / 1.95583, 2, '.', '' );
-			}
-			$jet_sign        = 'евро';
-			$jet_sign_second = 'лв.';
-			$jet_min_250     = JET_MIN_250_EUR;
-			break;
-		case 3:
-			if ( 'BGN' === $jet_currency_code ) {
-				$jet_price = number_format( $jet_price / 1.95583, 2, '.', '' );
-			}
-			$jet_sign        = 'евро';
-			$jet_sign_second = '';
-			$jet_min_250     = JET_MIN_250_EUR;
-			break;
-	}
+	$jet_initial_term_threshold = JET_INITIAL_TERM_THRESHOLD_EUR;
 
-	$_minprice = (float) get_option( 'jet_minprice' );
+	$_minprice = $jet_minimum;
 	$jet_show_button_initial = $jet_price >= $_minprice;
 
 	$jet_gap            = (int) get_option( 'jet_gap' );
@@ -329,7 +314,7 @@ function jet_credit_button() {
 	}
 	$jet_button_scheme_idx = Jet_Button_Schemes::normalize_index( get_option( 'jet_button_scheme', '0' ) );
 	$jet_wide_wrap_style   = Jet_Button_Schemes::wrap_inline_style( $jet_button_scheme_idx ) . sprintf( '--jet-wide-max-width:%dpx;--jet-wide-radius:%dpx;--jet-wide-font-size:%dpx;', $jet_btn_max_width, $jet_btn_round, $jet_btn_font );
-	if ( $jet_price < $jet_min_250 ) {
+	if ( $jet_price < $jet_initial_term_threshold ) {
 		$jet_vnoski = '9';
 	} else {
 		$jet_vnoski = $jet_vnoski_default;
@@ -359,7 +344,6 @@ function jet_credit_button() {
 	<div
 		id="jet-product-button-container"
 		data-jet-minprice="<?php echo esc_attr( number_format( $_minprice, 2, '.', '' ) ); ?>"
-		data-jet-eur="<?php echo (int) $jet_eur; ?>"
 		data-jet-currency="<?php echo esc_attr( $jet_currency_code ); ?>"
 		style="display:<?php echo $jet_show_button_initial ? 'block' : 'none'; ?>;padding-top:<?php echo $jet_gap; ?>px;"
 	>
@@ -380,12 +364,9 @@ function jet_credit_button() {
 					</div>
 					<?php if (1 === (int) $is_vnoska) { ?>
 						<div class="jet_wide_button_text">
-							<?php if ($jet_sign_second == '') { ?>
+
 								<span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?>
-							<?php } else { ?>
-								<span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?>
-								<span class="jet_wide_button_text_second">(<span id="jet_vnoska_second"></span> <?php echo $jet_sign_second; ?>)</span>
-							<?php } ?>
+
 						</div>
 					<?php } ?>
 				</button>
@@ -404,12 +385,9 @@ function jet_credit_button() {
 						</div>
 						<?php if (1 === (int) $is_vnoska) { ?>
 							<div class="jet_wide_button_text">
-								<?php if ($jet_sign_second == '') { ?>
+
 									<span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?>
-								<?php } else { ?>
-									<span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?>
-									<span class="jet_wide_button_text_second">(<span id="jet_vnoska_card_second"></span> <?php echo $jet_sign_second; ?>)</span>
-								<?php } ?>
+
 							</div>
 						<?php } ?>
 					</button>
@@ -431,14 +409,9 @@ function jet_credit_button() {
 				<?php if ($is_vnoska == 1) { ?>
 				<tr>
 					<td class="jet_button_table">
-						<?php if ($jet_sign_second == '') { ?>
+
 							<p><span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?></p>
-						<?php } else { ?>
-							<p>
-								<span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?><br />
-								<span style="font-size:75%;font-weight:400;">(<span id="jet_vnoska_second"></span> <?php echo $jet_sign_second; ?>)</span>
-							</p>
-						<?php } ?>
+
 					</td>
 				</tr>
 				<?php } ?>
@@ -459,14 +432,9 @@ function jet_credit_button() {
 				<?php if ($is_vnoska == 1) { ?>
 				<tr>
 					<td class="jet_button_table">
-						<?php if ($jet_sign_second == '') { ?>
+
 							<p><span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?></p>
-						<?php } else { ?>
-							<p>
-								<span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?><br />
-								<span style="font-size:75%;font-weight:400;">(<span id="jet_vnoska_card_second"></span> <?php echo $jet_sign_second; ?>)</span>
-							</p>
-						<?php } ?>
+
 					</td>
 				</tr>
 				<?php } ?>
@@ -490,6 +458,7 @@ function jet_credit_button() {
 										class="jet_input_text_active"
 										type="number"
 										min="0"
+										step="0.01"
 										id="jet_parva"
 										value=0
 									/>
@@ -502,27 +471,17 @@ function jet_credit_button() {
 							</div>
 							<div class="jet_row">
 								<div class="jet_column_left">
-									<?php if ($jet_sign_second == '') { ?>
+
 										Цена на стоките (<?php echo $jet_sign; ?>)
-									<?php } else { ?>
-										Цена на стоките (<?php echo $jet_sign; ?>
-										<span style='font-size:60%;font-weight:400;height:16px;'>&nbsp;/&nbsp;<?php echo $jet_sign_second; ?></span>)
-									<?php } ?>
+
 								</div>
 								<div class="jet_column_right">
-									<?php if ($jet_eur == 0 || $jet_eur == 3) { ?>
+
 										<div class="jet_input_text jet_disable">
 											<div><span id="jet_priceall"></span></div>
 											<div></div>
 										</div>
-									<?php } else { ?>
-										<div class="jet_input_text jet_disable">
-											<div><span id="jet_priceall"></span></div>
-											<div>
-												<span>/</span><span id="jet_priceall_second"></span>
-											</div>
-										</div>
-									<?php } ?>
+
 								</div>
 							</div>
 							<div class="jet_row">
@@ -549,52 +508,32 @@ function jet_credit_button() {
 							</div>
 							<div class="jet_row">
 								<div class="jet_column_left">
-									<?php if ($jet_sign_second == '') { ?>
+
 										Общо кредит (<?php echo $jet_sign; ?>)
-									<?php } else { ?>
-										Общо кредит (<?php echo $jet_sign; ?>
-										<span style='font-size:60%;font-weight:400;height:16px;'>&nbsp;/&nbsp;<?php echo $jet_sign_second; ?></span>)
-									<?php } ?>
+
 								</div>
 								<div class="jet_column_right">
-									<?php if ($jet_eur == 0 || $jet_eur == 3) { ?>
+
 										<div class="jet_input_text jet_disable">
 											<div><span id="jet_total_credit_price"></span></div>
 											<div></div>
 										</div>
-									<?php } else { ?>
-										<div class="jet_input_text jet_disable">
-											<div><span id="jet_total_credit_price"></span></div>
-											<div>
-												<span>/</span><span id="jet_total_credit_price_second"></span>
-											</div>
-										</div>
-									<?php } ?>
+
 								</div>
 							</div>
 							<div class="jet_row">
 								<div class="jet_column_left">
-									<?php if ($jet_sign_second == '') { ?>
+
 										Месечна вноска (<?php echo $jet_sign; ?>)
-									<?php } else { ?>
-										Месечна вноска (<?php echo $jet_sign; ?>
-										<span style='font-size:60%;font-weight:400;height:16px;'>&nbsp;/&nbsp;<?php echo $jet_sign_second; ?></span>)
-									<?php } ?>
+
 								</div>
 								<div class="jet_column_right">
-									<?php if ($jet_eur == 0 || $jet_eur == 3) { ?>
+
 										<div class="jet_input_text jet_disable">
 											<div><span id="jet_vnoska_popup"></span></div>
 											<div></div>
 										</div>
-									<?php } else { ?>
-										<div class="jet_input_text jet_disable">
-											<div><span id="jet_vnoska_popup"></span></div>
-											<div>
-												<span>/</span><span id="jet_vnoska_popup_second"></span>
-											</div>
-										</div>
-									<?php } ?>
+
 								</div>
 							</div>
 							<div class="jet_row">
@@ -621,27 +560,17 @@ function jet_credit_button() {
 							</div>
 							<div class="jet_row">
 								<div class="jet_column_left">
-									<?php if ($jet_sign_second == '') { ?>
+
 										Общо плащания (<?php echo $jet_sign; ?>)
-									<?php } else { ?>
-										Общо плащания (<?php echo $jet_sign; ?>
-										<span style='font-size:60%;font-weight:400;height:16px;'>&nbsp;/&nbsp;<?php echo $jet_sign_second; ?></span>)
-									<?php } ?>
+
 								</div>
 								<div class="jet_column_right">
-									<?php if ($jet_eur == 0 || $jet_eur == 3) { ?>
+
 										<div class="jet_input_text jet_disable">
 											<div><span id="jet_obshto"></span></div>
 											<div></div>
 										</div>
-									<?php } else { ?>
-										<div class="jet_input_text jet_disable">
-											<div><span id="jet_obshto"></span></div>
-											<div>
-												<span>/</span><span id="jet_obshto_second"></span>
-											</div>
-										</div>
-									<?php } ?>
+
 								</div>
 							</div>
 							<div class="jet_hr"></div>
@@ -846,6 +775,13 @@ if ( ! empty( $jet_hook ) ) {
 }
 
 function jet_credit_button_cart() {
+	try {
+		jet_require_eur_context();
+		$jet_minimum = jet_minimum_principal();
+	} catch ( Jet_Financial_Validation_Exception $error ) {
+		return null;
+	}
+
 	global $woocommerce;
 
 	$jet_cart_show = (int) get_option( 'jet_cart_show' );
@@ -854,7 +790,7 @@ function jet_credit_button_cart() {
 	}
 
 	$jet_currency_code = get_woocommerce_currency();
-	if ( $jet_currency_code !== 'EUR' && $jet_currency_code !== 'BGN' ) {
+	if ( 'EUR' !== $jet_currency_code || 'EUR' !== get_option( 'woocommerce_currency' ) ) {
 		return null;
 	}
 
@@ -868,42 +804,11 @@ function jet_credit_button_cart() {
 		return null;
 	}
 
-	$jet_eur = (int) get_option( 'jet_eur' );
-	$jet_sign = 'лв.';
-	$jet_sign_second = 'евро';
-	$jet_min_250 = JET_MIN_250;
+	$jet_sign = 'евро';
 
-	switch ($jet_eur) {
-		case 0:
-			$jet_sign = 'лв.';
-			$jet_sign_second = '';
-			break;
-		case 1:
-			if ( $jet_currency_code === 'EUR' ) {
-				$jet_price = number_format($jet_price * 1.95583, 2, ".", "");
-			}
-			$jet_sign = 'лв.';
-			$jet_sign_second = 'евро';
-			break;
-		case 2:
-			if ( $jet_currency_code === 'BGN' ) {
-				$jet_price = number_format($jet_price / 1.95583, 2, ".", "");
-			}
-			$jet_sign = 'евро';
-			$jet_sign_second = 'лв.';
-			$jet_min_250 = JET_MIN_250_EUR;
-			break;
-		case 3:
-			if ( $jet_currency_code == 'BGN' ) {
-				$jet_price = number_format($jet_price / 1.95583, 2, ".", "");
-			}
-			$jet_sign = 'евро';
-			$jet_sign_second = '';
-			$jet_min_250 = JET_MIN_250_EUR;
-			break;
-	}
+	$jet_initial_term_threshold = JET_INITIAL_TERM_THRESHOLD_EUR;
 
-	$_minprice = get_option( "jet_minprice" );
+	$_minprice = $jet_minimum;
 	if ($jet_price < $_minprice) {
 		return null;
 	}
@@ -937,7 +842,7 @@ function jet_credit_button_cart() {
 	}
 	$jet_button_scheme_idx = Jet_Button_Schemes::normalize_index( get_option( 'jet_button_scheme', '0' ) );
 	$jet_wide_wrap_style   = Jet_Button_Schemes::wrap_inline_style( $jet_button_scheme_idx ) . sprintf( '--jet-wide-max-width:%dpx;--jet-wide-radius:%dpx;--jet-wide-font-size:%dpx;', $jet_btn_max_width, $jet_btn_round, $jet_btn_font );
-	if ($jet_price < $jet_min_250) {
+	if ($jet_price < $jet_initial_term_threshold) {
 		$jet_vnoski = '9';
 	} else {
 		$jet_vnoski = $jet_vnoski_default;
@@ -972,21 +877,7 @@ function jet_credit_button_cart() {
 			? wc_get_product($cart_item['variation_id'])
 			: wc_get_product($cart_item['product_id']);
 		$jet_products_pr_current = (float)wc_get_price_including_tax($jet_product);
-		switch ($jet_eur) {
-			case 0:
-				break;
-			case 1:
-				if ($jet_currency_code == "EUR") {
-					$jet_products_pr_current = $jet_products_pr_current * 1.95583;
-				}
-				break;
-			case 2:
-			case 3:
-				if ($jet_currency_code == "BGN") {
-					$jet_products_pr_current = $jet_products_pr_current / 1.95583;
-				}
-				break;
-		}
+
 		$jet_products_pr .= number_format($jet_products_pr_current, 2, ".", "") . '_';
 		$jet_products_vr .= $cart_item['variation_id'] . '_';
 	}
@@ -1019,12 +910,9 @@ function jet_credit_button_cart() {
 					</div>
 					<?php if (1 === (int) $is_vnoska) { ?>
 						<div class="jet_wide_button_text">
-							<?php if ($jet_sign_second == '') { ?>
+
 								<span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?>
-							<?php } else { ?>
-								<span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?>
-								<span class="jet_wide_button_text_second">(<span id="jet_vnoska_second"></span> <?php echo $jet_sign_second; ?>)</span>
-							<?php } ?>
+
 						</div>
 					<?php } ?>
 				</button>
@@ -1042,12 +930,9 @@ function jet_credit_button_cart() {
 						</div>
 						<?php if (1 === (int) $is_vnoska) { ?>
 							<div class="jet_wide_button_text">
-								<?php if ($jet_sign_second == '') { ?>
+
 									<span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?>
-								<?php } else { ?>
-									<span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?>
-									<span class="jet_wide_button_text_second">(<span id="jet_vnoska_card_second"></span> <?php echo $jet_sign_second; ?>)</span>
-								<?php } ?>
+
 							</div>
 						<?php } ?>
 					</button>
@@ -1069,14 +954,9 @@ function jet_credit_button_cart() {
 				<?php if ($is_vnoska == 1) { ?>
 				<tr>
 					<td class="jet_button_table">
-						<?php if ($jet_sign_second == '') { ?>
+
 							<p><span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?></p>
-						<?php } else { ?>
-							<p>
-								<span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?><br />
-								<span style="font-size:75%;font-weight:400;">(<span id="jet_vnoska_second"></span> <?php echo $jet_sign_second; ?>)</span>
-							</p>
-						<?php } ?>
+
 					</td>
 				</tr>
 				<?php } ?>
@@ -1097,14 +977,9 @@ function jet_credit_button_cart() {
 					<?php if ($is_vnoska == 1) { ?>
 					<tr>
 						<td class="jet_button_table">
-							<?php if ($jet_sign_second == '') { ?>
+
 								<p><span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?></p>
-							<?php } else { ?>
-								<p>
-									<span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?><br />
-									<span style="font-size:75%;font-weight:400;">(<span id="jet_vnoska_card_second"></span> <?php echo $jet_sign_second; ?>)</span>
-								</p>
-							<?php } ?>
+
 						</td>
 					</tr>
 					<?php } ?>
@@ -1128,6 +1003,7 @@ function jet_credit_button_cart() {
 										class="jet_input_text_active"
 										type="number"
 										min="0"
+										step="0.01"
 										id="jet_parva"
 										value=0
 									/>
@@ -1140,27 +1016,17 @@ function jet_credit_button_cart() {
 							</div>
 							<div class="jet_row">
 								<div class="jet_column_left">
-									<?php if ($jet_sign_second == '') { ?>
+
 										Цена на стоките (<?php echo $jet_sign; ?>)
-									<?php } else { ?>
-										Цена на стоките (<?php echo $jet_sign; ?>
-										<span style='font-size:60%;font-weight:400;height:16px;'>&nbsp;/&nbsp;<?php echo $jet_sign_second; ?></span>)
-									<?php } ?>
+
 								</div>
 								<div class="jet_column_right">
-									<?php if ($jet_eur == 0 || $jet_eur == 3) { ?>
+
 										<div class="jet_input_text jet_disable">
 											<div><span id="jet_priceall"></span></div>
 											<div></div>
 										</div>
-									<?php } else { ?>
-										<div class="jet_input_text jet_disable">
-											<div><span id="jet_priceall"></span></div>
-											<div>
-												<span>/</span><span id="jet_priceall_second"></span>
-											</div>
-										</div>
-									<?php } ?>
+
 								</div>
 							</div>
 							<div class="jet_row">
@@ -1187,52 +1053,32 @@ function jet_credit_button_cart() {
 							</div>
 							<div class="jet_row">
 								<div class="jet_column_left">
-									<?php if ($jet_sign_second == '') { ?>
+
 										Общо кредит (<?php echo $jet_sign; ?>)
-									<?php } else { ?>
-										Общо кредит (<?php echo $jet_sign; ?>
-										<span style='font-size:60%;font-weight:400;height:16px;'>&nbsp;/&nbsp;<?php echo $jet_sign_second; ?></span>)
-									<?php } ?>
+
 								</div>
 								<div class="jet_column_right">
-									<?php if ($jet_eur == 0 || $jet_eur == 3) { ?>
+
 										<div class="jet_input_text jet_disable">
 											<div><span id="jet_total_credit_price"></span></div>
 											<div></div>
 										</div>
-									<?php } else { ?>
-										<div class="jet_input_text jet_disable">
-											<div><span id="jet_total_credit_price"></span></div>
-											<div>
-												<span>/</span><span id="jet_total_credit_price_second"></span>
-											</div>
-										</div>
-									<?php } ?>
+
 								</div>
 							</div>
 							<div class="jet_row">
 								<div class="jet_column_left">
-									<?php if ($jet_sign_second == '') { ?>
+
 										Месечна вноска (<?php echo $jet_sign; ?>)
-									<?php } else { ?>
-										Месечна вноска (<?php echo $jet_sign; ?>
-										<span style='font-size:60%;font-weight:400;height:16px;'>&nbsp;/&nbsp;<?php echo $jet_sign_second; ?></span>)
-									<?php } ?>
+
 								</div>
 								<div class="jet_column_right">
-									<?php if ($jet_eur == 0 || $jet_eur == 3) { ?>
+
 										<div class="jet_input_text jet_disable">
 											<div><span id="jet_vnoska_popup"></span></div>
 											<div></div>
 										</div>
-									<?php } else { ?>
-										<div class="jet_input_text jet_disable">
-											<div><span id="jet_vnoska_popup"></span></div>
-											<div>
-												<span>/</span><span id="jet_vnoska_popup_second"></span>
-											</div>
-										</div>
-									<?php } ?>
+
 								</div>
 							</div>
 							<div class="jet_row">
@@ -1259,27 +1105,17 @@ function jet_credit_button_cart() {
 							</div>
 							<div class="jet_row">
 								<div class="jet_column_left">
-									<?php if ($jet_sign_second == '') { ?>
+
 										Общо плащания (<?php echo $jet_sign; ?>)
-									<?php } else { ?>
-										Общо плащания (<?php echo $jet_sign; ?>
-										<span style='font-size:60%;font-weight:400;height:16px;'>&nbsp;/&nbsp;<?php echo $jet_sign_second; ?></span>)
-									<?php } ?>
+
 								</div>
 								<div class="jet_column_right">
-									<?php if ($jet_eur == 0 || $jet_eur == 3) { ?>
+
 										<div class="jet_input_text jet_disable">
 											<div><span id="jet_obshto"></span></div>
 											<div></div>
 										</div>
-									<?php } else { ?>
-										<div class="jet_input_text jet_disable">
-											<div><span id="jet_obshto"></span></div>
-											<div>
-												<span>/</span><span id="jet_obshto_second"></span>
-											</div>
-										</div>
-									<?php } ?>
+
 								</div>
 							</div>
 							<div class="jet_hr"></div>

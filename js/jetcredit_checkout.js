@@ -1,247 +1,81 @@
 jQuery(document).ready(function ($) {
-	const debounce = (func, delay) => {
-		let timeoutId;
-		return function (...args) {
-			clearTimeout(timeoutId);
-			timeoutId = setTimeout(() => {
-				func.apply(this, args);
-			}, delay);
-		};
-	}
-	const calculateJet = () => {
-		const jetPriceall = parseFloat(document.getElementById('jet_price').value);
-		let jet_uslovia_checked;
-		if (document.getElementById('jet_uslovia').checked) {
-			jet_uslovia_checked = 1;
-		} else {
-			jet_uslovia_checked = 0;
-		}
-		let jet_uslovia1_checked;
-		if (document.getElementById('jet_uslovia1').checked) {
-			jet_uslovia1_checked = 1;
-		} else {
-			jet_uslovia1_checked = 0;
-		}
-		const jetFormData = new FormData();
-		jetFormData.append('jet_priceall', jetPriceall.toFixed(2));
-		jetFormData.append('jet_parva', parseFloat(document.getElementById('jet_parva').value).toFixed(2));
-		jetFormData.append('jet_vnoski', parseInt(document.getElementById('jet_vnoski').value));
-		jetFormData.append('jet_product_id', document.getElementById('jet_products').value);
-		jetFormData.append('jet_products', document.getElementById('jet_products').value);
-		jetFormData.append('jet_products_qt', document.getElementById('jet_products_qt').value);
-		jetFormData.append('jet_products_pr', document.getElementById('jet_products_pr').value);
-		jetFormData.append('jet_products_vr', document.getElementById('jet_products_vr').value);
-		jetFormData.append('jet_uslovia', jet_uslovia_checked);
-		jetFormData.append('jet_uslovia1', jet_uslovia1_checked);
-		jetFormData.append('jet_egn', document.getElementById('jet_egn').value);
-		jetFormData.append('security', jet_checkout_js.nonce);
-		$.ajax({
-			url: jet_checkout_js.ajax_url + '?action=jet_calculate',
-			method: 'POST',
-			data: jetFormData,
-			processData: false,
-			contentType: false,
-			success: function (json) {
-				if (json.success === 'success') {
-					if (json.jet_show_button) {
-						$('#jet_panel_error').hide();
-						$('#jet_panel').show();
-					} else {
-						$('#jet_panel').hide();
-						$('#jet_panel_error').show();
-					}
-					document.getElementById("jet_vnoska_input").value = json.jet_vnoska;
-					document.getElementById("jet_vnoska").textContent = json.jet_vnoska;
-					if (document.getElementById("jet_vnoska_second") !== null) {
-						document.getElementById("jet_vnoska_second").textContent = json.jet_vnoska_second;
-					}
-					document.getElementById("jet_priceall_input").value = json.jet_priceall;
-					document.getElementById("jet_priceall").textContent = json.jet_priceall;
-					if (document.getElementById("jet_priceall_second") !== null) {
-						document.getElementById("jet_priceall_second").textContent = json.jet_priceall_second;
-					}
-					document.getElementById("jet_total_credit_price_input").value = json.jet_total_credit_price;
-					document.getElementById("jet_total_credit_price").textContent = json.jet_total_credit_price;
-					if (document.getElementById("jet_total_credit_price_second") !== null) {
-						document.getElementById("jet_total_credit_price_second").textContent = json.jet_total_credit_price_second;
-					}
-					document.getElementById("jet_gpr_input").value = json.jet_gpr;
-					document.getElementById("jet_gpr").textContent = json.jet_gpr;
-					document.getElementById("jet_glp_input").value = json.jet_glp;
-					document.getElementById("jet_glp").textContent = json.jet_glp;
-					document.getElementById("jet_obshto_input").value = json.jet_obshto;
-					document.getElementById("jet_obshto").textContent = json.jet_obshto;
-					if (document.getElementById("jet_obshto_second") !== null) {
-						document.getElementById("jet_obshto_second").textContent = json.jet_obshto_second;
-					}
-				}
-			},
-			error: function (error) {
-				console.error('Error:', error);
+	'use strict';
+	const form = $('form.checkout');
+	if (!form.length || window.jetClassicOffersInitialized) return;
+	window.jetClassicOffersInitialized = true;
+	const api = window.JetCreditOffers;
+	const config = jet_checkout_js;
+	const states = new Map();
+	let revision = 0;
+	const selected = () => $('input[name="payment_method"]:checked').val();
+	const state = (name) => {
+		if (!states.has(name)) states.set(name, { name, prefix: name === 'jetpaymentcard' ? 'jet_card_' : 'jet_', client: new api.Client(config), attempt: null });
+		return states.get(name);
+	};
+	const inputs = (s) => ({ jet_context: 'checkout_classic', jet_card: s.name === 'jetpaymentcard' ? '1' : '0',
+		jet_parva: api.money($('#' + s.prefix + 'parva').val() || '0'), jet_vnoski: String($('#' + s.prefix + 'vnoski').val() || ''), jet_client_revision: String(revision) });
+	const retryKey = (s) => JSON.stringify([inputs(s).jet_parva, inputs(s).jet_vnoski, api.money($('#' + s.prefix + 'price').val() || '0'), $('#' + s.prefix + 'products').val(), $('#' + s.prefix + 'products_qt').val(), $('#' + s.prefix + 'products_pr').val(), $('#' + s.prefix + 'products_vr').val()]);
+	const status = (s, text) => {
+		let node = $('#' + s.prefix + 'offer_status');
+		if (!node.length) node = $('<div>', { id: s.prefix + 'offer_status', role: 'status' }).insertBefore('#' + s.prefix + 'parva');
+		node.text(text);
+	};
+	const restriction = (s, visible) => $(s.name === 'jetpaymentcard' ? '#jet_panel_card_error' : '#jet_panel_error').prop('hidden', !visible).toggle(visible);
+	const invalidate = (s) => { s.client.invalidate(); $('#' + s.prefix + 'offer').val(''); };
+	const populate = (s, data) => {
+		for (const [name, value] of Object.entries(data)) form.find('[name="' + name + '"]').val(value);
+	};
+	const calculate = async (s) => {
+		invalidate(s); restriction(s, false); status(s, 'Преизчисляване…');
+		try {
+			const result = await s.client.calculate(inputs(s));
+			if (!result || selected() !== s.name) return;
+			api.terms(document.getElementById(s.prefix + 'vnoski'), Number(result.jet_priceall), config.rules);
+			if (!$('#' + s.prefix + 'vnoski').val() && result.jet_allowed_terms.includes(Number(result.jet_vnoski))) {
+				$('#' + s.prefix + 'vnoski').val(result.jet_vnoski); s.client.inputs = inputs(s);
 			}
-		});
-	}
-	const calculateJetCard = () => {
-		const jetCardPriceall = parseFloat(document.getElementById('jet_card_price').value);
-		let jet_card_uslovia_checked;
-		if (document.getElementById('jet_card_uslovia').checked) {
-			jet_card_uslovia_checked = 1;
-		} else {
-			jet_card_uslovia_checked = 0;
+			for (const name of ['priceall', 'total_credit_price', 'vnoska', 'gpr', 'glp', 'obshto']) $('#' + s.prefix + name).text(result['jet_' + name]);
+			if (result.jet_eligible) populate(s, api.fields(result, true, s.name === 'jetpaymentcard'));
+			restriction(s, !result.jet_eligible);
+			status(s, result.jet_eligible ? '' : api.message('installment_below_minimum', config.rules));
+		} catch (error) {
+			if (error.result) api.terms(document.getElementById(s.prefix + 'vnoski'), Number(error.result.jet_priceall), config.rules);
+			restriction(s, true);
+			status(s, api.message(error, config.rules));
 		}
-		let jet_card_uslovia1_checked;
-		if (document.getElementById('jet_card_uslovia1').checked) {
-			jet_card_uslovia1_checked = 1;
-		} else {
-			jet_card_uslovia1_checked = 0;
-		}
-		const jetFormData = new FormData();
-		jetFormData.append('jet_priceall', jetCardPriceall.toFixed(2));
-		jetFormData.append('jet_parva', parseFloat(document.getElementById('jet_card_parva').value).toFixed(2));
-		jetFormData.append('jet_vnoski', parseInt(document.getElementById('jet_card_vnoski').value));
-		jetFormData.append('jet_product_id', document.getElementById('jet_card_products').value);
-		jetFormData.append('jet_products', document.getElementById('jet_card_products').value);
-		jetFormData.append('jet_products_qt', document.getElementById('jet_card_products_qt').value);
-		jetFormData.append('jet_products_pr', document.getElementById('jet_card_products_pr').value);
-		jetFormData.append('jet_products_vr', document.getElementById('jet_card_products_vr').value);
-		jetFormData.append('jet_uslovia', jet_card_uslovia_checked);
-		jetFormData.append('jet_uslovia1', jet_card_uslovia1_checked);
-		jetFormData.append('jet_egn', document.getElementById('jet_card_egn').value);
-		jetFormData.append('security', jet_checkout_js.nonce);
-		$.ajax({
-			url: jet_checkout_js.ajax_url + '?action=jet_calculate_cart',
-			method: 'POST',
-			data: jetFormData,
-			processData: false,
-			contentType: false,
-			success: function (json) {
-				if (json.success === 'success') {
-					if (json.jet_show_button) {
-						$('#jet_panel_card_error').hide();
-						$('#jet_panel_card').show();
-					} else {
-						$('#jet_panel_card').hide();
-						$('#jet_panel_card_error').show();
-					}
-					document.getElementById("jet_card_vnoska_input").value = json.jet_vnoska_card;
-					document.getElementById("jet_card_vnoska").textContent = json.jet_vnoska_card;
-					if (document.getElementById("jet_card_vnoska_second") !== null) {
-						if (json.jet_vnoska_card_second == 0) {
-							document.getElementById("jet_card_vnoska_second").textContent = json.jet_vnoska_card;
-						} else {
-							document.getElementById("jet_card_vnoska_second").textContent = json.jet_vnoska_card_second;
-						}
-					}
-					document.getElementById("jet_card_priceall_input").value = json.jet_priceall;
-					document.getElementById("jet_card_priceall").textContent = json.jet_priceall;
-					if (document.getElementById("jet_card_priceall_second") !== null) {
-						if (json.jet_priceall_second == 0) {
-							document.getElementById("jet_card_priceall_second").textContent = json.jet_priceall;
-						} else {
-							document.getElementById("jet_card_priceall_second").textContent = json.jet_priceall_second;
-						}
-					}
-					document.getElementById("jet_card_total_credit_price_input").value = json.jet_total_credit_price;
-					document.getElementById("jet_card_total_credit_price").textContent = json.jet_total_credit_price;
-					if (document.getElementById("jet_card_total_credit_price_second") !== null) {
-						if (json.jet_total_credit_price_second == 0) {
-							document.getElementById("jet_card_total_credit_price_second").textContent = json.jet_total_credit_price;
-						} else {
-							document.getElementById("jet_card_total_credit_price_second").textContent = json.jet_total_credit_price_second;
-						}
-					}
-					document.getElementById("jet_card_gpr_input").value = json.jet_gpr_card;
-					document.getElementById("jet_card_gpr").textContent = json.jet_gpr_card;
-					document.getElementById("jet_card_glp_input").value = json.jet_glp_card;
-					document.getElementById("jet_card_glp").textContent = json.jet_glp_card;
-					document.getElementById("jet_card_obshto_input").value = json.jet_obshto_card;
-					document.getElementById("jet_card_obshto").textContent = json.jet_obshto_card;
-					if (document.getElementById("jet_card_obshto_second") !== null) {
-						if (json.jet_obshto_card_second == 0) {
-							document.getElementById("jet_card_obshto_second").textContent = json.jet_obshto_card;
-						} else {
-							document.getElementById("jet_card_obshto_second").textContent = json.jet_obshto_card_second;
-						}
-					}
-				}
-			},
-			error: function (error) {
-				console.error('Error:', error);
-			}
-		});
-	}
-	function handleJetEgnChange(event) {
-		if (event.target.id == "jet_egn") {
-			const input = event.target.value;
-			const regex = /^[0-9]{0,10}$/;
-			if (!regex.test(input)) {
-				event.target.value = input.slice(0, -1);
-			}
-			calculateJet();
-		}
-		if (event.target.id == "jet_card_egn") {
-			const input = event.target.value;
-			const regex = /^[0-9]{0,10}$/;
-			if (!regex.test(input)) {
-				event.target.value = input.slice(0, -1);
-			}
-			calculateJetCard();
-		}
-	}
-	document.addEventListener('input', debounce(handleJetEgnChange, 1000));
-	document.addEventListener('blur', (event) => {
-		if (event.target.id == "jet_egn") {
-			calculateJet();
-		}
-		if (event.target.id == "jet_card_egn") {
-			calculateJetCard();
+	};
+	const refresh = () => {
+		for (const s of states.values()) invalidate(s);
+		const name = selected();
+		if (name === 'jetpayment' || name === 'jetpaymentcard') calculate(state(name));
+	};
+	form.on('input.jetOffers change.jetOffers', '#jet_parva, #jet_card_parva, #jet_vnoski, #jet_card_vnoski', function () {
+		const s = state(selected());
+		if (s.client.current(inputs(s)) || (s.attempt && s.attempt.key === retryKey(s))) return;
+		s.attempt = null; calculate(s);
+	});
+	form.on('click.jetOffers', '#btn_preizcisli, #jet_card_btn_preizcisli', () => {
+		const s = state(selected()); s.attempt = null; calculate(s);
+	});
+	form.on('change.jetOffers', 'input[name="payment_method"]', refresh);
+	$(document.body).on('update_checkout.jetOffers', () => { ++revision; for (const s of states.values()) invalidate(s); });
+	$(document.body).on('updated_checkout.jetOffers', () => { ++revision; refresh(); });
+	form.on('checkout_place_order.jetOffers', () => {
+		const name = selected();
+		if (name !== 'jetpayment' && name !== 'jetpaymentcard') return true;
+		const s = state(name);
+		if (s.attempt && s.attempt.key === retryKey(s)) { populate(s, s.attempt.fields); return true; }
+		if (!s.client.current(inputs(s))) { status(s, api.message('missing_offer', config.rules)); calculate(s); return false; }
+		const fields = api.fields(s.client.data, true, name === 'jetpaymentcard');
+		populate(s, fields); s.attempt = { key: retryKey(s), fields };
+		return true;
+	});
+	$(document.body).on('checkout_error.jetOffers', () => {
+		// Only explicit pre-delivery failure releases the pending financial attempt.
+		const errors = $('.woocommerce-error').text();
+		if (errors.includes('не беше подадена') || errors.includes('Условията за финансиране са невалидни')) {
+			const s = states.get(selected()); if (s) { s.attempt = null; calculate(s); }
 		}
 	});
-	document.addEventListener('click', (event) => {
-		if (event.target.id == 'btn_preizcisli') {
-			calculateJet();
-		}
-		if (event.target.id == 'jet_card_btn_preizcisli') {
-			calculateJetCard();
-		}
-		if (event.target.id == 'radio-control-wc-payment-method-options-jetpayment') {
-			if (event.target.checked == true) {
-				calculateJet();
-			}
-		}
-		if (event.target.id == 'radio-control-wc-payment-method-options-jetpaymentcard') {
-			if (event.target.checked == true) {
-				calculateJetCard();
-			}
-		}
-		if (event.target.id == 'jet_uslovia' || event.target.id == 'jet_uslovia1') {
-			calculateJet();
-		}
-		if (event.target.id == 'jet_card_uslovia' || event.target.id == 'jet_card_uslovia1') {
-			calculateJetCard();
-		}
-	});
-	document.addEventListener('change', (event) => {
-		if (event.target.id == 'jet_vnoski') {
-			calculateJet();
-		}
-		if (event.target.id == 'jet_card_vnoski') {
-			calculateJetCard();
-		}
-	});
-	const handlePaymentMethodChange = () => {
-		var selectedPaymentMethod = $('input[name="payment_method"]:checked').val();
-		if (selectedPaymentMethod === 'jetpayment') {
-			calculateJet();
-		}
-		if (selectedPaymentMethod === 'jetpaymentcard') {
-			calculateJetCard();
-		}
-	}
-	$('form.checkout').on('change', 'input[name="payment_method"]', function () {
-		handlePaymentMethodChange();
-	});
-	$(document.body).on('updated_checkout', function () {
-		handlePaymentMethodChange();
-	});
+	refresh();
 });

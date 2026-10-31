@@ -50,16 +50,15 @@ final class Jet_Payment_Gateway_Blocks extends AbstractPaymentMethodType {
 	 * @return array<int, string>
 	 */
 	public function get_payment_method_script_handles() {
+		wp_enqueue_style( 'jet_checkout_styles', plugin_dir_url( __FILE__ ) . 'css/jetcredit_checkout.css', array(), filemtime( JET_PLUGIN_DIR . '/css/jetcredit_checkout.css' ), 'all' );
+		jet_register_offer_script();
+		if ( ! wp_script_is( 'jet-blocks-ui', 'registered' ) ) {
+			wp_register_script( 'jet-blocks-ui', JET_JS_URI . 'jetcredit_blocks.js', array( 'jet-offers', 'wc-blocks-registry', 'wc-settings', 'wc-blocks-data-store', 'wp-data', 'wp-element', 'wp-html-entities' ), filemtime( JET_PLUGIN_DIR . '/js/jetcredit_blocks.js' ), true );
+		}
 		wp_register_script(
 			'jetpayment-blocks-integration',
 			plugin_dir_url( __FILE__ ) . 'checkout.js',
-			array(
-				'wc-blocks-registry',
-				'wc-settings',
-				'wp-element',
-				'wp-html-entities',
-				'wp-i18n',
-			),
+			array( 'jet-blocks-ui' ),
 			filemtime( JET_PLUGIN_DIR . '/checkout.js' ),
 			true
 		);
@@ -75,40 +74,18 @@ final class Jet_Payment_Gateway_Blocks extends AbstractPaymentMethodType {
 	 * @return array<string, mixed>
 	 */
 	public function get_payment_method_data() {
+		try { jet_require_eur_context(); } catch ( Jet_Financial_Validation_Exception $error ) { return array(); }
 		global $woocommerce;
 		if ( null === $woocommerce->cart ) {
 			return array();
 		}
 		$jet_price = $woocommerce->cart->get_total( 'float' );
-		$jet_eur = (int) get_option( 'jet_eur' );
-		$jet_currency_code = get_woocommerce_currency();
-		$jet_sign = 'лв.';
-		$jet_sign_second = 'евро';
-		$jet_min_250 = JET_MIN_250;
-		switch ( $jet_eur ) {
-			case 0:
-				$jet_sign = 'лв.';
-				$jet_sign_second = '';
-				break;
-			case 1:
-				if ( 'EUR' === $jet_currency_code ) {
-					$jet_price = number_format( $jet_price * 1.95583, 2, '.', '' );
-				}
-				$jet_sign = 'лв.';
-				$jet_sign_second = 'евро';
-				break;
-			case 2:
-			case 3:
-				if ( 'BGN' === $jet_currency_code ) {
-					$jet_price = number_format( $jet_price / 1.95583, 2, '.', '' );
-				}
-				$jet_sign = 'евро';
-				$jet_sign_second = 2 === $jet_eur ? 'лв.' : '';
-				$jet_min_250 = JET_MIN_250_EUR;
-				break;
-		}
+
+		$jet_sign = 'евро';
+
+		$jet_initial_term_threshold = JET_INITIAL_TERM_THRESHOLD_EUR;
 		$jet_vnoski_default = get_option( 'jet_vnoski_default' );
-		if ( $jet_price < $jet_min_250 ) {
+		if ( $jet_price < $jet_initial_term_threshold ) {
 			$jet_vnoski = '9';
 		} else {
 			$jet_vnoski = $jet_vnoski_default;
@@ -127,21 +104,6 @@ final class Jet_Payment_Gateway_Blocks extends AbstractPaymentMethodType {
 				$jet_product = new WC_Product( $cart_item['product_id'] );
 			}
 			$jet_products_pr_current = (float) wc_get_price_including_tax( $jet_product );
-			switch ( $jet_eur ) {
-				case 0:
-					break;
-				case 1:
-					if ( 'EUR' === $jet_currency_code ) {
-						$jet_products_pr_current *= 1.95583;
-					}
-					break;
-				case 2:
-				case 3:
-					if ( 'BGN' === $jet_currency_code ) {
-						$jet_products_pr_current /= 1.95583;
-					}
-					break;
-			}
 			$jet_products_pr .= number_format( $jet_products_pr_current, 2, '.', '' ) . '_';
 			$jet_products_vr .= $jet_product_vr_current . '_';
 		}
@@ -158,9 +120,9 @@ final class Jet_Payment_Gateway_Blocks extends AbstractPaymentMethodType {
 			'jet_products_pr' => $jet_products_pr,
 			'jet_products_vr' => $jet_products_vr,
 			'jet_sign'        => $jet_sign,
-			'jet_sign_second' => $jet_sign_second,
-			'jet_eur'         => $jet_eur,
 			'jet_vnoski'      => $jet_vnoski,
+			'config' => jet_frontend_configuration(),
+			'supports' => $this->gateway->supports,
 		);
 	}
 }

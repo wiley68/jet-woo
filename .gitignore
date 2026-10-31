@@ -50,3 +50,6 @@ error_log
 
 # Composer (PHPCS / WordPress Coding Standards за jetcredit)
 /vendor/
+
+# Generated installer ZIPs and checksums.
+/dist/

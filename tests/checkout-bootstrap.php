@@ -11,17 +11,21 @@ class WC_Payment_Gateway {
 		return 'https://shop.example.test/order-received/' . $order->get_id() . '/?key=synthetic-order-key';
 	}
 }
-function apply_filters( $name, $value, ...$args ) { return $value; }
 function wc_get_order_statuses() { return array( 'wc-on-hold' => 'On hold', 'wc-processing' => 'Processing' ); }
-function sanitize_email( $value ) { return filter_var( $value, FILTER_SANITIZE_EMAIL ); }
-function sanitize_text_field( $value ) { return trim( preg_replace( '/[\r\n\t ]+/', ' ', strip_tags( $value ) ) ); }
-function absint( $value ) { return abs( (int) $value ); }
 function wc_get_order( $id ) { return $GLOBALS['checkout_orders'][ $id ] ?? false; }
 function wc_add_notice( $message, $type ) { $GLOBALS['checkout_notices'][] = array( $message, $type ); }
 
 class JetCheckoutTestOrder {
-	public $id, $fields, $statuses = array();
-	public function __construct( $id, $fields ) { $this->id = $id; $this->fields = $fields; }
+	public $id, $fields, $statuses = array(), $currency = 'EUR', $total;
+	private $lines;
+	public function __construct( $id, $fields ) {
+		$this->id = $id; $this->fields = $fields;
+		$this->total = $GLOBALS['test_source_amount'] ?? 0;
+		$this->lines = $GLOBALS['test_source_lines'] ?? array();
+	}
+	public function get_currency( $context = 'view' ) { return $this->currency; }
+	public function get_total() { return $this->total; }
+	public function get_items( $type ) { return array_map( function ( $line ) { return new JetTestOrderItem( $line ); }, $this->lines ); }
 	public function get_id() { return $this->id; }
 	public function update_status( $status, $note ) {
 		if ( 'status' === ( $GLOBALS['checkout_failure'] ?? '' ) ) { throw new RuntimeException( 'Synthetic status hook failure.' ); }
@@ -42,12 +46,7 @@ class JetCheckoutTestCart extends JetTestCart {
 		if ( isset( $GLOBALS['checkout_effect'] ) ) { ($GLOBALS['checkout_effect'])( 'cart' ); }
 	}
 }
-class JetCheckoutTestSession {
-	public $values;
-	public function __construct( $values = array() ) { $this->values = $values; }
-	public function get( $key ) { return $this->values[ $key ] ?? null; }
-	public function __unset( $key ) { unset( $this->values[ $key ] ); }
-}
+class JetCheckoutTestSession extends JetTestSession {}
 require JET_INCLUDES_DIR . '/class-jet-payment-gateway.php';
 require JET_INCLUDES_DIR . '/class-card-jet-payment-gateway.php';
 
@@ -63,7 +62,11 @@ function checkout_reset( $case ) {
 	$GLOBALS['checkout_failure'] = '';
 	$GLOBALS['wpdb']->fail = false;
 	unset( $GLOBALS['checkout_effect'], $GLOBALS['test_option_write'] );
+	if ( ! getenv( 'JET_TEST_SOURCE_ROOT' ) ) { jet_test_setup_source( $case, 'checkout_classic' ); }
 	$GLOBALS['checkout_orders'] = array( $case['order_id'] => new JetCheckoutTestOrder( $case['order_id'], $case['order_fields'] ) );
-	$GLOBALS['checkout_wc'] = (object) array( 'cart' => new JetCheckoutTestCart(), 'session' => new JetCheckoutTestSession( $case['session'] ) );
+	$GLOBALS['checkout_wc'] = new JetOfflineWoo( array( 'cart' => new JetCheckoutTestCart(), 'session' => new JetCheckoutTestSession( $case['session'] ) ) );
+	if ( ! getenv( 'JET_TEST_SOURCE_ROOT' ) ) {
+		jet_test_issue_offer( 'checkout_classic', 'card' === $case['method'], array_merge( $case['session'], $case['post'] ) );
+	}
 	return 'card' === $case['method'] ? new Jet_Card_Payment_Gateway() : new Jet_Payment_Gateway();
 }

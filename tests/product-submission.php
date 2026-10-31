@@ -16,8 +16,17 @@ $_POST = array(
 	'jet_priceall' => '1000', 'jet_name' => 'Test', 'jet_lastname' => 'Customer',
 	'jet_email' => 'customer@example.test', 'jet_submission_id' => str_repeat( 'a', 32 ),
 	'jet_products' => '42_43', 'jet_products_qt' => '2_1',
-	'jet_products_pr' => '500.00_250.00', 'jet_products_vr' => '0_77',
+	'jet_products_pr' => '375.00_250.00', 'jet_products_vr' => '0_77',
 );
+$context = getenv( 'JET_TEST_CART' ) ? 'cart' : 'product';
+jet_test_setup_source( array( 'post' => $_POST, 'options' => $records ), $context );
+$woocommerce->cart = new JetTestCart();
+function fresh_offer( $id ) {
+	$_POST['jet_submission_id'] = $id;
+	$GLOBALS['woocommerce']->cart = new JetTestCart();
+	jet_test_issue_offer( $GLOBALS['context'] );
+}
+jet_test_issue_offer( $context );
 // Re-enter while the first request is inside wp_mail: the second worker must stop before side effects.
 $during_mail = function () { expect( submit()['code'] === 'processing', 'Concurrent request was not blocked.' ); };
 expect( submit()['success'] === 'success', 'First request failed.' );
@@ -34,31 +43,32 @@ $_POST['jet_name'] = 'Edited';
 expect( submit()['success'] === 'success' && $order_calls === 1, 'Edited retry created another order.' );
 
 // A new deliberate application can succeed.
-$_POST['jet_submission_id'] = str_repeat( 'b', 32 );
+fresh_offer( str_repeat( 'b', 32 ) );
 expect( submit()['success'] === 'success' && $order_calls === 2, 'New application was blocked.' );
 // The product and cart endpoints must not share a request identity.
 $other_key = jet_claim_product_submission( $_POST, getenv( 'JET_TEST_CART' ) ? 'product' : 'cart' );
 delete_option( $other_key );
 
-// Cached old frontend: nonce changes must not bypass the payload fingerprint.
-unset( $_POST['jet_submission_id'] );
-expect( submit()['success'] === 'success', 'Legacy request failed.' );
-$before = $order_calls;
-expect( submit()['success'] === 'success' && $order_calls === $before, 'Legacy replay created an order.' );
-expect( end( $scheduled )[0] <= time() + 10 * MINUTE_IN_SECONDS, 'Legacy retention is incorrect.' );
+// A cached unsigned request must be rejected, rather than acquire a legacy fingerprint claim.
+$valid = $_POST; $before = $order_calls; $before_mail = $mail_calls;
+unset( $_POST['jet_submission_id'], $_POST['jet_offer'] );
+expect( submit()['success'] === 'unsuccess' && $order_calls === $before && $mail_calls === $before_mail, 'Unsigned legacy request was accepted.' );
+$_POST = $valid; unset( $_POST['jet_submission_id'] );
+expect( submit()['code'] === 'stale_offer' && $order_calls === $before, 'An offer was not bound to its submission ID.' );
+$_POST = $valid;
 if ( getenv( 'JET_TEST_CART' ) ) {
 	foreach ( array( 'jet_products' => '42_44', 'jet_products_qt' => '3_1', 'jet_products_pr' => '501.00_250.00', 'jet_products_vr' => '0_78' ) as $field => $value ) {
-		$original = $_POST[ $field ];
-		$_POST[ $field ] = $value;
-		$before = $order_calls;
-		expect( submit()['success'] === 'success' && $order_calls === $before + 1, 'Changed cart incorrectly deduplicated: ' . $field );
-		expect( submit()['success'] === 'success' && $order_calls === $before + 1, 'Changed cart replay created an order: ' . $field );
-		$_POST[ $field ] = $original;
+		fresh_offer( substr( hash( 'sha256', $field ), 0, 32 ) );
+		$original = $_POST[$field]; $_POST[$field] = $value; $before = $order_calls;
+		expect( submit()['code'] === 'stale_financial_products' && $order_calls === $before, 'Manipulated cart was accepted: ' . $field );
+		$_POST[$field] = $original;
+		expect( submit()['success'] === 'success' && $order_calls === $before + 1, 'Valid new cart application was blocked.' );
+		expect( submit()['success'] === 'success' && $order_calls === $before + 1, 'Verified cart replay created an order.' );
 	}
 }
 
 // Failure after sending mail remains claimed: automatic replay would be unsafe.
-$_POST['jet_submission_id'] = str_repeat( 'c', 32 );
+fresh_offer( str_repeat( 'c', 32 ) );
 $order_throws = true;
 expect( submit()['code'] === 'uncertain', 'Partial failure was not recorded.' );
 $before = $mail_calls;
@@ -66,7 +76,7 @@ $order_throws = false;
 expect( submit()['code'] === 'uncertain' && $mail_calls === $before, 'Partial failure resent mail.' );
 
 // A mail rejection creates no order and permits a deliberate retry.
-$_POST['jet_submission_id'] = str_repeat( 'd', 32 );
+fresh_offer( str_repeat( 'd', 32 ) );
 $mail_result = false;
 $before = $order_calls;
 expect( submit()['success'] === 'unsuccess' && $order_calls === $before, 'Mail rejection created an order.' );
@@ -74,7 +84,7 @@ $mail_result = true;
 expect( submit()['success'] === 'success' && $order_calls === $before + 1, 'Safe retry failed.' );
 
 // Storage failure and invalid inputs must fail before any mail or order.
-$_POST['jet_submission_id'] = str_repeat( 'e', 32 );
+fresh_offer( str_repeat( 'e', 32 ) );
 $wpdb->fail = true;
 $before = $mail_calls;
 expect( submit()['code'] === 'submission_storage_error' && $mail_calls === $before, 'Storage failure was not closed.' );
@@ -95,4 +105,4 @@ foreach ( $records as $key => $record ) {
 		expect( ! isset( $records[ $key ] ), 'Expired record was not removed.' );
 	}
 }
-echo 'PASS (' . ( getenv( 'JET_TEST_CART' ) ? 'cart' : 'product' ) . "): concurrent/repeated requests, endpoint isolation, legacy frontend, partial failure, mail retry, storage failure, validation, cleanup.\n";
+echo 'PASS (' . ( getenv( 'JET_TEST_CART' ) ? 'cart' : 'product' ) . "): concurrent/repeated requests, endpoint isolation, unsigned legacy rejection, signed fresh applications, partial failure, mail retry, storage failure, validation, cleanup.\n";

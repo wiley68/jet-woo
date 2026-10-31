@@ -1,4 +1,6 @@
 jQuery(document).ready(function ($) {
+	if (window.jetCartOfferInitialized) return;
+	window.jetCartOfferInitialized = true;
 	let card;
 	card = 0;
 	// Share the lock if a theme or script optimizer initializes this file twice.
@@ -58,6 +60,7 @@ jQuery(document).ready(function ($) {
 		jetOverlay.textContent = '';
 		jetOverlay.removeAttribute('role');
 		$('#buy2_jetcredit').prop('disabled', jetSubmission.submitWasDisabled).removeAttr('aria-busy');
+		changeBtnJetcreditBuy();
 		if (jetSubmission.previousFocus && jetSubmission.previousFocus.isConnected) {
 			jetSubmission.previousFocus.focus();
 		}
@@ -91,6 +94,7 @@ jQuery(document).ready(function ($) {
 		if (jetSubmission.locked) {
 			return;
 		}
+		if (jetSubmission.attempt) { changeBtnJetcreditBuy(); return; }
 		if ($('#btn_jet').length !== 0) {
 			$('#jet_step_1').css('display', 'block');
 			$('#jet_step_2').css('display', 'none');
@@ -122,12 +126,12 @@ jQuery(document).ready(function ($) {
 				if (card == 1 && $('#jet_vnoska_popup').length !== 0) {
 					_taxa = parseFloat($('#jet_vnoska_popup').text());
 				}
-				if (_taxa >= 20) {
+				if (offers.current(offerInputs()) && _taxa >= Number(rules.min_installment)) {
 					$('#jet_step_1').css('display', 'none');
 					$('#jet_step_2').css('display', 'block');
 				} else {
 					$("#jet_alert_overlay").addClass("show");
-					jetShowCustomAlert('Месечната вноска трябва да надхвърля сумата от 20 лв.!', false);
+					jetShowCustomAlert(window.JetCreditOffers.message('installment_below_minimum', rules), false);
 				}
 			});
 
@@ -169,78 +173,54 @@ jQuery(document).ready(function ($) {
 		}
 	}
 
-	const jetCalculate = () => {
-		const jetPriceall = parseFloat($('#jet_price').val());
-		jetHideOptions401();
-		jetHideOptions601();
-		if (jetPriceall >= 401) {
-			jetShowOptions401();
+	const offers = new window.JetCreditOffers.Client(jet_cart_js);
+	const rules = jet_cart_js.rules;
+	let cartRevision = 0;
+	const offerInputs = () => {
+		jetSubmission.id = jetSubmission.id || jetCreateSubmissionId();
+		return {
+			jet_context: 'cart', jet_card: String(card), jet_submission_id: jetSubmission.id,
+			jet_parva: String($('#jet_parva').val() || '0'), jet_vnoski: String($('#jet_vnoski').val() || ''),
+			jet_client_revision: String(cartRevision)
+		};
+	};
+	const canRetryAttempt = () => {
+		if (!jetSubmission.attempt) return false;
+		const inputs = offerInputs();
+		return ["jet_card", "jet_vnoski", "jet_parva"].every((key) => inputs[key] === jetSubmission.attempt[key] || (inputs[key] !== undefined && jetSubmission.attempt[key] !== undefined && Number(inputs[key]) === Number(jetSubmission.attempt[key])));
+	};
+	const offerStatus = (text) => {
+		if (!$('#jet_offer_status').length) $('<div>', { id: 'jet_offer_status', role: 'status' }).prependTo('#jet_step_1');
+		$('#jet_offer_status').text(text);
+	};
+	const invalidateOffer = () => {
+		offers.invalidate();
+		if (!jetSubmission.locked) {
+			$('#buy_jetcredit, #buy2_jetcredit').prop('disabled', true);
+			if (jetSubmission.attempt) changeBtnJetcreditBuy();
 		}
-		if (jetPriceall >= 601) {
-			jetShowOptions601();
+	};
+	const jetCalculate = async () => {
+		if (jetSubmission.locked) return;
+		if (jetSubmission.attempt) { invalidateOffer(); changeBtnJetcreditBuy(); return; }
+		invalidateOffer(); offerStatus('Преизчисляване…');
+		try {
+			const json = await offers.calculate(offerInputs());
+			if (!json) return;
+			window.JetCreditOffers.terms(document.getElementById('jet_vnoski'), Number(json.jet_priceall), rules);
+			if (!$('#jet_vnoski').val() && json.jet_allowed_terms.includes(Number(json.jet_vnoski))) { $('#jet_vnoski').val(json.jet_vnoski); offers.inputs = offerInputs(); }
+			$('#jet_vnoska').text(json.jet_vnoska_regular);
+			$('#jet_vnoska_card').text(json.jet_vnoska_card || '');
+			$('#jet_vnoski_text, #jet_vnoski_text_card').text(json.jet_vnoski);
+			for (const name of ['priceall', 'total_credit_price', 'gpr', 'glp', 'obshto']) $('#jet_' + name).text(json['jet_' + name]);
+			$('#jet_vnoska_popup').text(json.jet_vnoska);
+			offerStatus(json.jet_eligible ? '' : window.JetCreditOffers.message('installment_below_minimum', rules));
+			changeBtnJetcredit(); changeBtnJetcreditBuy();
+		} catch (error) {
+			if (error.result && error.result.jet_allowed_terms) window.JetCreditOffers.terms(document.getElementById('jet_vnoski'), Number(error.result.jet_priceall), rules);
+			offerStatus(window.JetCreditOffers.message(error, rules));
 		}
-
-		if (parseFloat($('#jet_parva').val()) < jetPriceall) {
-			const jetFormData = new FormData();
-			jetFormData.append('jet_priceall', jetPriceall.toFixed(2));
-			jetFormData.append('jet_parva', parseFloat($('#jet_parva').val()).toFixed(2));
-			jetFormData.append('jet_vnoski', parseInt($('#jet_vnoski').val()));
-			jetFormData.append('jet_products', $('#jet_products').val());
-			jetFormData.append('jet_products_qt', $('#jet_products_qt').val());
-			jetFormData.append('jet_products_pr', $('#jet_products_pr').val());
-			jetFormData.append('security', jet_cart_js.nonce);
-			$.ajax({
-				url: jet_cart_js.ajax_url + '?action=jet_calculate_cart',
-				method: 'POST',
-				data: jetFormData,
-				processData: false,
-				contentType: false,
-				success: function (json) {
-					if (json.success === 'success') {
-						if (json.jet_show_button) {
-							$('#jet-product-button-container').show();
-						} else {
-							$('#jet-product-button-container').hide();
-						}
-						$('#jet_vnoska').text(json.jet_vnoska);
-						if ($('#jet_vnoska_second').length !== 0) $('#jet_vnoska_second').text(json.jet_vnoska_second);
-						$('#jet_vnoski_text').text(parseInt($('#jet_vnoski').val()));
-						$('#jet_priceall').text(json.jet_priceall);
-						if ($('#jet_priceall_second').length !== 0) $('#jet_priceall_second').text(json.jet_priceall_second);
-						$('#jet_total_credit_price').text(json.jet_total_credit_price);
-						if ($('#jet_total_credit_price_second').length !== 0) $('#jet_total_credit_price_second').text(json.jet_total_credit_price_second);
-						$('#jet_vnoska_popup').text(json.jet_vnoska);
-						if ($('#jet_vnoska_popup_second').length !== 0) $('#jet_vnoska_popup_second').text(json.jet_vnoska_second);
-						$('#jet_gpr').text(json.jet_gpr);
-						$('#jet_glp').text(json.jet_glp);
-						$('#jet_obshto').text(json.jet_obshto);
-						if ($('#jet_obshto_second').length !== 0) $('#jet_obshto_second').text(json.jet_obshto_second);
-						if (parseInt($('#jet_card_in').val()) == 1) {
-							if ($('#jet_vnoska_card').length !== 0) {
-								$('#jet_vnoska_card').text(json.jet_vnoska_card);
-								if ($('#jet_vnoska_card_second').length !== 0) $('#jet_vnoska_card_second').text(json.jet_vnoska_card_second);
-								$('#jet_vnoski_text_card').text(parseInt($('#jet_vnoski').val()));
-								if (card == 1) {
-									$('#jet_vnoska_popup').text(json.jet_vnoska_card);
-									if ($('#jet_vnoska_popup_second').length !== 0) $('#jet_vnoska_popup_second').text(json.jet_vnoska_card_second);
-									$('#jet_gpr').text(json.jet_gpr_card);
-									$('#jet_glp').text(json.jet_glp_card);
-									$('#jet_obshto').text(json.jet_obshto_card);
-									if ($('#jet_obshto_second').length !== 0) $('#jet_obshto_second').text(json.jet_obshto_card_second);
-								}
-							}
-						}
-					}
-				},
-				error: function (error) {
-					console.error('Error:', error);
-				}
-			});
-		} else {
-			$("#jet_alert_overlay").addClass("show");
-			jetShowCustomAlert('Първоначалната вноска трябва да бъде по-малка от цената на стоките!', false);
-		}
-	}
+	};
 
 	const jetClose = () => {
 		$('#jet-product-popup-container').css('display', 'none');
@@ -326,31 +306,20 @@ jQuery(document).ready(function ($) {
 		if (jetSubmission.locked) {
 			return;
 		}
-		jetSubmission.id = jetSubmission.id || jetCreateSubmissionId();
+		if (jetSubmission.attempt ? !canRetryAttempt() : !offers.current(offerInputs())) {
+			offerStatus(window.JetCreditOffers.message('missing_offer', rules)); changeBtnJetcreditBuy(); return;
+		}
 		jetLockSubmission();
 		try {
+			if (!jetSubmission.attempt) {
+				jetSubmission.attempt = Object.assign(offerInputs(), window.JetCreditOffers.fields(offers.data), {
+					jet_name: $('#jet_name').val(), jet_lastname: $('#jet_lastname').val(), jet_egn: $('#jet_egn').val(),
+					jet_email: $('#jet_email').val(), jet_phone: $('#jet_phone').val(), jet_lname: $('#jet_lname').val()
+				});
+			}
 			const jetFormSendData = new FormData();
-			jetFormSendData.append('jet_priceall', $('#jet_priceall').text());
-			jetFormSendData.append('jet_vnoski', $('#jet_vnoski').val());
-			jetFormSendData.append('jet_vnoska', $('#jet_vnoska_popup').text());
-			jetFormSendData.append('jet_parva', $('#jet_parva').val());
-			jetFormSendData.append('jet_total_credit_price', $('#jet_total_credit_price').text());
-			jetFormSendData.append('jet_obshto', $('#jet_obshto').text());
-			jetFormSendData.append('jet_gpr', $('#jet_gpr').text());
-			jetFormSendData.append('jet_glp', $('#jet_glp').text());
-			jetFormSendData.append('jet_name', $('#jet_name').val());
-			jetFormSendData.append('jet_lastname', $('#jet_lastname').val());
-			jetFormSendData.append('jet_egn', $('#jet_egn').val());
-			jetFormSendData.append('jet_email', $('#jet_email').val());
-			jetFormSendData.append('jet_phone', $('#jet_phone').val());
-			jetFormSendData.append('jet_lname', $('#jet_lname').val());
-			jetFormSendData.append('jet_card', card);
-			jetFormSendData.append('jet_products', $('#jet_products').val());
-			jetFormSendData.append('jet_products_qt', $('#jet_products_qt').val());
-			jetFormSendData.append('jet_products_pr', $('#jet_products_pr').val());
-			jetFormSendData.append('jet_products_vr', $('#jet_products_vr').val());
+			for (const [key, value] of Object.entries(jetSubmission.attempt)) jetFormSendData.append(key, value);
 			jetFormSendData.append('security', jet_cart_js.nonce);
-			jetFormSendData.append('jet_submission_id', jetSubmission.id);
 
 			$.ajax({
 				url: jet_cart_js.ajax_url + '?action=jet_send_card',
@@ -361,10 +330,14 @@ jQuery(document).ready(function ($) {
 				dataType: 'json',
 				success: function (json) {
 					if (json && json.success === 'success') {
-						jetShowCustomAlert('Успешно изпратихте Вашата заявка за лизинг към ПБ Лични Финанси. Очаквайте контакт за потвърждаване на направената от Вас заявка.', true);
+						jetShowCustomAlert(json.code === 'manual_registered' ? json.message : 'Успешно изпратихте Вашата заявка за лизинг към ПБ Лични Финанси. Очаквайте контакт за потвърждаване на направената от Вас заявка.', true);
+					} else if (json && json.code === 'manual_registration_failed') {
+						jetShowCustomAlert('Регистрацията в магазина изисква проверка. Не е направен опит за изпращане до банката. Моля, свържете се с магазина.', false);
 					} else if (json && (json.code === 'processing' || json.code === 'uncertain')) {
 						jetShowCustomAlert('Заявката вече е приета за обработка, но резултатът още не е потвърден. Моля, свържете се с магазина за проверка, преди да правите нова заявка.', false);
 					} else {
+						jetSubmission.attempt = null;
+						invalidateOffer();
 						jetShowCustomAlert('Не можете да изпратите Вашата заявка за лизинг към ПБ Лични Финанси. Моля опитайте по-късно.', false);
 					}
 				},
@@ -379,60 +352,10 @@ jQuery(document).ready(function ($) {
 		}
 	}
 
-	const jetHideOptions401 = () => {
-		$('#jet_vnoski').find('option').each(function () {
-			if ($(this).val() === '15' || $(this).val() === '18' || $(this).val() === '24') {
-				$(this).prop('disabled', true);
-			}
-		});
-	}
-
-	const jetShowOptions401 = () => {
-		$('#jet_vnoski').find('option').each(function () {
-			if ($(this).val() === '15' || $(this).val() === '18' || $(this).val() === '24') {
-				$(this).prop('disabled', false);
-			}
-		});
-	}
-
-	const jetHideOptions601 = () => {
-		$('#jet_vnoski').find('option').each(function () {
-			if ($(this).val() === '30' || $(this).val() === '36') {
-				$(this).prop('disabled', true);
-			}
-		});
-	}
-
-	const jetShowOptions601 = () => {
-		$('#jet_vnoski').find('option').each(function () {
-			if ($(this).val() === '30' || $(this).val() === '36') {
-				$(this).prop('disabled', false);
-			}
-		});
-	}
-
 	const changeBtnJetcredit = () => {
-		if ($('#uslovia').is(':checked') && $('#uslovia1').is(':checked')) {
-			let _taxa = parseFloat($('#jet_vnoska_popup').text());
-			if (card == 1 && $('#jet_vnoska_popup').length !== 0) {
-				_taxa = parseFloat($('#jet_vnoska_popup').text());
-			}
-			if (_taxa >= 20) {
-				$('#buy_jetcredit').prop('disabled', false).css({
-					opacity: 1.00
-				});
-			} else {
-				$("#jet_alert_overlay").addClass("show");
-				jetShowCustomAlert('Месечната вноска трябва да надхвърля сумата от 20 лв.!', false);
-				$('#uslovia').prop('checked', false);
-				$('#uslovia1').prop('checked', false);
-			}
-		} else {
-			$('#buy_jetcredit').prop('disabled', true).css({
-				opacity: 0.50
-			});
-		}
-	}
+		const enabled = $('#uslovia').is(':checked') && $('#uslovia1').is(':checked') && offers.current(offerInputs());
+		$('#buy_jetcredit').prop('disabled', !enabled).css({ opacity: enabled ? 1 : 0.5 });
+	};
 
 	const checkForm = () => {
 		let check = true;
@@ -490,19 +413,10 @@ jQuery(document).ready(function ($) {
 	}
 
 	const changeBtnJetcreditBuy = () => {
-		if (jetSubmission.locked) {
-			return;
-		}
-		if ($('#uslovia2').is(':checked')) {
-			$('#buy2_jetcredit').prop('disabled', false).css({
-				opacity: 1.00
-			});
-		} else {
-			$('#buy2_jetcredit').prop('disabled', true).css({
-				opacity: 0.50
-			});
-		}
-	}
+		if (jetSubmission.locked) return;
+		const enabled = $('#uslovia2').is(':checked') && (jetSubmission.attempt ? canRetryAttempt() : offers.current(offerInputs()));
+		$('#buy2_jetcredit').prop('disabled', !enabled).css({ opacity: enabled ? 1 : 0.5 });
+	};
 
 	document.addEventListener('click', (event) => {
 		if (event.target.id == "uslovia" || event.target.id == "uslovia1") {
@@ -531,6 +445,7 @@ jQuery(document).ready(function ($) {
 				subtree: true
 			};
 			function mutationCallback(mutationsList, observer) {
+				++cartRevision; invalidateOffer();
 				if (!jetIsCartEmpty()) {
 					jetLoad();
 				}
@@ -539,5 +454,7 @@ jQuery(document).ready(function ($) {
 		}
 	}
 
+	$(document.body).on('updated_wc_div.jetOffers updated_cart_totals.jetOffers removed_from_cart.jetOffers applied_coupon.jetOffers removed_coupon.jetOffers', () => { ++cartRevision; invalidateOffer(); jetLoad(); });
+	$(document).on('input.jetOffers change.jetOffers', '#jet_parva', () => { jetCalculate(); });
 	jetLoad();
 });

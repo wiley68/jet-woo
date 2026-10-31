@@ -23,8 +23,7 @@
 		'jet_btn_max_width' => 570,
 		'jet_btn_round' => 16,
 		'jet_btn_font' => 14,
-		'jet_minprice' => JET_MINPRICE,
-		'jet_eur' => 0
+		'jet_minprice' => JET_MIN_PRINCIPAL_EUR
 	];
 	$jet_visual_defaults = [
 		'jet_button_scheme' => '0',
@@ -53,6 +52,7 @@
 			}
 		} else {
 			foreach ( $jet_settings as $key => $default ) {
+				if ( 'jet_count' === $key ) { continue; }
 				$value = filter_input( INPUT_POST, $key, FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 				if ( 'jet_button_scheme' === $key && class_exists( 'Jet_Button_Schemes', false ) ) {
 					$value = $value !== null ? (string) Jet_Button_Schemes::normalize_index( $value ) : (string) Jet_Button_Schemes::normalize_index( $default );
@@ -215,18 +215,6 @@
 							<span class="jet_form_controll_text"><?php echo esc_html('Дали да се показва текст, в дясно от бутона указващ месечната вноска за избрания период на лизинг?'); ?></span>
 						</div>
 					</div>
-					<div class="jet_form_group">
-						<div class="jet_control_label"><?php echo esc_html('Избор на режим на работа с валути'); ?></div>
-						<div class="jet_control">
-							<select name="jet_eur" class="jet_form_control">
-								<option value=0 <?php selected($jet_eur, 0); ?>><?php echo esc_html('Единична визуализация в лева и изпращане на исканията в лева'); ?></option>
-								<option value=1 <?php selected($jet_eur, 1); ?>><?php echo esc_html('Двойна визуализация лева/евро и изпращане на исканията в лева'); ?></option>
-								<option value=2 <?php selected($jet_eur, 2); ?>><?php echo esc_html('Двойна визуализация евро/лева и изпращане на исканията в евро'); ?></option>
-								<option value=3 <?php selected($jet_eur, 3); ?>><?php echo esc_html('Единична визуализация в евро и изпращане на исканията в евро'); ?></option>
-							</select>
-							<span class="jet_form_controll_text"><?php echo esc_html('Избор на режим на работа с валути. Възможност за показване в евро или лева. Изпращане на исканията в евро или лева с превалутиране ако е необходимо'); ?></span>
-						</div>
-					</div>
 				</div>
 				<div
 					class="jet_tab_panel"
@@ -239,7 +227,7 @@
 						<div class="jet_control_label"><?php echo esc_html('Избери email за изпращане'); ?></div>
 						<div class="jet_control">
 							<input type="text" name="jet_email" class="jet_form_control" value="<?php echo esc_attr($jet_email); ?>">
-							<span class="jet_form_controll_text"><?php echo esc_html('Избери email адрес на който ще се изпращат заявките от клиента. Използвайте "pf-online.shop@postbank.bg" за изпращане на заявките към ПБ Лични Финанси. Можете да въведете повече от един мейл адрес, като ги разделите помежду си със запетая. (Ако оставите празно ще се използва email-а по-подразбиране за системата. Препоръчва се използването на email извън Вашия домейн за да се избегне ауто спан защитата.)'); ?></span>
+							<span class="jet_form_controll_text"><?php echo esc_html('Получатели на банковите заявления. Въведете валидни адреси, разделени със запетая. При празен списък заявката се регистрира в магазина за ръчна обработка, без изпращане до банката. При невалиден адрес заявката не се приема. Няма автоматичен резервен получател.'); ?></span>
 						</div>
 					</div>
 					<div class="jet_form_group">
@@ -448,7 +436,7 @@
 												<?php echo 1 === (int) $jet_btn_logo ? '' : 'style="display:none;"'; ?>
 											/>
 										</div>
-										<div class="jet_admin_preview_button_text">12 x 97.33 евро <span class="jet_admin_preview_button_text_second">(190.37 лв.)</span></div>
+										<div class="jet_admin_preview_button_text">12 x 97.33 евро </div>
 									</button>
 									<?php if ( 1 === (int) $jet_card_in ) { ?>
 										<button type="button" class="jet_admin_preview_button" tabindex="-1">
@@ -462,7 +450,7 @@
 													<?php echo 1 === (int) $jet_btn_logo ? '' : 'style="display:none;"'; ?>
 												/>
 											</div>
-											<div class="jet_admin_preview_button_text">12 x 97.33 евро <span class="jet_admin_preview_button_text_second">(190.37 лв.)</span></div>
+											<div class="jet_admin_preview_button_text">12 x 97.33 евро </div>
 										</button>
 									<?php } ?>
 								</div>

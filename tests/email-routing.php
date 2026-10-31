@@ -24,7 +24,10 @@ function routing_reset( $case ) {
 	$GLOBALS['order_failure'] = '';
 	$GLOBALS['during_mail'] = $GLOBALS['mail_behavior'] = null;
 	$GLOBALS['wpdb']->fail = false;
+	if ( ! getenv( 'JET_TEST_SOURCE_ROOT' ) ) { jet_test_setup_source( $case, $case['context'] ); }
 	$GLOBALS['woocommerce']->cart = new JetTestCart();
+	$GLOBALS['woocommerce']->session = new JetTestSession();
+	if ( ! getenv( 'JET_TEST_SOURCE_ROOT' ) ) { jet_test_issue_offer( $case['context'], '1' === (string) ( $_POST['jet_card'] ?? 0 ) ); }
 }
 function routing_submit( $context ) {
 	$action = 'wp_ajax_nopriv_jet_send' . ( 'cart' === $context ? '_card' : '' );
@@ -75,6 +78,9 @@ if ( getenv( 'JET_TEST_SOURCE_ROOT' ) ) {
 foreach ( $baseline['cases'] as $name => $case ) {
 	routing_reset( $case );
 	$context = $case['context'];
+	$original = jet_test_original_bank_mail( $context );
+	routing_expect( $original[1] === $case['mail'][1] && $original[2] === $case['mail'][2] && $original[3] === array_slice( $case['mail'][3], 0, 3 ), "$name: frozen fixture differs from v1.9.3 EUR template." );
+	routing_reset( $case );
 	$mail_behavior = function ( $mail ) use ( $context ) { routing_delivery_order( $context, $mail ); return true; };
 	routing_success( $context );
 	$bank = $mails[0];
@@ -114,12 +120,22 @@ foreach ( $baseline['cases'] as $name => $case ) {
 	$events = array_column( $order_events, 0 );
 	routing_expect( in_array( 'set_status', $events, true ) && in_array( array( 'set_status', array( 'on-hold' ) ), $order_events, true ), "$name: configured order status changed." );
 	routing_expect( in_array( array( 'set_payment_method', array( 'jetpayment' ) ), $order_events, true ), "$name: gateway changed." );
-	routing_expect( count( array_filter( $events, function ( $event ) { return 'add_product' === $event; } ) ) === ( 'cart' === $context ? 2 : 1 ), "$name: order products changed." );
+	routing_expect( count( $saved_financial_order->get_items() ) === ( 'cart' === $context ? 2 : 1 ), "$name: order products changed." );
 	echo "PASS T01/T03/T04/T06 $name: byte-identical bank subject/body/headers, five-row mask, private confirmation.\n";
 }
 
 foreach ( array( 'product', 'cart' ) as $context ) {
 	$case = $baseline['cases'][ $context . '-standard' ];
+	foreach ( array( 'unsigned', 'expired', 'manipulated', 'legacy' ) as $invalid ) {
+		routing_reset( $case );
+		if ( 'unsigned' === $invalid ) { unset( $_POST['jet_offer'] ); }
+		if ( 'expired' === $invalid ) { $_POST['jet_offer'] = jet_test_expired_offer( $_POST['jet_offer'] ); }
+		if ( 'manipulated' === $invalid ) { $_POST['jet_offer'] .= 'x'; }
+		if ( 'legacy' === $invalid ) { $_POST = $case['post']; }
+		$expected_code = 'expired' === $invalid ? 'stale_offer' : ( 'legacy' === $invalid ? 'invalid_offer_context' : 'invalid_offer' );
+		routing_expect( $expected_code === routing_submit( $context )['code'], "$context/$invalid: unverified application accepted." );
+		routing_expect( 0 === $mail_calls && 0 === $order_calls && empty( routing_claims() ), "$context/$invalid: validation caused delivery/order/claim side effects." );
+	}
 	// T02/T07: public email is one validated address, never part of bank destinations.
 	foreach ( array( 'single@example.test', "o'connor@example.test", 'not-an-email', 'one@example.test,two@example.test', 'one@example.test;two@example.test', "one@example.test\r\nBcc: extra@example.test", "one@example.test\r\n", "one@example.test\0", 'Name <one@example.test>', '' ) as $email ) {
 		routing_reset( $case );
@@ -132,7 +148,7 @@ foreach ( array( 'product', 'cart' ) as $context ) {
 		if ( $valid ) { routing_expect( $mails[2][0] === $email, "$context: customer address was altered." ); }
 		foreach ( $mails as $mail ) { routing_no_cc( $mail ); }
 	}
-	foreach ( array( false, '', 'invalid', array( 'bank@example.test' ), 'bank@example.test, invalid', 'bank@example.test,', "bank@example.test\r\nBcc: other@example.test", "bank@example.test\r\n" ) as $bank_email ) {
+	foreach ( array( false, 'invalid', array( 'bank@example.test' ), 'bank@example.test, invalid', 'bank@example.test,', "bank@example.test\r\nBcc: other@example.test", "bank@example.test\r\n" ) as $bank_email ) {
 		routing_reset( $case );
 		$records['jet_email'] = $bank_email;
 		routing_expect( 'invalid_bank_recipient' === routing_submit( $context )['code'], "$context: invalid bank configuration accepted." );

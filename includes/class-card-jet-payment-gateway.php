@@ -4,12 +4,13 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 	public $domain;
 	public $instructions;
 	public $order_status;
+	private static $thankyou_registered = false;
 
 	public function __construct() {
 		$this->domain = 'jetpaymentcard';
 		$this->id = 'jetpaymentcard';
 		$this->icon = apply_filters('woocommerce_custom_gateway_icon', '');
-		$this->has_fields = false;
+		$this->has_fields = true;
 		$this->method_title = 'ПБ Лични Финанси - на вноски с кредитна карта';
 		$this->method_description = 'Дава възможност на Вашите клиенти да закупуват стока на вноски с кредитна карта на ПБ Лични Финанси';
 		$this->init_form_fields();
@@ -19,7 +20,10 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 		$this->instructions = $this->get_option('instructions', $this->description);
 		$this->order_status = $this->get_option('order_status', 'wc-processing');
 		add_action('woocommerce_update_options_payment_gateways_' . $this->id, array($this, 'process_admin_options'));
-		add_action('woocommerce_thankyou_dskapipayment', array($this, 'thankyou_jetpaymentcard_page'));
+		if ( ! self::$thankyou_registered ) {
+			add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'thankyou_jetpaymentcard_page' ) );
+			self::$thankyou_registered = true;
+		}
 		add_action('woocommerce_email_before_order_table', array($this, 'email_jetpaymentcard_instructions'), 10, 3 );
 	}
 
@@ -64,7 +68,8 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 		);
 	}
 
-	public function thankyou_jetpaymentcard_page() {
+	public function thankyou_jetpaymentcard_page( $order_id = 0 ) {
+		jet_checkout_manual_notice( $order_id );
 		if ($this->instructions)
 		echo wpautop(wptexturize($this->instructions));
 	}
@@ -76,6 +81,12 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 	}
 
 	public function is_available() {
+		try {
+			jet_require_eur_context();
+			$jet_minprice = jet_minimum_principal();
+		} catch ( Jet_Financial_Validation_Exception $error ) {
+			return false;
+		}
 		if ('yes' !== $this->enabled) {
 			return false;
 		}
@@ -95,10 +106,9 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 				return false;
 			}
 			$jet_currency_code = get_woocommerce_currency();
-			if ($jet_currency_code != 'EUR' && $jet_currency_code != 'BGN') {
+			if ($jet_currency_code !== 'EUR') {
 				return false;
 			}
-			$jet_minprice = (float)get_option("jet_minprice");
 			if ($this->get_order_total() > 0) {
 				if (($this->get_order_total() < $jet_minprice)) {
 					return false;
@@ -116,41 +126,12 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 		global $woocommerce;
 		$jet_card_price = $woocommerce->cart->get_total('float');
 		$jet_card_currency_code = get_woocommerce_currency();
-		$jet_card_eur = (int)get_option("jet_eur");
-		$jet_card_sign = 'лева';
-		$jet_card_sign_second = 'евро';
-		$jet_card_min_250 = JET_MIN_250;
-		switch ($jet_card_eur) {
-			case 0:
-				$jet_card_sign = 'лева';
-				$jet_card_sign_second = '';
-				break;
-			case 1:
-				if ($jet_card_currency_code == "EUR") {
-					$jet_card_price = number_format($jet_card_price * 1.95583, 2, ".", "");
-				}
-				$jet_card_sign = 'лева';
-				$jet_card_sign_second = 'евро';
-				break;
-			case 2:
-				if ($jet_card_currency_code == "BGN") {
-					$jet_card_price = number_format($jet_card_price / 1.95583, 2, ".", "");
-				}
-				$jet_card_sign = 'евро';
-				$jet_card_sign_second = 'лева';
-				$jet_card_min_250 = JET_MIN_250_EUR;
-				break;
-			case 3:
-				if ($jet_card_currency_code == "BGN") {
-					$jet_card_price = number_format($jet_card_price / 1.95583, 2, ".", "");
-				}
-				$jet_card_sign = 'евро';
-				$jet_card_sign_second = '';
-				$jet_card_min_250 = JET_MIN_250_EUR;
-				break;
-		}
+
+		$jet_card_sign = 'евро';
+
+		$jet_card_initial_term_threshold = JET_INITIAL_TERM_THRESHOLD_EUR;
 		$jet_card_vnoski_default = get_option("jet_vnoski_default");
-		if ($jet_card_price < $jet_card_min_250) {
+		if ($jet_card_price < $jet_card_initial_term_threshold) {
 			$jet_card_vnoski = '9';
 		} else {
 			$jet_card_vnoski = $jet_card_vnoski_default;
@@ -169,21 +150,6 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 				$jet_card_product = new WC_Product($cart_item['product_id']);
 			}
 			$jet_card_products_pr_current = (float)wc_get_price_including_tax($jet_card_product);
-			switch ($jet_card_eur) {
-				case 0:
-					break;
-				case 1:
-					if ($jet_card_currency_code == "EUR") {
-						$jet_card_products_pr_current = $jet_card_products_pr_current * 1.95583;
-					}
-					break;
-				case 2:
-				case 3:
-					if ($jet_card_currency_code == "BGN") {
-						$jet_card_products_pr_current = $jet_card_products_pr_current / 1.95583;
-					}
-					break;
-			}
 			$jet_card_products_pr .= number_format($jet_card_products_pr_current, 2, ".", "") . '_';
 			$jet_card_products_vr .= $jet_card_product_vr_current . '_';
 		}
@@ -197,6 +163,8 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 		<input type="hidden" id="jet_card_products_qt" name="jet_card_products_qt" value="<?php echo $jet_card_products_qt; ?>" />
 		<input type="hidden" id="jet_card_products_pr" name="jet_card_products_pr" value="<?php echo $jet_card_products_pr; ?>" />
 		<input type="hidden" id="jet_card_products_vr" name="jet_card_products_vr" value="<?php echo $jet_card_products_vr; ?>" />
+		<input type="hidden" id="jet_card_offer" name="jet_card_offer" value="" />
+		<input type="hidden" id="jet_card_context" name="jet_card_context" value="checkout_classic" />
 		<div id="jet_panel_card" class="jet_panel">
 			<div class="jet_row jet_row_parva">
 				<div class="jet_column_left">
@@ -207,6 +175,7 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 						class="jet_input_text_active"
 						type="number"
 						min="0"
+						step="0.01"
 						id="jet_card_parva"
 						name="jet_card_parva_input"
 						value=0
@@ -220,28 +189,18 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 			</div>
 			<div class="jet_row">
 				<div class="jet_column_left">
-					<?php if ($jet_card_sign_second == '') { ?>
+
 						Цена на стоките (<?php echo $jet_card_sign; ?>)
-					<?php } else { ?>
-						Цена на стоките (<?php echo $jet_card_sign; ?>
-						<span style='font-size:70%;font-weight:400;height:14px;'>&nbsp;/&nbsp;<?php echo $jet_card_sign_second; ?></span>)
-					<?php } ?>
+
 				</div>
 				<div class="jet_column_right">
 					<input type="hidden" id="jet_card_priceall_input" name="jet_card_priceall_input" />
-					<?php if ($jet_card_eur == 0 || $jet_card_eur == 3) { ?>
+
 						<div class="jet_input_text jet_disable">
 							<div><span id="jet_card_priceall"></span></div>
 							<div></div>
 						</div>
-					<?php } else { ?>
-						<div class="jet_input_text jet_disable">
-							<div><span id="jet_card_priceall"></span></div>
-							<div>
-								<span>/</span><span id="jet_card_priceall_second"></span>
-							</div>
-						</div>
-					<?php } ?>
+
 				</div>
 			</div>
 			<div class="jet_row">
@@ -269,54 +228,34 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 			</div>
 			<div class="jet_row">
 				<div class="jet_column_left">
-					<?php if ($jet_card_sign_second == '') { ?>
+
 						Общо кредит (<?php echo $jet_card_sign; ?>)
-					<?php } else { ?>
-						Общо кредит (<?php echo $jet_card_sign; ?>
-						<span style='font-size:70%;font-weight:400;height:14px;'>&nbsp;/&nbsp;<?php echo $jet_card_sign_second; ?></span>)
-					<?php } ?>
+
 				</div>
 				<div class="jet_column_right">
 					<input type="hidden" id="jet_card_total_credit_price_input" name="jet_card_total_credit_price_input" />
-					<?php if ($jet_card_eur == 0 || $jet_card_eur == 3) { ?>
+
 						<div class="jet_input_text jet_disable">
 							<div><span id="jet_card_total_credit_price"></span></div>
 							<div></div>
 						</div>
-					<?php } else { ?>
-						<div class="jet_input_text jet_disable">
-							<div><span id="jet_card_total_credit_price"></span></div>
-							<div>
-								<span>/</span><span id="jet_card_total_credit_price_second"></span>
-							</div>
-						</div>
-					<?php } ?>
+
 				</div>
 			</div>
 			<div class="jet_row">
 				<div class="jet_column_left">
-					<?php if ($jet_card_sign_second == '') { ?>
+
 						Месечна вноска (<?php echo $jet_card_sign; ?>)
-					<?php } else { ?>
-						Месечна вноска (<?php echo $jet_card_sign; ?>
-						<span style='font-size:70%;font-weight:400;height:14px;'>&nbsp;/&nbsp;<?php echo $jet_card_sign_second; ?></span>)
-					<?php } ?>
+
 				</div>
 				<div class="jet_column_right">
 					<input type="hidden" id="jet_card_vnoska_input" name="jet_card_vnoska_input" />
-					<?php if ($jet_card_eur == 0 || $jet_card_eur == 3) { ?>
+
 						<div class="jet_input_text jet_disable">
 							<div><span id="jet_card_vnoska"></span></div>
 							<div></div>
 						</div>
-					<?php } else { ?>
-						<div class="jet_input_text jet_disable">
-							<div><span id="jet_card_vnoska"></span></div>
-							<div>
-								<span>/</span><span id="jet_card_vnoska_second"></span>
-							</div>
-						</div>
-					<?php } ?>
+
 				</div>
 			</div>
 			<div class="jet_row">
@@ -345,28 +284,18 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 			</div>
 			<div class="jet_row">
 				<div class="jet_column_left">
-					<?php if ($jet_card_sign_second == '') { ?>
+
 						Общо плащания (<?php echo $jet_card_sign; ?>)
-					<?php } else { ?>
-						Общо плащания (<?php echo $jet_card_sign; ?>
-						<span style='font-size:70%;font-weight:400;height:14px;'>&nbsp;/&nbsp;<?php echo $jet_card_sign_second; ?></span>)
-					<?php } ?>
+
 				</div>
 				<div class="jet_column_right">
 					<input type="hidden" id="jet_card_obshto_input" name="jet_card_obshto_input" />
-					<?php if ($jet_card_eur == 0 || $jet_card_eur == 3) { ?>
+
 						<div class="jet_input_text jet_disable">
 							<div><span id="jet_card_obshto"></span></div>
 							<div></div>
 						</div>
-					<?php } else { ?>
-						<div class="jet_input_text jet_disable">
-							<div><span id="jet_card_obshto"></span></div>
-							<div>
-								<span>/</span><span id="jet_card_obshto_second"></span>
-							</div>
-						</div>
-					<?php } ?>
+
 				</div>
 			</div>
 			<div class="jet_row">
@@ -423,63 +352,27 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 				</div>
 			</div>
 		</div>
-		<div id="jet_panel_card_error" class="jet_panel">
+		<div id="jet_panel_card_error" class="jet_panel" hidden style="display:none">
 			<span>Не можете да поръчвате този продукт с ПБ Лични Финанси - на вноски с кредитна карта!</span>
 		</div>
 		<?php
 	}
 
 	public function validate_fields() {
-		if (isset($_POST['jet_card_uslovia']) && $_POST['jet_card_uslovia'] !== '') {
-			$jet_card_uslovia = (int)$_POST['jet_card_uslovia'];
-		} else {
-			$jet_card_uslovia = 0;
-			if (isset(WC()->session)) {
-				if (WC()->session->get('jet_card_uslovia')) {
-					$jet_card_uslovia = (int)WC()->session->get('jet_card_uslovia');
-				} else {
-					$jet_card_uslovia = 0;
-				}
-			} else {
-				$jet_card_uslovia = 0;
-			}
-		}
-		if (isset($_POST['jet_card_uslovia1']) && $_POST['jet_card_uslovia1'] !== '') {
-			$jet_card_uslovia1 = (int)$_POST['jet_card_uslovia1'];
-		} else {
-			$jet_card_uslovia1 = 0;
-			if (isset(WC()->session)) {
-				if (WC()->session->get('jet_card_uslovia1')) {
-					$jet_card_uslovia1 = (int)WC()->session->get('jet_card_uslovia1');
-				} else {
-					$jet_card_uslovia1 = 0;
-				}
-			} else {
-				$jet_card_uslovia1 = 0;
-			}
-		}
-		if (isset($_POST['jet_card_egn']) && $_POST['jet_card_egn'] !== '') {
-			$jet_card_egn = sanitize_text_field($_POST['jet_card_egn']);
-		} else {
-			$jet_card_egn = '';
-			if (isset(WC()->session)) {
-				if (WC()->session->get('jet_card_egn')) {
-					$jet_card_egn = (int)WC()->session->get('jet_card_egn');
-				} else {
-					$jet_card_egn = '';
-				}
-			} else {
-				$jet_card_egn = '';
-			}
-		}
-		if($jet_card_uslovia === 0 || $jet_card_uslovia1 === 0) {
-			wc_add_notice('Необходимо е да се съгласите с "Условия за кандидатстване на ПБ Лични Финанси" и "Защита на физическите лица по отношение на обработката на лични данни"!', 'error' );
+		try {
+			jet_validate_submission_financing( wp_unslash( $_POST ), 'checkout_card' );
+		} catch ( Jet_Financial_Validation_Exception $error ) {
+			wc_add_notice( 'Условията за финансиране са невалидни или променени. Моля, преизчислете.', 'error' );
 			return false;
 		}
-		if($jet_card_egn === '') {
-			wc_add_notice('Необходимо е да попълните ЕГН"!', 'error' );
+
+		try {
+			jet_validate_checkout_customer( wp_unslash( $_POST ), true );
+		} catch ( Jet_Financial_Validation_Exception $error ) {
+			wc_add_notice( 'Попълнете ЕГН и потвърдете двете условия за кандидатстване.', 'error' );
 			return false;
 		}
+
 		return true;
 	}
 
@@ -487,8 +380,8 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 		return jet_checkout_process_submission(
 			$this,
 			$order_id,
-			function ( $order, $bank_recipients, $claim_key, &$notification ) {
-				return $this->process_credit_application( $order, $bank_recipients, $claim_key, $notification );
+			function ( $order, $bank_recipients, $claim_key, &$notification, &$bank_attempted ) {
+				return $this->process_credit_application( $order, $bank_recipients, $claim_key, $notification, $bank_attempted );
 			}
 		);
 	}
@@ -502,7 +395,8 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 	 * @param array    $notification    In-memory secondary message data.
 	 * @return array|null Successful payment result, or null on bank rejection.
 	 */
-	protected function process_credit_application( $order, $bank_recipients, $claim_key, &$notification ) {
+	protected function process_credit_application( $order, $bank_recipients, $claim_key, &$notification, &$bank_attempted = null ) {
+		jet_require_eur_context( $order );
 		$jet_card_fname = filter_input(INPUT_POST, 'billing_first_name', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? $order->get_billing_first_name();
 		$jet_card_lastname = filter_input(INPUT_POST, 'billing_last_name', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? $order->get_billing_last_name();
 		$jet_card_phone = filter_input(INPUT_POST, 'billing_phone', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? $order->get_billing_phone();
@@ -512,206 +406,27 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 		$jet_card_billing_postcode = filter_input(INPUT_POST, 'billing_postcode', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? $order->get_billing_postcode();
 		$jet_card_shipping_city = filter_input(INPUT_POST, 'shipping_city', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? $order->get_shipping_city();
 		$jet_card_shipping_address_1 = filter_input(INPUT_POST, 'shipping_address_1', FILTER_SANITIZE_FULL_SPECIAL_CHARS) ?? $order->get_shipping_address_1();
-		if (isset($_POST['jet_card_priceall_input'])) {
-			$jet_card_priceall = (float)$_POST['jet_card_priceall_input'];
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_priceall') ) {
-					$jet_card_priceall = (float)WC()->session->get('jet_card_priceall');
-					WC()->session->__unset('jet_card_priceall');
-				} else {
-					$jet_card_priceall = 0.00;
-				}
-			} else {
-				$jet_card_priceall = 0.00;
-			}
-		}
-		if (isset($_POST['jet_card_vnoski_input'])) {
-			$jet_card_vnoski = (int)$_POST['jet_card_vnoski_input'];
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_vnoski') ) {
-					$jet_card_vnoski = (int)WC()->session->get('jet_card_vnoski');
-					WC()->session->__unset('jet_card_vnoski');
-				} else {
-					$jet_card_vnoski = 12;
-				}
-			} else {
-				$jet_card_vnoski = 12;
-			}
-		}
-		if (isset($_POST['jet_card_vnoska_input'])) {
-			$jet_card_vnoska = (float)$_POST['jet_card_vnoska_input'];
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_vnoska') ) {
-					$jet_card_vnoska = (float)WC()->session->get('jet_card_vnoska');
-					WC()->session->__unset('jet_card_vnoska');
-				} else {
-					$jet_card_vnoska = 0.00;
-				}
-			} else {
-				$jet_card_vnoska = 0.00;
-			}
-		}
-		if (isset($_POST['jet_card_parva_input'])) {
-			$jet_card_parva = (float)$_POST['jet_card_parva_input'];
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_parva') ) {
-					$jet_card_parva = (float)WC()->session->get('jet_card_parva');
-					WC()->session->__unset('jet_card_parva');
-				} else {
-					$jet_card_parva = 0.00;
-				}
-			} else {
-				$jet_card_parva = 0.00;
-			}
-		}
-		if (isset($_POST['jet_card_total_credit_price_input'])) {
-			$jet_card_total_credit_price = (float)$_POST['jet_card_total_credit_price_input'];
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_total_credit_price') ) {
-					$jet_card_total_credit_price = (float)WC()->session->get('jet_card_total_credit_price');
-					WC()->session->__unset('jet_card_total_credit_price');
-				} else {
-					$jet_card_total_credit_price = 0.00;
-				}
-			} else {
-				$jet_card_total_credit_price = 0.00;
-			}
-		}
-		if (isset($_POST['jet_card_obshto_input'])) {
-			$jet_card_obshto = (float)$_POST['jet_card_obshto_input'];
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_obshto') ) {
-					$jet_card_obshto = (float)WC()->session->get('jet_card_obshto');
-					WC()->session->__unset('jet_card_obshto');
-				} else {
-					$jet_card_obshto = 0.00;
-				}
-			} else {
-				$jet_card_obshto = 0.00;
-			}
-		}
-		if (isset($_POST['jet_card_gpr_input'])) {
-			$jet_card_gpr = (float)$_POST['jet_card_gpr_input'];
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_gpr') ) {
-					$jet_card_gpr = (float)WC()->session->get('jet_card_gpr');
-					WC()->session->__unset('jet_card_gpr');
-				} else {
-					$jet_card_gpr = 0.00;
-				}
-			} else {
-				$jet_card_gpr = 0.00;
-			}
-		}
-		if (isset($_POST['jet_card_glp_input'])) {
-			$jet_card_glp = (float)$_POST['jet_card_glp_input'];
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_glp') ) {
-					$jet_card_glp = (float)WC()->session->get('jet_card_glp');
-					WC()->session->__unset('jet_card_glp');
-				} else {
-					$jet_card_glp = 0.00;
-				}
-			} else {
-				$jet_card_glp = 0.00;
-			}
-		}
-		if (isset($_POST['jet_card_products'])) {
-			$jet_card_products = sanitize_text_field($_POST['jet_card_products']);
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_products') ) {
-					$jet_card_products = WC()->session->get('jet_card_products');
-					WC()->session->__unset('jet_card_products');
-				} else {
-					$jet_card_products = '';
-				}
-			} else {
-				$jet_card_products = '';
-			}
-		}
-		if (isset($_POST['jet_card_products_qt'])) {
-			$jet_card_products_qt = sanitize_text_field($_POST['jet_card_products_qt']);
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_products_qt') ) {
-					$jet_card_products_qt = WC()->session->get('jet_card_products_qt');
-					WC()->session->__unset('jet_card_products_qt');
-				} else {
-					$jet_card_products_qt = '';
-				}
-			} else {
-				$jet_card_products_qt = '';
-			}
-		}
-		if (isset($_POST['jet_card_products_pr'])) {
-			$jet_card_products_pr = sanitize_text_field($_POST['jet_card_products_pr']);
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_products_pr') ) {
-					$jet_card_products_pr = WC()->session->get('jet_card_products_pr');
-					WC()->session->__unset('jet_card_products_pr');
-				} else {
-					$jet_card_products_pr = '';
-				}
-			} else {
-				$jet_card_products_pr = '';
-			}
-		}
-		if (isset($_POST['jet_card_products_vr'])) {
-			$jet_card_products_vr = sanitize_text_field($_POST['jet_card_products_vr']);
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_products_vr') ) {
-					$jet_card_products_vr = WC()->session->get('jet_card_products_vr');
-					WC()->session->__unset('jet_card_products_vr');
-				} else {
-					$jet_card_products_vr = '';
-				}
-			} else {
-				$jet_card_products_vr = '';
-			}
-		}
-		if (isset($_POST['jet_card_egn'])) {
-			$jet_card_egn = sanitize_text_field($_POST['jet_card_egn']);
-		} else {
-			if ( isset( WC()->session ) ) {
-				if ( WC()->session->get('jet_card_egn') ) {
-					$jet_card_egn = WC()->session->get('jet_card_egn');
-					WC()->session->__unset('jet_card_egn');
-				} else {
-					$jet_card_egn = '';
-				}
-			} else {
-				$jet_card_egn = '';
-			}
-		}
+		$financial_source = jet_order_financial_source( $order );
+		$finance = jet_validate_submission_financing( wp_unslash( $_POST ), 'checkout_card', $order );
+		jet_validate_checkout_customer( wp_unslash( $_POST ), true );
+		$jet_card_priceall = $finance['jet_priceall'];
+		$jet_card_vnoski = $finance['jet_vnoski'];
+		$jet_card_vnoska = $finance['jet_vnoska'];
+		$jet_card_parva = $finance['jet_parva'];
+		$jet_card_total_credit_price = $finance['jet_total_credit_price'];
+		$jet_card_obshto = $finance['jet_obshto'];
+		$jet_card_gpr = $finance['jet_gpr'];
+		$jet_card_glp = $finance['jet_glp'];
+		$jet_card_products = sanitize_text_field( wp_unslash( $_POST['jet_card_products'] ) );
+		$jet_card_products_qt = sanitize_text_field( wp_unslash( $_POST['jet_card_products_qt'] ) );
+		$jet_card_products_pr = sanitize_text_field( wp_unslash( $_POST['jet_card_products_pr'] ) );
+		$jet_card_products_vr = sanitize_text_field( wp_unslash( $_POST['jet_card_products_vr'] ) );
+		$jet_card_egn = sanitize_text_field( wp_unslash( $_POST['jet_card_egn'] ) );
+
 		$toEmail_admin = get_bloginfo('admin_email');
 		$jet_id = get_option('jet_id');
-		$jet_card_eur = (int)get_option("jet_eur");
-		$jet_card_sign = 'лева';
-		switch ($jet_card_eur) {
-			case 0:
-				$jet_card_sign = 'лева';
-				break;
-			case 1:
-				$jet_card_sign = 'лева';
-				break;
-			case 2:
-				$jet_card_sign = 'евро';
-				break;
-			case 3:
-				$jet_card_sign = 'евро';
-				break;
-		}
+
+		$jet_card_sign = 'евро';
 		$body = "Данни за потребителя:\r\n";
 		$body .= 'Собствено име: ' . jet_sanitize_bank_email_field( $jet_card_fname ) . ";\r\n";
 		$body .= 'Фамилия: ' . jet_sanitize_bank_email_field( $jet_card_lastname ) . ";\r\n";
@@ -768,7 +483,7 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 			$body .= 'Марка: ' . jet_sanitize_bank_email_field( '(' . $_product[ $index ] . ') ' . $product_m_txt ) . ";\r\n";
 			$body .= 'Единична цена в ' . $jet_card_sign . ' с ДДС: ' . jet_sanitize_bank_email_field( number_format( $product_p_txt, 2, '.', '' ) ) . ";\r\n";
 			$body .= 'Брой стоки: ' . jet_sanitize_bank_email_field( $product_q_txt ) . ";\r\n";
-			$body .= 'Обща сума в ' . $jet_card_sign . ' с ДДС: ' . jet_sanitize_bank_email_field( number_format( (float) $product_q_txt * (float) $product_p_txt, 2, '.', '' ) ) . ";\r\n\r\n";
+			$body .= 'Обща сума в ' . $jet_card_sign . ' с ДДС: ' . jet_sanitize_bank_email_field( number_format( (float) $financial_source['lines'][$index]['subtotal'], 2, '.', '' ) ) . ";\r\n\r\n";
 		}
 		$body .= "Тип стока: Кредитна Карта;\r\n";
 		$body .= "Марка: -;\r\n";
@@ -780,20 +495,19 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 		$body .= 'Срок на изплащане в месеца: ' . jet_sanitize_bank_email_field( $jet_card_vnoski ) . ";\r\n";
 		$body .= 'Месечна вноска в ' . $jet_card_sign . ': ' . jet_sanitize_bank_email_field( number_format( $jet_card_vnoska, 2, '.', '' ) ) . ";\r\n";
 		$body .= 'Първоначална вноска в ' . $jet_card_sign . ': ' . jet_sanitize_bank_email_field( number_format( (float) $jet_card_parva, 2, '.', '' ) ) . ";\r\n";
-		$jet_card_count = (int)get_option("jet_count") + 1;
-		update_option("jet_count", $jet_card_count);
-		$subject = $jet_id . ", онлайн заявка по поръчка $jet_card_count";
 		$headers = [
 			'MIME-Version: 1.0',
 			'Content-type: text/plain; charset=utf-8',
 			'From: ' . mb_encode_mimeheader($jet_id,"UTF-8") . ' <' . $toEmail_admin . '>',
 		];
-		if ( wp_mail( $bank_recipients, $subject, $body, $headers ) ) {
-			jet_checkout_submission_state( $claim_key, 'bank_sent' );
+		$delivery = jet_submission_deliver( $bank_recipients, $jet_id, $body, $headers, $subject, $bank_attempted );
+		if ( 'bank_failed' !== $delivery ) {
+			if ( 'bank_sent' === $delivery ) { jet_checkout_submission_state( $claim_key, 'bank_sent' ); }
 			$new_status = 'wc-' === substr( $this->order_status, 0, 3 ) ? substr( $this->order_status, 3 ) : $this->order_status;
 			$order->update_status( $new_status, 'Статусът на поръчката е зададен от платежния метод ПБ Лични Финанси - на вноски с кредитна карта.' );
 			WC()->cart->empty_cart();
 			$notification = array(
+				'manual'   => 'manual_registered' === $delivery,
 				'admin'    => get_bloginfo( 'admin_email' ),
 				// phpcs:ignore WordPress.Security.NonceVerification.Missing,WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- WooCommerce validates checkout; delivery validates the raw single address without changing the bank template.
 				'customer' => isset( $_POST['billing_email'] ) ? wp_unslash( $_POST['billing_email'] ) : $order->get_billing_email(),
@@ -801,10 +515,7 @@ class Jet_Card_Payment_Gateway extends WC_Payment_Gateway {
 				'body'     => $body,
 				'headers'  => $headers,
 			);
-			return array(
-				'result'   => 'success',
-				'redirect' => $this->get_return_url($order),
-			);
+			return jet_checkout_submission_result( $this, $order, 'manual_registered' === $delivery );
 		}
 	}
 }

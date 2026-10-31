@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
 const { JSDOM, VirtualConsole } = require('jsdom');
+const { rules, quote } = require('./eur-js-fixtures.cjs');
 
 (async () => {
 	const cart = !!process.env.JET_TEST_CART;
@@ -43,7 +44,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 	window.console.error = () => {};
 	window.eval(fs.readFileSync(process.env.JET_TEST_JQUERY || path.resolve(__dirname, '../../../../wp-includes/js/jquery/jquery.min.js'), 'utf8'));
 	const $ = window.jQuery;
-	window.jet_js = { ajax_url: '/wp-admin/admin-ajax.php', nonce: 'valid' };
+	window.jet_js = { ajax_url: '/wp-admin/admin-ajax.php', nonce: 'valid', rules, available: true };
 	window.jet_cart_js = window.jet_js;
 	const requests = [];
 	let calculateRequests = 0;
@@ -56,9 +57,10 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 		}
 		calculateRequests++;
 		return $.Deferred().resolve(options.data.action === 'jet_get_nonce'
-			? { success: true, data: { nonce: 'valid' } } : { success: 'noop' }).promise();
+			? { success: true, data: { nonce: 'valid' } } : quote(options.data)).promise();
 	};
 	const source = fs.readFileSync(path.resolve(__dirname, cart ? '../js/jetcredit_cart.js' : '../js/jetcredit_product.js'), 'utf8');
+	window.eval(fs.readFileSync(path.resolve(__dirname, '../js/jetcredit_offers.js'), 'utf8'));
 	window.eval(source);
 	if (process.env.JET_TEST_DUPLICATE_SCRIPT) window.eval(source);
 	await new Promise((resolve) => $(resolve));
@@ -81,6 +83,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 		for (let i = 0; i < 5; i++) await updateNotice();
 		const before = calculateRequests;
 		click(document.getElementById('btn_jet'));
+		await new Promise((resolve) => window.setTimeout(resolve, 10));
 		assert.equal(calculateRequests, before + 1, 'Cart updates must not accumulate button handlers');
 	}
 	readyForm();
@@ -123,11 +126,19 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 		acknowledge();
 		assert.equal(send.disabled, false);
 		assert.equal(document.activeElement, send);
+		$('#jet_parva').val('100').trigger('input');
+		assert.equal(send.disabled, true, 'Editing a pending attempt must block retry with changed inputs');
+		$('#jet_parva').val('0').trigger('input');
+		assert.equal(send.disabled, false, 'Restoring pending inputs must allow the same retry');
+
 		click(pageAction);
 		assert.equal(actions, 1, 'Cart error acknowledgement must release the page');
+		await updateNotice();
+		assert.notEqual($('#jet_step_2').css('display'), 'none', 'A pending retry must survive later cart fragments');
+		assert.equal(send.disabled, false, 'Cart fragments must permit checking the pending submission');
 		click(send);
 		assert.equal(requests[1].data.get('jet_submission_id'), firstId, 'Cart retry must keep its identity');
-		requests[1].success({ success: 'unsuccess', code: 'processing' });
+		requests[1].success({ success: 'unsuccess', code: process.env.JET_TEST_MANUAL ? 'manual_registration_failed' : 'processing' });
 		assert.match(document.querySelector('[role="alertdialog"]').textContent, /проверка/);
 		acknowledge();
 		ajaxThrows = true;
@@ -137,7 +148,8 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 		ajaxThrows = false;
 		click(send);
 		assert.equal(requests[2].data.get('jet_submission_id'), firstId);
-		requests[2].success({ success: 'success' });
+		requests[2].success(process.env.JET_TEST_MANUAL ? { success: 'success', code: 'manual_registered', message: 'Заявката е регистрирана в магазина за ръчна обработка. Не е изпратена до банката.' } : { success: 'success' });
+		assert.match(document.querySelector('[role="alertdialog"]').textContent, process.env.JET_TEST_MANUAL ? /ръчна обработка.*Не е изпратена/ : /Успешно изпратихте/);
 		click(pageAction);
 		assert.equal(actions, 1, 'Cart result must remain modal');
 		acknowledge();
@@ -153,7 +165,8 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 		return;
 	}
 
-	requests[0].success({ success: 'success' });
+	requests[0].success(process.env.JET_TEST_MANUAL ? { success: 'success', code: 'manual_registered', message: 'Заявката е регистрирана в магазина за ръчна обработка. Не е изпратена до банката.' } : { success: 'success' });
+	assert.match(document.querySelector('[role="alertdialog"]').textContent, process.env.JET_TEST_MANUAL ? /ръчна обработка.*Не е изпратена/ : /Успешно изпратихте/);
 	assert.ok(document.querySelector('[role="alertdialog"]'));
 	assert.equal(send.disabled, true, 'Lock must remain until result is acknowledged');
 	click(pageAction);
@@ -167,6 +180,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 	click(pageAction);
 	assert.equal(actions, 1, 'Page interactions must resume');
 
+	await new Promise((resolve) => window.setTimeout(resolve, 10));
 	// A network failure must unlock after acknowledgement and keep its retry identity.
 	readyForm();
 	click(send);
@@ -177,9 +191,13 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 	acknowledge();
 	assert.equal(send.disabled, false);
 	assert.equal(document.activeElement, send, 'Focus should return after an error');
+	$('#jet_parva').val('100').trigger('input');
+	assert.equal(send.disabled, true, 'Changed pending inputs must block retry');
+	$('#jet_parva').val('0').trigger('input');
+	assert.equal(send.disabled, false, 'Unchanged pending inputs must allow retry');
 	click(send);
 	assert.equal(requests[2].data.get('jet_submission_id'), retryId, 'Network retry must reuse the original identity');
-	requests[2].success({ success: 'unsuccess', code: 'processing' });
+	requests[2].success({ success: 'unsuccess', code: process.env.JET_TEST_MANUAL ? 'manual_registration_failed' : 'processing' });
 	assert.match(document.querySelector('[role="alertdialog"]').textContent, /проверка/);
 	acknowledge();
 	click(send);
@@ -187,6 +205,7 @@ const { JSDOM, VirtualConsole } = require('jsdom');
 	requests[3].success({ success: 'success' });
 	acknowledge();
 
+	await new Promise((resolve) => window.setTimeout(resolve, 10));
 	readyForm();
 	ajaxThrows = true;
 	click(send);

@@ -314,3 +314,85 @@ input[type="checkbox"].jet_uslovia {
 .jet_uslovia_a:focus {
 	outline: none !important;
 }
+
+/* Blocks reuse the Classic controls; responsive overrides stay inside this panel. */
+.jet_blocks_panel {
+	container-type: inline-size;
+	min-width: 0;
+}
+
+.jet_blocks_panel .jet_row {
+	align-items: center;
+}
+
+.jet_blocks_panel .jet_column_left,
+.jet_blocks_panel .jet_column_right,
+.jet_blocks_panel .jet_column_right > input,
+.jet_blocks_panel .jet_input_text,
+.jet_blocks_panel .jet_input_text > div:first-child {
+	min-width: 0;
+}
+
+.jet_blocks_panel .jet_column_left {
+	height: auto !important;
+	min-height: 38px;
+	overflow-wrap: anywhere;
+}
+
+.jet_blocks_panel .jet_column_right > input,
+.jet_blocks_panel select.jet_input_text {
+	box-sizing: border-box;
+	width: 100%;
+	max-width: 100%;
+}
+
+.jet_blocks_panel .jet_row_parva .jet_column_right {
+	flex-wrap: nowrap !important;
+	gap: 3px !important;
+	height: auto !important;
+	min-height: 38px;
+}
+
+.jet_blocks_panel .jet_row_parva input {
+	width: 0;
+}
+
+.jet_blocks_panel .jet_button_preizcisli {
+	flex: 0 0 auto;
+	width: auto !important;
+	max-width: 100%;
+	margin: 0 !important;
+	white-space: nowrap;
+}
+
+.jet_blocks_panel .jet_input_text.jet_disable {
+	height: auto !important;
+	min-height: 32px;
+}
+
+.jet_blocks_panel output {
+	max-width: 100%;
+	line-height: 14px;
+	overflow-wrap: anywhere;
+}
+
+@container (max-width: 360px) {
+	.jet_blocks_panel .jet_row_parva {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.jet_blocks_panel .jet_row_parva .jet_column_left {
+		min-height: 28px;
+	}
+}
+
+@container (max-width: 220px) {
+	.jet_blocks_panel .jet_row_parva .jet_column_right {
+		flex-wrap: wrap !important;
+	}
+
+	.jet_blocks_panel .jet_row_parva input {
+		flex-basis: 100% !important;
+	}
+}

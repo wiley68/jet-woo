@@ -21,6 +21,9 @@ function checkout_concurrent_wait( $path ) {
 	do {
 		clearstatcache( true, $path );
 		if ( file_exists( $path ) ) { return; }
+		if ( '.bank' === substr( $path, -5 ) && file_exists( substr( $path, 0, -5 ) . '.result' ) ) {
+			throw new RuntimeException( 'Worker stopped before bank delivery: ' . file_get_contents( substr( $path, 0, -5 ) . '.result' ) );
+		}
 		usleep( 1000 );
 	} while ( microtime( true ) < $deadline );
 	throw new RuntimeException( 'Checkout worker barrier timed out: ' . basename( $path ) );
@@ -35,7 +38,7 @@ foreach ( array( 'standard', 'card' ) as $method ) {
 			$db = checkout_concurrent_connect( $path );
 			$db->exec( 'CREATE TABLE wp_options (option_name TEXT PRIMARY KEY, option_value TEXT, autoload TEXT)' );
 			$db->exec( 'CREATE TABLE effects (kind TEXT)' );
-			foreach ( $case['options'] as $key => $value ) { update_option( $key, $value ); }
+			foreach ( $records as $key => $value ) { update_option( $key, $value ); }
 			$wpdb->connection = $db = null;
 			$worker = pcntl_fork();
 			checkout_concurrent_expect( -1 !== $worker, 'Cannot fork checkout worker.' );

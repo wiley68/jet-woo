@@ -31,6 +31,9 @@ function concurrent_wait( $path ) {
 	do {
 		clearstatcache( true, $path );
 		if ( file_exists( $path ) ) { return; }
+		if ( '.bank' === substr( $path, -5 ) && file_exists( substr( $path, 0, -5 ) . '.result' ) ) {
+			throw new RuntimeException( 'Worker stopped before bank delivery: ' . file_get_contents( substr( $path, 0, -5 ) . '.result' ) );
+		}
 		usleep( 1000 );
 	} while ( microtime( true ) < $deadline );
 	throw new RuntimeException( 'Worker barrier timed out: ' . basename( $path ) );
@@ -43,9 +46,11 @@ foreach ( array( 'product', 'cart' ) as $context ) {
 		$db->exec( 'CREATE TABLE wp_options (option_name TEXT PRIMARY KEY, option_value TEXT, autoload TEXT)' );
 		$db->exec( 'CREATE TABLE effects (kind TEXT)' );
 		$case = $baseline['cases'][ $context . '-standard' ];
-		foreach ( $case['options'] as $key => $value ) { update_option( $key, $value ); }
+		jet_test_setup_source( $case, $context );
+		foreach ( $records as $key => $value ) { update_option( $key, $value ); }
 		$_POST = $case['post'];
 		$woocommerce->cart = new JetTestCart();
+		jet_test_issue_offer( $context, false );
 		// Each child opens its own connection, like independent PHP request workers.
 		$wpdb->connection = $db = null;
 		$worker = pcntl_fork();
@@ -65,7 +70,8 @@ foreach ( array( 'product', 'cart' ) as $context ) {
 					if ( 'admin' === $kind ) { throw new RuntimeException( 'Secondary hook failure in primary worker.' ); }
 					return true;
 				};
-				concurrent_expect( 'success' === concurrent_submit( $context )['success'], 'Primary worker failed.' );
+				$result = concurrent_submit( $context );
+				concurrent_expect( 'success' === $result['success'], 'Primary worker failed: ' . ( $result['code'] ?? 'unknown' ) );
 				file_put_contents( $path . '.result', 'success' );
 				exit( 0 );
 			} catch ( Throwable $error ) {

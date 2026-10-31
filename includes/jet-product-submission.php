@@ -6,7 +6,7 @@
  */
 
 /**
- * Claim an application before sending mail or creating an order.
+ * Compute the unchanged application identity for lookup and atomic claiming.
  *
  * INSERT IGNORE relies on the unique option_name index, so simultaneous PHP
  * workers cannot both claim the same application. A transient or a nonce alone
@@ -14,11 +14,9 @@
  *
  * @param array  $data    Unslashed request data, after nonce verification in the AJAX handler.
  * @param string $context Application source: product or cart.
- * @return string Option name owned by this request.
+ * @return string Deterministic option name; this function does not claim it.
  */
-function jet_claim_product_submission( $data, $context = 'product' ) {
-	global $wpdb;
-
+function jet_product_submission_key( $data, $context = 'product' ) {
 	$submission_id = isset( $data['jet_submission_id'] ) ? $data['jet_submission_id'] : '';
 	if ( ! is_string( $submission_id ) || ( '' !== $submission_id && ! preg_match( '/^[a-f0-9]{16,64}$/', $submission_id ) ) ) {
 		wp_send_json(
@@ -64,7 +62,26 @@ function jet_claim_product_submission( $data, $context = 'product' ) {
 		}
 	}
 
-	$key = 'jet_submission_' . hash_hmac( 'sha256', wp_json_encode( $identity ), wp_salt( 'nonce' ) );
+	return 'jet_submission_' . hash_hmac( 'sha256', wp_json_encode( $identity ), wp_salt( 'nonce' ) );
+}
+
+/** Read an existing delivery result before revalidating a cart already emptied by success. */
+function jet_product_submission_status( $data, $context = 'product' ) {
+	$key = jet_product_submission_key( $data, $context );
+	wp_cache_delete( $key, 'options' );
+	wp_cache_delete( 'notoptions', 'options' );
+	$response = get_option( $key );
+	if ( false === $response ) {
+		return null;
+	}
+	return is_array( $response ) ? $response : array( 'success' => 'unsuccess', 'code' => 'uncertain' );
+}
+
+/** Own an application atomically before any mail or order side effects. */
+function jet_claim_product_submission( $data, $context = 'product' ) {
+	global $wpdb;
+	$key = jet_product_submission_key( $data, $context );
+	$submission_id = isset( $data['jet_submission_id'] ) ? $data['jet_submission_id'] : '';
 	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Atomic claim requires INSERT IGNORE, not the Options API upsert.
 	$result = $wpdb->query(
 		$wpdb->prepare(

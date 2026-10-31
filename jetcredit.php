@@ -3,13 +3,13 @@
  * Plugin Name: ПБ Лични Финанси
  * Plugin URI: https://avalonbg.com/software/cc-woo.html
  * Description: Дава възможност на Вашите клиенти да закупуват стока на изплащане с ПБ Лични Финанси
- * Version: 1.9.3
+ * Version: 2.0.0
  * Author: Ilko Ivanov
  * Author URI: https://avalonbg.com
  * Text Domain: jetcredit
  * Domain Path: /languages
- * License: GPL-2.0+
- * License URI: https://www.gnu.org/licenses/gpl-2.0.html
+ * License: GPL-3.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-3.0.html
  *
  * @package jetcredit
  */
@@ -39,10 +39,8 @@ define( 'JET_PLUGIN_PATH', plugin_dir_path(__FILE__) );
 define( 'JET_IMAGES_URI', JET_PLUGIN_URL . 'images/' );
 define( 'JET_CSS_URI', JET_PLUGIN_URL . 'css/' );
 define( 'JET_JS_URI', JET_PLUGIN_URL . 'js/' );
-define( 'JET_VERSION', '1.9.3' );
-define( 'JET_MINPRICE', 75.00 );
-define( 'JET_MIN_250', 250.00 );
-define( 'JET_MIN_250_EUR', 125.00 );
+define( 'JET_VERSION', '2.0.0' );
+require_once JET_INCLUDES_DIR . '/jet-financial-rules.php';
 
 $jet_files = [
 	'/functions.php',
@@ -54,11 +52,11 @@ foreach ( $jet_files as $file ) {
 }
 
 register_activation_hook( __FILE__, 'jet_create_tables' );
-register_deactivation_hook( __FILE__, 'jet_remove_tables' );
 
 function jet_declare_cart_checkout_blocks_compatibility() {
 	if ( class_exists( '\Automattic\WooCommerce\Utilities\FeaturesUtil' ) ) {
 		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'cart_checkout_blocks', __FILE__, true );
+		\Automattic\WooCommerce\Utilities\FeaturesUtil::declare_compatibility( 'custom_order_tables', __FILE__, true );
 	}
 }
 add_action( 'before_woocommerce_init', 'jet_declare_cart_checkout_blocks_compatibility' );

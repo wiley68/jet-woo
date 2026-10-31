@@ -60,21 +60,26 @@ set_error_handler( function ( $severity, $message, $file, $line ) {
 	throw new ErrorException( $message, 0, $severity, $file, $line );
 } );
 
-// C01-C04: independent original template for each gateway and currency/data branch.
+// C01-C04: EUR equivalents of historical product/data branches. BGN/session-only originals are explicitly rejected below.
 foreach ( $baseline['cases'] as $name => $case ) {
+	$gateway = checkout_reset( $case );
+	$original = jet_test_original_bank_mail( 'checkout_classic', $gateway );
+	if ( false !== strpos( $name, '-eur-' ) ) {
+		checkout_expect( $original[1] === $case['mail'][1] && $original[2] === $case['mail'][2] && $original[3] === array_slice( $case['mail'][3], 0, 3 ), "$name: frozen EUR golden differs from v1.9.3 EUR template." );
+	}
 	$gateway = checkout_reset( $case );
 	$mail_behavior = function ( $mail ) { checkout_mail_order( $mail ); return true; };
 	checkout_expect( checkout_ok( $gateway ) === $case['result'], "$name: successful redirect changed." );
 	checkout_expect( 3 === count( $mails ), "$name: expected three independent messages." );
 	$bank = $mails[0]; $admin = $mails[1]; $customer = $mails[2];
 	checkout_expect( array( 'bank@example.test' ) === $bank[0], "$name: wrong bank recipient." );
-	checkout_expect( $bank[1] === $case['mail'][1], "$name: bank subject not byte-identical." );
-	checkout_expect( $bank[2] === $case['mail'][2], "$name: bank body not byte-identical." );
-	checkout_expect( $bank[3] === array_slice( $case['mail'][3], 0, 3 ), "$name: MIME/Content-type/From changed." );
+	checkout_expect( $bank[1] === $original[1], "$name: bank subject not byte-identical." );
+	checkout_expect( $bank[2] === $original[2], "$name: bank body not byte-identical." );
+	checkout_expect( $bank[3] === $original[3], "$name: MIME/Content-type/From changed." );
 	checkout_expect( 1 === preg_match( '//u', $bank[2] ) && ! preg_match( '/(?<!\r)\n|\r(?!\n)/', $bank[2] ), "$name: UTF-8/CRLF damaged." );
 	checkout_expect( false !== strpos( $bank[2], ";\r\n\r\n" ), "$name: semicolon/empty row damaged." );
 	foreach ( $mails as $mail ) { checkout_no_copies( $mail ); }
-	$expected = explode( "\r\n", $case['mail'][2] );
+	$expected = explode( "\r\n", $original[2] );
 	array_splice( $expected, 1, 5, array( 'Собствено име: ********;', 'Фамилия: ********;', 'ЕГН: **********;', 'Телефон за връзка: **********;', 'Имейл адрес: ********;' ) );
 	checkout_expect( $admin[0] === 'shop@example.test' && $admin[1] === $bank[1] && $admin[2] === implode( "\r\n", $expected ) && $admin[3] === $bank[3], "$name: incorrect administrator copy." );
 	$confirmation = "Здравейте,\r\n\r\nВашата заявка за кредитно финансиране чрез ПБ Лични Финанси беше подадена успешно за обработка.\r\n\r\nТова съобщение потвърждава подаването на заявката, но не означава, че кредитът е одобрен.\r\n\r\nБлагодарим Ви!";
@@ -96,10 +101,38 @@ foreach ( $baseline['cases'] as $name => $case ) {
 	checkout_expect( empty( $scheduled ), "$name: checkout scheduled new background work." );
 	checkout_expect( checkout_ok( $gateway ) === $case['result'], "$name: replay redirect changed." );
 	checkout_expect( 3 === $mail_calls && 1 === $checkout_wc->cart->empties && 1 === count( $checkout_orders[314]->statuses ) && 41 === $records['jet_count'], "$name: replay repeated primary or secondary effects." );
-	echo "PASS C01-C04/C06 $name: original bytes/headers, limited masking, confirmation, status/redirect/cart, replay.\n";
+	echo "PASS C01-C04/C06 EUR/request equivalent of $name: original bytes/headers, limited masking, confirmation, status/redirect/cart, replay.\n";
 }
 foreach ( array( 'standard', 'card' ) as $method ) {
 	$case = $baseline['cases'][$method . '-bgn-normal'];
+	$prefix = 'card' === $method ? 'jet_card_' : 'jet_';
+	foreach ( array( 'unsigned', 'expired', 'manipulated', 'legacy-session', 'non-eur', 'non-eur-order', 'stale-order', 'changed-scheme' ) as $invalid ) {
+		$gateway = checkout_reset( $case );
+		if ( 'unsigned' === $invalid ) { unset( $_POST[$prefix . 'offer'] ); }
+		if ( 'expired' === $invalid ) { $_POST[$prefix . 'offer'] = jet_test_expired_offer( $_POST[$prefix . 'offer'] ); }
+		if ( 'manipulated' === $invalid ) { $_POST[$prefix . 'offer'] .= 'x'; }
+		if ( 'legacy-session' === $invalid ) {
+			$session_case = $baseline['cases'][$method . '-eur-session'];
+			$checkout_wc->session = new JetCheckoutTestSession( $session_case['session'] );
+			$_POST = $session_case['post'];
+		}
+		if ( 'non-eur-order' === $invalid ) { $checkout_orders[314]->currency = 'BGN'; }
+		if ( 'stale-order' === $invalid ) { $checkout_orders[314]->total++; }
+		if ( 'changed-scheme' === $invalid ) {
+			$wrong = jet_create_verified_offer( 'checkout_classic', array(), 50.10, 12, 'card' !== $method );
+			$_POST[$prefix . 'offer'] = $wrong;
+		}
+		if ( 'non-eur' === $invalid ) { $records['woocommerce_currency'] = $test_currency = 'BGN'; }
+		$reasons = array( 'unsigned' => 'invalid_offer', 'expired' => 'stale_offer', 'manipulated' => 'invalid_offer', 'legacy-session' => 'invalid_offer_context', 'non-eur' => 'non_eur_currency', 'non-eur-order' => 'non_eur_order_currency', 'stale-order' => 'stale_offer', 'changed-scheme' => 'stale_offer' );
+		try {
+			jet_validate_submission_financing( $_POST, 'card' === $method ? 'checkout_card' : 'checkout_classic', $checkout_orders[314] );
+			throw new RuntimeException( 'Invalid checkout financing unexpectedly validated.' );
+		} catch ( Jet_Financial_Validation_Exception $error ) {
+			checkout_expect( $reasons[$invalid] === $error->getMessage(), "$method/$invalid: rejected for the wrong reason: " . $error->getMessage() );
+		}
+		checkout_failed( $gateway );
+		checkout_expect( 0 === $mail_calls && empty( $checkout_orders[314]->statuses ) && 0 === $checkout_wc->cart->empties && false === checkout_record(), "$method/$invalid: invalid offer left delivery/order/uncertain state." );
+	}
 	// C02/C04/C05: raw applicant input is validated, never sanitized into a new recipient.
 	foreach ( array( 'changed@example.test', "o'connor@example.test", 'bad-address', '', 'one@example.test,two@example.test', 'one@example.test;two@example.test', "one@example.test\r\nBcc: other@example.test", "one@example.test\r\n", "one@example.test\0", array( 'one@example.test' ), 'Name <one@example.test>' ) as $email ) {
 		$gateway = checkout_reset( $case );
@@ -122,7 +155,7 @@ foreach ( array( 'standard', 'card' ) as $method ) {
 	$checkout_orders[314]->fields['billing_email'] = 'first@example.test,second@example.test';
 	checkout_ok( $gateway );
 	checkout_expect( 2 === $mail_calls, "$method: invalid order-email fallback accepted." );
-	foreach ( array( false, '', 'bad', array( 'bank@example.test' ), 'bank@example.test,', 'bank@example.test, invalid', "bank@example.test\r\nBcc: other@example.test" ) as $configured ) {
+	foreach ( array( false, 'bad', array( 'bank@example.test' ), 'bank@example.test,', 'bank@example.test, invalid', "bank@example.test\r\nBcc: other@example.test" ) as $configured ) {
 		$gateway = checkout_reset( $case );
 		$records['jet_email'] = $configured;
 		checkout_failed( $gateway );
