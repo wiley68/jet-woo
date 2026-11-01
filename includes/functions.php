@@ -363,7 +363,7 @@ function jet_credit_button() {
 						<?php } ?>
 					</div>
 					<?php if (1 === (int) $is_vnoska) { ?>
-						<div class="jet_wide_button_text">
+						<div class="jet_wide_button_text jet_button_installment" style="display: none;">
 
 								<span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?>
 
@@ -384,7 +384,7 @@ function jet_credit_button() {
 							<?php } ?>
 						</div>
 						<?php if (1 === (int) $is_vnoska) { ?>
-							<div class="jet_wide_button_text">
+							<div class="jet_wide_button_text jet_button_installment" style="display: none;">
 
 									<span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?>
 
@@ -407,7 +407,7 @@ function jet_credit_button() {
 					</td>
 				</tr>
 				<?php if ($is_vnoska == 1) { ?>
-				<tr>
+				<tr class="jet_button_installment" style="display: none;">
 					<td class="jet_button_table">
 
 							<p><span id="jet_vnoski_text"></span> x <span id="jet_vnoska"></span> <?php echo $jet_sign; ?></p>
@@ -430,7 +430,7 @@ function jet_credit_button() {
 					</td>
 				</tr>
 				<?php if ($is_vnoska == 1) { ?>
-				<tr>
+				<tr class="jet_button_installment" style="display: none;">
 					<td class="jet_button_table">
 
 							<p><span id="jet_vnoski_text_card"></span> x <span id="jet_vnoska_card"></span> <?php echo $jet_sign; ?></p>

@@ -96,6 +96,16 @@
 		if (code === 'stale_financial_values' || code === 'stale_financial_products') return 'Цената или избраните опции не могат да бъдат потвърдени. Преизчислете или се свържете с магазина.';
 		return 'Няма актуална потвърдена оферта. Моля, преизчислете условията.';
 	};
+	const popupLoading = (loading) => {
+		const popup = $('#jet-product-popup-container');
+		if (loading && !popup.find('.jet_offer_loader').length) {
+			const content = popup.find('.modalpayment-content_jet').first();
+			$('<div>', { class: 'jet_offer_loader', role: 'status', 'aria-live': 'polite' })
+				.append($('<span>', { text: 'Преизчисляване…' }))
+				.appendTo(content.length ? content : popup);
+		}
+		popup.toggleClass('jet_offer_loading', loading).attr('aria-busy', loading ? 'true' : 'false');
+	};
 	const id = () => {
 		const bytes = new Uint8Array(16);
 		window.crypto.getRandomValues(bytes);
@@ -108,5 +118,5 @@
 		const number = Number(text);
 		return text && Number.isFinite(number) ? number.toFixed(2) : null;
 	};
-	window.JetCreditOffers = { Client, fields, terms, money, message, id, decimalFromText };
+	window.JetCreditOffers = { Client, fields, terms, money, message, popupLoading, id, decimalFromText };
 })(window, jQuery);

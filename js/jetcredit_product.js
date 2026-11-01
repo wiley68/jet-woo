@@ -122,18 +122,30 @@ jQuery(document).ready(function ($) {
 		return ["jet_card", "jet_product_id", "jet_variation_id", "jet_quantity", "jet_vnoski", "jet_parva", "jet_expected_amount"].every((key) => inputs[key] === jetSubmission.attempt[key] || (inputs[key] !== undefined && jetSubmission.attempt[key] !== undefined && Number(inputs[key]) === Number(jetSubmission.attempt[key])));
 	};
 	const offerStatus = (text) => {
+		if (!text) { $('#jet_offer_status').remove(); return; }
 		if (!$('#jet_offer_status').length) $('<div>', { id: 'jet_offer_status', role: 'status' }).prependTo('#jet_step_1');
 		$('#jet_offer_status').text(text);
 	};
+	const updateButtonInstallments = (quote) => {
+		const hasTerm = quote && Number(quote.jet_vnoski) > 0;
+		$('#jet_vnoski_text').closest('.jet_button_installment').toggle(Boolean(hasTerm && Number(quote.jet_vnoska_regular) > 0));
+		$('#jet_vnoski_text_card').closest('.jet_button_installment').toggle(Boolean(hasTerm && Number(quote.jet_vnoska_card) > 0));
+	};
+	let calculationRevision = 0;
 	const invalidateOffer = () => {
+		++calculationRevision;
 		offers.invalidate();
+		window.JetCreditOffers.popupLoading(false);
+		updateButtonInstallments(null);
 		if (!jetSubmission.locked) $('#buy_jetcredit, #buy2_jetcredit').prop('disabled', true);
 	};
 	const jetCalculate = async () => {
 		if (jetSubmission.locked) return;
 		if (jetSubmission.attempt) { invalidateOffer(); changeBtnJetcreditBuy(); return; }
 		invalidateOffer();
-		offerStatus('Преизчисляване…');
+		const revision = calculationRevision;
+		offerStatus('');
+		window.JetCreditOffers.popupLoading(true);
 		try {
 			const json = await offers.calculate(offerInputs());
 			if (!json) return;
@@ -142,6 +154,7 @@ jQuery(document).ready(function ($) {
 			$('#jet_vnoska').text(json.jet_vnoska_regular);
 			$('#jet_vnoska_card').text(json.jet_vnoska_card || '');
 			$('#jet_vnoski_text, #jet_vnoski_text_card').text(json.jet_vnoski);
+			updateButtonInstallments(json);
 			for (const name of ['priceall', 'total_credit_price', 'gpr', 'glp', 'obshto']) $('#jet_' + name).text(json['jet_' + name]);
 			$('#jet_vnoska_popup').text(json.jet_vnoska);
 			$('#jet-product-button-container').toggle(Number(json.jet_priceall) >= Number(rules.min_principal));
@@ -151,6 +164,8 @@ jQuery(document).ready(function ($) {
 		} catch (error) {
 			if (error.result && error.result.jet_allowed_terms) window.JetCreditOffers.terms(document.getElementById('jet_vnoski'), Number(error.result.jet_priceall), rules);
 			offerStatus(window.JetCreditOffers.message(error, rules));
+		} finally {
+			if (revision === calculationRevision) window.JetCreditOffers.popupLoading(false);
 		}
 	};
 

@@ -190,11 +190,15 @@ jQuery(document).ready(function ($) {
 		return ["jet_card", "jet_vnoski", "jet_parva"].every((key) => inputs[key] === jetSubmission.attempt[key] || (inputs[key] !== undefined && jetSubmission.attempt[key] !== undefined && Number(inputs[key]) === Number(jetSubmission.attempt[key])));
 	};
 	const offerStatus = (text) => {
+		if (!text) { $('#jet_offer_status').remove(); return; }
 		if (!$('#jet_offer_status').length) $('<div>', { id: 'jet_offer_status', role: 'status' }).prependTo('#jet_step_1');
 		$('#jet_offer_status').text(text);
 	};
+	let calculationRevision = 0;
 	const invalidateOffer = () => {
+		++calculationRevision;
 		offers.invalidate();
+		window.JetCreditOffers.popupLoading(false);
 		if (!jetSubmission.locked) {
 			$('#buy_jetcredit, #buy2_jetcredit').prop('disabled', true);
 			if (jetSubmission.attempt) changeBtnJetcreditBuy();
@@ -203,7 +207,10 @@ jQuery(document).ready(function ($) {
 	const jetCalculate = async () => {
 		if (jetSubmission.locked) return;
 		if (jetSubmission.attempt) { invalidateOffer(); changeBtnJetcreditBuy(); return; }
-		invalidateOffer(); offerStatus('Преизчисляване…');
+		invalidateOffer();
+		const revision = calculationRevision;
+		offerStatus('');
+		window.JetCreditOffers.popupLoading(true);
 		try {
 			const json = await offers.calculate(offerInputs());
 			if (!json) return;
@@ -219,6 +226,8 @@ jQuery(document).ready(function ($) {
 		} catch (error) {
 			if (error.result && error.result.jet_allowed_terms) window.JetCreditOffers.terms(document.getElementById('jet_vnoski'), Number(error.result.jet_priceall), rules);
 			offerStatus(window.JetCreditOffers.message(error, rules));
+		} finally {
+			if (revision === calculationRevision) window.JetCreditOffers.popupLoading(false);
 		}
 	};
 

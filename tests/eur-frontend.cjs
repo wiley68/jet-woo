@@ -97,15 +97,20 @@ async function popup(cart) {
 		<button id="buy_jetcredit">Continue</button><button id="buy2_jetcredit">Send</button><span id="jet_priceall"></span><span id="jet_vnoska_popup"></span>
 		</div>`);
 	w.eval(script(cart ? 'js/jetcredit_cart.js' : 'js/jetcredit_product.js')); await waitFor(() => $('#jet_vnoska_popup').text(), 'popup initial quote');
+	check(!$('#jet_offer_status').length && $('#jet-product-popup-container').attr('aria-busy') === 'false', 'Completed popup calculation retained inline status or loader.');
 	$('#uslovia2').prop('checked', true).triggerHandler('click');
 	check(!$('#buy2_jetcredit').prop('disabled'), 'Valid popup offer did not enable submission.');
 	transport.defer = true;
 	$('#jet_parva').val('100').trigger('input');
 	check($('#buy2_jetcredit').prop('disabled'), 'Initial payment change left submit enabled.');
+	check($('#jet-product-popup-container').hasClass('jet_offer_loading') && $('#jet-product-popup-container').attr('aria-busy') === 'true', 'Pending popup calculation has no loader.');
+	check(!$('#jet_step_1').find('#jet_offer_status, .jet_offer_loader').length && $('.jet_offer_loader[role="status"]').length === 1, 'Popup loader is duplicated or inside the form rows.');
 	await waitFor(() => requests.at(-1).options.data.jet_parva === '100', 'popup first edited request'); const old = requests.at(-1);
 	$('#jet_parva').val('200').trigger('input'); await waitFor(() => requests.at(-1).options.data.jet_parva === '200', 'popup latest edited request'); const latest = requests.at(-1);
-	latest.deferred.resolve(quote(latest.options.data)); await waitFor(() => $('#jet_vnoska_popup').text() === quote(latest.options.data).jet_vnoska, 'popup latest quote response');
 	old.deferred.resolve(quote(old.options.data)); await Promise.resolve(old.deferred.promise()); await tick();
+	check($('#jet-product-popup-container').hasClass('jet_offer_loading'), 'Older popup response hid the loader while the latest calculation was pending.');
+	latest.deferred.resolve(quote(latest.options.data)); await waitFor(() => $('#jet_vnoska_popup').text() === quote(latest.options.data).jet_vnoska, 'popup latest quote response');
+	check(!$('#jet-product-popup-container').hasClass('jet_offer_loading') && $('#jet-product-popup-container').attr('aria-busy') === 'false', 'Latest popup response left the loader active.');
 	check($('#jet_vnoska_popup').text() === quote(latest.options.data).jet_vnoska, 'Stale popup AJAX response replaced latest result.');
 	if (cart) {
 		$(w.document.body).trigger('applied_coupon');
@@ -117,11 +122,71 @@ async function popup(cart) {
 		$('form.variations_form').trigger('found_variation', [{ variation_id: 77 }]); await waitFor(() => requests.at(-1).options.data.jet_variation_id === '77', 'variation request');
 		check(requests.at(-1).options.data.jet_variation_id === '77', 'Variation missing in request.');
 		$('form.variations_form').trigger('reset_data'); check($('#buy2_jetcredit').prop('disabled'), 'Reset variation retained offer.');
+		check(!$('#jet-product-popup-container').hasClass('jet_offer_loading'), 'Reset variation retained the loader.');
 		transport.defer = false; transport.failure = true;
 		$('.wapf-product-totals').show(); $('.wapf-grand-total').text('1200 евро'); await waitFor(() => $('#jet_offer_status').text().includes('не могат да бъдат потвърдени'), 'unsupported WAPF response');
 		check($('#buy2_jetcredit').prop('disabled') && $('#jet_offer_status').text().includes('не могат да бъдат потвърдени'), 'Unsupported WAPF total did not fail safely.');
+		check(!$('#jet-product-popup-container').hasClass('jet_offer_loading'), 'Failed popup calculation retained the loader.');
 	}
 	dom.window.close();
+}
+
+async function productButtonInstallments() {
+	for (const type of ['wide', 'standard']) {
+		const buttons = ['', '_card'].map(suffix => {
+			const installment = `<span id="jet_vnoski_text${suffix}"></span> x <span id="jet_vnoska${suffix}"></span> евро`;
+			return type === 'wide'
+				? `<button id="btn_jet${suffix}" class="jet_wide_button"><div class="jet_wide_button_head">Купи на изплащане</div><div class="jet_wide_button_text jet_button_installment" style="display:none">${installment}</div></button>`
+				: `<table><tr><td><button id="btn_jet${suffix}">Купи на изплащане</button></td></tr><tr class="jet_button_installment" style="display:none"><td>${installment}</td></tr></table>`;
+		}).join('');
+		const { dom, w, $, requests, transport } = await setup(`
+			<form class="variations_form"><button class="single_add_to_cart_button disabled">Купи</button></form>
+			<div id="jet-product-button-container">${buttons}</div>
+			<div id="jet-product-popup-container" style="display:none"><div id="jet_step_1"></div><div id="jet_step_2"></div></div>
+			<input id="jet_product_id" value="42"><input id="jet_variation_id" value=""><input id="jet_parva" value="0">
+			<select id="jet_vnoski"><option selected>12</option></select>`);
+		const rowsHidden = () => $('.jet_button_installment').toArray().every(el => $(el).css('display') === 'none');
+		const rowsVisible = () => $('.jet_button_installment').toArray().every(el => $(el).css('display') !== 'none');
+		check(rowsHidden(), type + ': empty installments visible before script initialization.');
+		transport.defer = true;
+		w.eval(script('js/jetcredit_product.js'));
+		await waitFor(() => requests.length === 1, 'initial unselected product request');
+		requests[0].deferred.resolve({ success: 'unsuccess', code: 'stale_financial_products' });
+		await tick();
+		check(rowsHidden(), type + ': empty installments visible without a selected option.');
+		for (const id of ['btn_jet', 'btn_jet_card']) {
+			$('#' + id).triggerHandler('click');
+			check($('#jet_alert_box').text().includes('изберете първо опция'), type + ': missing option warning on ' + id);
+			check($('#jet-product-popup-container').css('display') === 'none' && rowsHidden(), type + ': warning opened calculator or installments.');
+			$('#jet_alert_box button').trigger('click');
+		}
+		check(requests.length === 1, type + ': warning triggered a calculation.');
+		$('.single_add_to_cart_button').removeClass('disabled');
+		$('form.variations_form').trigger('found_variation', [{ variation_id: 77 }]);
+		await waitFor(() => requests.length === 2, 'selected product calculation');
+		check(rowsHidden(), type + ': installments visible before selected price was calculated.');
+		requests[1].deferred.resolve(quote(requests[1].options.data));
+		await waitFor(rowsVisible, 'selected product installments');
+		check($('#jet_vnoska').text() !== '' && $('#jet_vnoska_card').text() !== '', type + ': missing regular/card values.');
+		$('form.variations_form').trigger('woocommerce_variation_select_change');
+		check(rowsHidden(), type + ': old installments visible while changing option.');
+		$('form.variations_form').trigger('found_variation', [{ variation_id: 78 }]);
+		await waitFor(() => requests.length === 3, 'changed product calculation');
+		$('form.variations_form').trigger('reset_data');
+		requests[2].deferred.resolve(quote(requests[2].options.data));
+		await tick();
+		check(rowsHidden(), type + ': late quote restored installments after reset.');
+		$('form.variations_form').trigger('found_variation', [{ variation_id: 77 }]);
+		await waitFor(() => requests.length === 4, 'reselected product calculation');
+		requests[3].deferred.resolve(quote(requests[3].options.data));
+		await waitFor(rowsVisible, 'reselected product installments');
+		$('#jet_parva').val('100').trigger('input');
+		await waitFor(() => requests.length === 5, 'failed product calculation');
+		requests[4].deferred.resolve({ success: 'unsuccess', code: 'stale_financial_products' });
+		await tick();
+		check(rowsHidden(), type + ': failed calculation retained old installments.');
+		dom.window.close();
+	}
 }
 
 async function blocks() {
@@ -205,6 +270,6 @@ async function blocks() {
 	delete global.window; delete global.document; delete global.navigator;
 }
 (async () => {
-	await shared(); await classic(); await popup(false); await popup(true); await blocks();
+	await shared(); await classic(); await popup(false); await popup(true); await productButtonInstallments(); await blocks();
 	console.log(`PASS EUR frontend: ${checks} assertions; shared AJAX lifecycle, product/variation/quantity/WAPF, cart, Classic, React Blocks and both gateways.`);
 })().catch(error => { console.error(error); process.exitCode = 1; });
