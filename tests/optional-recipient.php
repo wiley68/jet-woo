@@ -63,11 +63,13 @@ foreach ( $manual_cases as list( $context, $blocks ) ) {
 			eur_expect( 42 === $saved_financial_order->get_items()[0]->get_product_id(), 'Order product lost.' );
 		}
 		eur_expect( 'shop@example.test' === $mails[0][0] && 'synthetic@example.test' === $mails[1][0], 'Notification recipients changed.' );
-		eur_expect( false !== strpos( $mails[0][2], 'Собствено име: ********;' ) && false !== strpos( $mails[0][2], 'ЕГН: **********;' ), 'Admin notification was not masked.' );
-		foreach ( array( 'Собствено име: Synthetic;', 'Фамилия: Applicant;', 'ЕГН: synthetic;', 'Телефон за връзка: synthetic;', 'synthetic@example.test' ) as $personal ) {
-			foreach ( $mails as $mail ) { eur_expect( false === strpos( $mail[2], $personal ), 'Personal data leaked to secondary notice.' ); }
+		foreach ( $mails as $mail ) {
+			eur_expect( false !== strpos( $mail[2], 'ЕГН: **********;' ) && false === strpos( $mail[2], 'ЕГН: synthetic;' ), 'Secondary notification exposes EGN.' );
+			foreach ( array( 'Собствено име: Synthetic;', 'Фамилия: ' . ( $checkout ? 'Synthetic' : 'Applicant' ) . ';', 'Телефон за връзка: ' . ( $checkout ? 'Synthetic' : 'synthetic' ) . ';', 'synthetic@example.test', 'Данни за кредита:' ) as $detail ) {
+				eur_expect( false !== strpos( $mail[2], $detail ), 'Secondary notification lost application details.' );
+			}
 		}
-		eur_expect( false !== strpos( $mails[0][2], 'Размер на кредита' ) && false === strpos( $mails[1][2], 'Данни за кредита:' ), 'Admin financing summary/customer privacy changed.' );
+		eur_expect( $mails[0][1] === $mails[1][1], 'Manual notification subjects differ.' );
 		foreach ( $mails as $mail ) { eur_expect( false !== strpos( $mail[2], jet_submission_manual_message() ), 'Notification falsely implies bank delivery.' ); }
 		if ( $checkout ) {
 			$gateway = 'checkout_card' === $context ? new Jet_Card_Payment_Gateway() : new Jet_Payment_Gateway();

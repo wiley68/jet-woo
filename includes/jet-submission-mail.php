@@ -107,7 +107,7 @@ function jet_submission_deliver( $recipients, $merchant, $body, $headers, &$subj
 }
 
 /**
- * Replace just the five personal rows at the start of the original bank body.
+ * Mask only the EGN row at the start of the original bank body.
  * Fail closed if the expected structure is absent, never send an unmasked copy.
  *
  * @param string $body Original bank message.
@@ -119,18 +119,20 @@ function jet_submission_admin_body( $body ) {
 		return '';
 	}
 	$fields = array(
-		'Собствено име: '     => '********',
-		'Фамилия: '           => '********',
-		'ЕГН: '               => '**********',
-		'Телефон за връзка: ' => '**********',
-		'Имейл адрес: '       => '********',
+		'Собствено име: ',
+		'Фамилия: ',
+		'ЕГН: ',
+		'Телефон за връзка: ',
+		'Имейл адрес: ',
 	);
 	$index  = 1;
-	foreach ( $fields as $label => $mask ) {
+	foreach ( $fields as $label ) {
 		if ( 0 !== strpos( $lines[ $index ], $label ) || ';' !== substr( $lines[ $index ], -1 ) || preg_match( '/[\r\n]/', $lines[ $index ] ) ) {
 			return '';
 		}
-		$lines[ $index ] = $label . $mask . ';';
+		if ( 'ЕГН: ' === $label ) {
+			$lines[ $index ] = $label . '**********;';
+		}
 		++$index;
 	}
 	return implode( "\r\n", $lines );
@@ -158,15 +160,13 @@ function jet_submission_notify( $notification ) {
 
 	try {
 		$customer = jet_submission_single_email( $notification['customer'] );
-		if ( '' !== $customer ) {
-			$subject = 'Потвърждение за подадена заявка за кредит';
-			$body    = "Здравейте,\r\n\r\n";
-			$body   .= ! empty( $notification['manual'] )
-				? jet_submission_manual_message() . "\r\n\r\n"
-				: "Вашата заявка за кредитно финансиране чрез ПБ Лични Финанси беше подадена успешно за обработка.\r\n\r\n";
-			$body   .= "Това съобщение потвърждава подаването на заявката, но не означава, че кредитът е одобрен.\r\n\r\n";
-			$body   .= 'Благодарим Ви!';
-			wp_mail( $customer, $subject, $body, $notification['headers'] );
+		$body     = jet_submission_admin_body( $notification['body'] );
+		if ( '' !== $customer && '' !== $body ) {
+			$intro = ! empty( $notification['manual'] )
+				? jet_submission_manual_message()
+				: 'Вашата заявка за кредитно финансиране чрез ПБ Лични Финанси беше подадена успешно за обработка.';
+			$body = $intro . "\r\n" . $body;
+			wp_mail( $customer, $notification['subject'], $body, $notification['headers'] );
 		}
 	} catch ( Throwable $error ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- Intentionally retain the completed submission result.
 		// Notification delivery must not make a completed application retryable.

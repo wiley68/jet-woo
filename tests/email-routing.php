@@ -97,31 +97,25 @@ foreach ( $baseline['cases'] as $name => $case ) {
 	foreach ( $mails as $mail ) { routing_no_cc( $mail ); }
 	routing_expect( 'shop@example.test' === $admin[0] && $admin[1] === $bank[1], "$name: incorrect admin delivery." );
 	$expected = explode( "\r\n", $case['mail'][2] );
-	$masked = array( 'Собствено име: ********;', 'Фамилия: ********;', 'ЕГН: **********;', 'Телефон за връзка: **********;', 'Имейл адрес: ********;' );
-	array_splice( $expected, 1, 5, $masked );
-	routing_expect( $admin[2] === implode( "\r\n", $expected ), "$name: admin changed more than five personal rows." );
+	$expected[3] = 'ЕГН: **********;';
+	routing_expect( $admin[2] === implode( "\r\n", $expected ), "$name: admin changed more than the EGN row." );
 	routing_expect( $admin[3] === $bank[3], "$name: admin content headers changed." );
 	if ( $customer_present ) {
 		$customer = $mails[2];
 		routing_expect( 'fixture@example.test' === $customer[0], "$name: wrong customer recipient." );
-		routing_expect( 'Потвърждение за подадена заявка за кредит' === $customer[1], "$name: customer subject changed." );
-		$customer_body = "Здравейте,\r\n\r\nВашата заявка за кредитно финансиране чрез ПБ Лични Финанси беше подадена успешно за обработка.\r\n\r\nТова съобщение потвърждава подаването на заявката, но не означава, че кредитът е одобрен.\r\n\r\nБлагодарим Ви!";
-		routing_expect( $customer_body === $customer[2], "$name: customer notice or non-approval wording changed." );
-		foreach ( array( 'jet_name', 'jet_lastname', 'jet_egn', 'jet_phone', 'jet_email' ) as $field ) {
-			foreach ( array( $case['post'][ $field ], jet_sanitize_bank_email_field( filter_var( $case['post'][ $field ], FILTER_SANITIZE_FULL_SPECIAL_CHARS ) ) ) as $value ) {
-				routing_expect( false === strpos( $admin[2], $value ), "$name: admin exposes $field." );
-				routing_expect( false === strpos( $customer[2], $value ), "$name: customer notice exposes $field." );
-			}
-		}
-		foreach ( array( 'Данни за потребителя:', 'Данни за стоката:', 'Данни за кредита:', $bank[2] ) as $value ) {
-			routing_expect( false === strpos( $customer[2], $value ), "$name: customer received bank template." );
+		routing_expect( $bank[1] === $customer[1], "$name: customer subject differs from bank/admin." );
+		$customer_body = "Вашата заявка за кредитно финансиране чрез ПБ Лични Финанси беше подадена успешно за обработка.\r\n" . $admin[2];
+		routing_expect( $customer_body === $customer[2], "$name: customer must receive the introduction followed by the exact admin body." );
+		routing_expect( $customer[3] === $bank[3], "$name: customer content headers changed." );
+		foreach ( array( $admin, $customer ) as $secondary ) {
+			routing_expect( false === strpos( $secondary[2], $case['post']['jet_egn'] ), "$name: secondary mail exposes EGN." );
 		}
 	}
 	$events = array_column( $order_events, 0 );
 	routing_expect( in_array( 'set_status', $events, true ) && in_array( array( 'set_status', array( 'on-hold' ) ), $order_events, true ), "$name: configured order status changed." );
 	routing_expect( in_array( array( 'set_payment_method', array( 'jetpayment' ) ), $order_events, true ), "$name: gateway changed." );
 	routing_expect( count( $saved_financial_order->get_items() ) === ( 'cart' === $context ? 2 : 1 ), "$name: order products changed." );
-	echo "PASS T01/T03/T04/T06 $name: byte-identical bank subject/body/headers, five-row mask, private confirmation.\n";
+	echo "PASS T01/T03/T04/T06 $name: byte-identical bank subject/body/headers, EGN-only mask, full customer copy with shared subject.\n";
 }
 
 foreach ( array( 'product', 'cart' ) as $context ) {
@@ -158,12 +152,12 @@ foreach ( array( 'product', 'cart' ) as $context ) {
 		routing_success( $context );
 		routing_expect( $mails[0][0] === array( 'fixed-bank@example.test' ), "$context: safe retry used fallback recipient." );
 	}
-	// Masking is confined to five rows even when a personal value appears in a product.
+	// EGN masking must not alter an identical value in product data.
 	routing_reset( $case );
-	$_POST['jet_name'] = $product_title = 'RepeatedSyntheticValue';
+	$_POST['jet_egn'] = $product_title = 'RepeatedSyntheticValue';
 	routing_success( $context );
 	routing_expect( false !== strpos( $mails[1][2], 'RepeatedSyntheticValue' ), "$context: global PII replacement altered product data." );
-	routing_expect( explode( "\r\n", $mails[1][2] )[1] === 'Собствено име: ********;', "$context: personal row not masked." );
+	routing_expect( explode( "\r\n", $mails[1][2] )[3] === 'ЕГН: **********;', "$context: EGN row not masked." );
 	routing_expect( '' === jet_submission_admin_body( "Unexpected\r\n" . $mails[0][2] ), 'Unexpected template was not rejected.' );
 	echo "PASS T02/T07 $context: single/list recipients, malformed/missing bank configuration, customer injection, limited masking.\n";
 
@@ -221,4 +215,25 @@ foreach ( array( 'product', 'cart' ) as $context ) {
 	if ( 'cart' === $context ) { routing_expect( 2 === $woocommerce->cart->removals, 'Overlap cleared cart twice.' ); }
 	echo "PASS T05 $context: false/exception isolation, safe bank retry, uncertain post-bank failures, duplicate and overlapping AJAX requests.\n";
 }
+
+// An unexpected template must never expose EGN in either secondary message.
+$case = $baseline['cases']['product-standard'];
+foreach ( array(
+	"Unexpected\r\n" . $case['mail'][2],
+	str_replace( 'ЕГН: ', 'Unexpected: ', $case['mail'][2] ),
+	str_replace( ";\r\n", "\r\n", $case['mail'][2] ),
+) as $invalid_body ) {
+	routing_reset( $case );
+	jet_submission_notify( array( 'admin' => 'shop@example.test', 'customer' => 'fixture@example.test', 'body' => $invalid_body, 'subject' => $case['mail'][1], 'headers' => array() ) );
+	routing_expect( 0 === $mail_calls, 'Unexpected template produced a secondary message.' );
+}
+
+// The customer copy does not depend on a valid admin address.
+routing_reset( $case );
+jet_submission_notify( array( 'admin' => '', 'customer' => 'fixture@example.test', 'body' => $case['mail'][2], 'subject' => $case['mail'][1], 'headers' => array() ) );
+$expected = explode( "\r\n", $case['mail'][2] );
+$expected[3] = 'ЕГН: **********;';
+routing_expect( 1 === $mail_calls && 'fixture@example.test' === $mails[0][0], 'Invalid admin address suppressed customer delivery.' );
+routing_expect( $case['mail'][1] === $mails[0][1] && $mails[0][2] === "Вашата заявка за кредитно финансиране чрез ПБ Лични Финанси беше подадена успешно за обработка.\r\n" . implode( "\r\n", $expected ), 'Independent customer delivery lost the shared subject or masked application.' );
+
 echo "PASS: $checks assertions; all mail/database/order effects stubbed; no external delivery.\n";

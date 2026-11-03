@@ -80,14 +80,12 @@ foreach ( $baseline['cases'] as $name => $case ) {
 	checkout_expect( false !== strpos( $bank[2], ";\r\n\r\n" ), "$name: semicolon/empty row damaged." );
 	foreach ( $mails as $mail ) { checkout_no_copies( $mail ); }
 	$expected = explode( "\r\n", $original[2] );
-	array_splice( $expected, 1, 5, array( 'Собствено име: ********;', 'Фамилия: ********;', 'ЕГН: **********;', 'Телефон за връзка: **********;', 'Имейл адрес: ********;' ) );
+	$expected[3] = 'ЕГН: **********;';
 	checkout_expect( $admin[0] === 'shop@example.test' && $admin[1] === $bank[1] && $admin[2] === implode( "\r\n", $expected ) && $admin[3] === $bank[3], "$name: incorrect administrator copy." );
-	$confirmation = "Здравейте,\r\n\r\nВашата заявка за кредитно финансиране чрез ПБ Лични Финанси беше подадена успешно за обработка.\r\n\r\nТова съобщение потвърждава подаването на заявката, но не означава, че кредитът е одобрен.\r\n\r\nБлагодарим Ви!";
-	checkout_expect( 'applicant@example.test' === $customer[0] && 'Потвърждение за подадена заявка за кредит' === $customer[1] && $customer[2] === $confirmation, "$name: customer received more than the approved confirmation." );
-	$personal = array_merge( array_values( $case['order_fields'] ), array( '0000000000' ) );
-	foreach ( $personal as $value ) {
-		checkout_expect( false === strpos( $admin[2], $value ) && false === strpos( $admin[2], jet_sanitize_bank_email_field( $value ) ), "$name: administrator exposes personal data." );
-		checkout_expect( false === strpos( $customer[2], $value ) && false === strpos( $customer[2], jet_sanitize_bank_email_field( $value ) ), "$name: customer notice exposes personal data." );
+	$confirmation = "Вашата заявка за кредитно финансиране чрез ПБ Лични Финанси беше подадена успешно за обработка.\r\n" . $admin[2];
+	checkout_expect( 'applicant@example.test' === $customer[0] && $bank[1] === $customer[1] && $customer[2] === $confirmation && $customer[3] === $bank[3], "$name: customer must receive the introduction and exact admin body with matching subject/headers." );
+	foreach ( array( $admin, $customer ) as $secondary ) {
+		checkout_expect( false === strpos( $secondary[2], '0000000000' ), "$name: secondary mail exposes EGN." );
 	}
 	foreach ( $case['order_fields'] as $field => $value ) {
 		if ( preg_match( '/(?:city|address|postcode|shipping)/', $field ) ) {
@@ -211,11 +209,11 @@ foreach ( array( 'standard', 'card' ) as $method ) {
 		checkout_failed( $gateway );
 		checkout_expect( 1 === $mail_calls, "$method/$failure: storage recovery resent an uncertain bank application." );
 	}
-	// Personal values coinciding with product values must not be replaced globally.
+	// EGN values coinciding with product values must not be replaced globally.
 	$gateway = checkout_reset( $case );
-	$product_title = $checkout_orders[314]->fields['billing_first_name'] = 'RepeatedSyntheticValue';
+	$product_title = $_POST[$prefix . 'egn'] = 'RepeatedSyntheticValue';
 	checkout_ok( $gateway );
-	checkout_expect( false !== strpos( $mails[1][2], 'RepeatedSyntheticValue' ) && explode( "\r\n", $mails[1][2] )[1] === 'Собствено име: ********;', "$method: masking altered product data or exposed the personal row." );
+	checkout_expect( false !== strpos( $mails[1][2], 'RepeatedSyntheticValue' ) && explode( "\r\n", $mails[1][2] )[3] === 'ЕГН: **********;', "$method: masking altered product data or exposed the EGN row." );
 	foreach ( array( 'wc-processing', 'pending', 'wc-custom-review' ) as $configured_status ) {
 		$gateway = checkout_reset( $case );
 		$gateway->order_status = $configured_status;

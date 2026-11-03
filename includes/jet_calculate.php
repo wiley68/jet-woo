@@ -319,7 +319,7 @@
 			'country'	=> $jet_shipping_country);
 		$order = jet_prepare_financial_order( 'product', wp_unslash( $_POST ), $addressBilling, $addressShipping );
 		$order->set_payment_method('jetpayment');
-		$order->set_payment_method_title('ПБ Лични Финанси');
+		$order->set_payment_method_title($jet_card == 1 ? 'ПБ Лични Финанси - на вноски с кредитна карта' : 'ПБ Лични Финанси');
 		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
 		$gateway_settings = isset($payment_gateways['jetpayment']) ? $payment_gateways['jetpayment']->settings : null;
 		if ($gateway_settings && isset($gateway_settings['order_status'])) {
@@ -623,7 +623,7 @@
 		$order = jet_prepare_financial_order( 'cart', wp_unslash( $_POST ), $addressBilling, $addressShipping );
 
 		$order->set_payment_method('jetpayment');
-		$order->set_payment_method_title('ПБ Лични Финанси');
+		$order->set_payment_method_title($jet_card == 1 ? 'ПБ Лични Финанси - на вноски с кредитна карта' : 'ПБ Лични Финанси');
 		$payment_gateways = WC()->payment_gateways->get_available_payment_gateways();
 		$gateway_settings = isset($payment_gateways['jetpayment']) ? $payment_gateways['jetpayment']->settings : null;
 		if ($gateway_settings && isset($gateway_settings['order_status'])) {

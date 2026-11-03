@@ -111,7 +111,7 @@ foreach ( array( 'product', 'cart', 'checkout_classic', 'checkout_card' ) as $co
 	eur_reset(); $_POST = eur_payload( $context );
 	eur_expect( eur_success( eur_submit( $context ), $context ), "$context: valid current form rejected." );
 	eur_expect( 3 === count( $mails ), "$context: three isolated messages required." );
-	eur_expect( false !== strpos( $mails[1][2], 'ЕГН: **********;' ) && false === strpos( $mails[2][2], 'Данни за потребителя:' ), "$context: notification privacy." );
+	eur_expect( false !== strpos( $mails[1][2], 'ЕГН: **********;' ) && $mails[2][2] === "Вашата заявка за кредитно финансиране чрез ПБ Лични Финанси беше подадена успешно за обработка.\r\n" . $mails[1][2] && $mails[2][1] === $mails[0][1], "$context: EGN masking, full customer copy or subject mismatch." );
 	$before = count( $mails );
 	eur_expect( eur_success( eur_submit( $context ), $context ) && $before === count( $mails ), "$context: replay duplicated mail after cart emptying." );
 	if ( $checkout = 0 === strpos( $context, 'checkout' ) ) {
