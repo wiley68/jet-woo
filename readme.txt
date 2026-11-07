@@ -4,7 +4,7 @@ Tags: credit, calculator, woocommerce
 Requires at least: 6.9.0
 Requires PHP: 7.4
 Tested up to: 7.1.4
-Stable tag: 2.0.1
+Stable tag: 2.0.2
 License: GPL-3.0-or-later
 License URI: https://www.gnu.org/licenses/gpl-3.0.html
 WC requires at least: 9.1
@@ -21,7 +21,7 @@ Product, Cart, Classic Checkout и Checkout Blocks използват сървъ
 == Installation ==
 
 1. Използвайте standalone ZIP за чиста инсталация. Не се поддържа автоматична миграция от предишна BGN конфигурация. Не деинсталирайте съществуваща инсталация като метод за обновяване: uninstall премахва настройки и брояча.
-2. В WordPress изберете Plugins > Add New > Upload Plugin и качете CC_Woocommerce_JET_v.2.0.1.zip. Архивът съдържа директория jetcredit/; при разархивиране не я преименувайте.
+2. В WordPress изберете Plugins > Add New > Upload Plugin и качете CC_Woocommerce_JET_v.2.0.2.zip. Архивът съдържа директория jetcredit/; при разархивиране не я преименувайте.
 3. WooCommerce трябва да е активен, а базовата и ефективната валута на магазина да са EUR. Не-EUR заявки и поръчки се отказват без превалутиране.
 4. Активирайте плъгина. Активацията създава липсващата промоционална таблица; деактивацията запазва съществуващите данни.
 5. Прегледайте и запазете нормалните настройки на плъгина и двата gateway. Въвеждайте паричните настройки и промоционални прагове в EUR. Няма автоматична конверсия или допълнителен setup approval екран.
